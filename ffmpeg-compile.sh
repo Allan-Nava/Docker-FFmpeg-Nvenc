@@ -8,6 +8,8 @@
 # Abort on error
 set -e
 #
+sudo apt-get install git 
+#
 git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 
 cd nv-codec-headers && sudo make install && cd –
