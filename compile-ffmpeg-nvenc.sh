@@ -6,8 +6,8 @@
 #install required things from apt
 installLibs(){
 echo "Installing prerequisites"
-sudo apt-get update
-sudo apt-get -y --force-yes install autoconf automake build-essential libass-dev libfreetype6-dev libgpac-dev \
+ apt-get update
+ apt-get -y --force-yes install autoconf automake build-essential libass-dev libfreetype6-dev libgpac-dev \
   libsdl1.2-dev libtheora-dev libtool libva-dev libvdpau-dev libvorbis-dev libxcb1-dev libxcb-shm0-dev \
   libxcb-xfixes0-dev pkg-config texi2html zlib1g-dev
 }
@@ -17,12 +17,12 @@ InstallCUDASDK(){
 echo "Installing CUDA and the latest driver repositories from repositories"
 cd ~/ffmpeg_sources
 wget -c -v -nc https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.2.88-1_amd64.deb
-sudo dpkg -i cuda-repo-ubuntu1604_9.2.88-1_amd64.deb
-sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
-sudo apt-get -y update
-sudo apt-get -y install cuda
-sudo add-apt-repository ppa:graphics-drivers/ppa
-sudo apt-get update && sudo apt-get -y upgrade
+ dpkg -i cuda-repo-ubuntu1604_9.2.88-1_amd64.deb
+ apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+ apt-get -y update
+ apt-get -y install cuda
+ add-apt-repository ppa:graphics-drivers/ppa
+ apt-get update &&  apt-get -y upgrade
 }
 
 #Install nvidia SDK
@@ -33,7 +33,7 @@ cd ~/ffmpeg_sources
 git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 cd nv-codec-headers
 make
-sudo make install
+ make install
 }
 
 #Compile nasm
@@ -65,7 +65,7 @@ make -j$(nproc) distclean
 #Compile libfdk-acc
 compileLibfdkcc(){
 echo "Compiling libfdk-cc"
-sudo apt-get install unzip
+ apt-get install unzip
 cd ~/ffmpeg_sources
 wget -O fdk-aac.zip https://github.com/mstorsjo/fdk-aac/zipball/master
 unzip fdk-aac.zip
@@ -80,7 +80,7 @@ make -j$(nproc) distclean
 #Compile libmp3lame
 compileLibMP3Lame(){
 echo "Compiling libmp3lame"
-sudo apt-get install nasm
+ apt-get install nasm
 cd ~/ffmpeg_sources
 wget http://downloads.sourceforge.net/project/lame/lame/3.99/lame-3.99.5.tar.gz
 tar xzvf lame-3.99.5.tar.gz
