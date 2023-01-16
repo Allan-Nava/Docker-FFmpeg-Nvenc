@@ -9,7 +9,8 @@
 set -e
 #
 apt-get update
-apt-get install git-all.
+apt-get install git-all
+#apt-get install git
 #
 git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 
