@@ -170,4 +170,7 @@ compileLibMP3Lame
 compileLibOpus
 compileLibPvx
 compileFfmpeg
+#
+ls */* 
+#
 echo "Complete!"
