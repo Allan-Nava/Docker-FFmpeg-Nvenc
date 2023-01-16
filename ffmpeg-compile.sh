@@ -26,6 +26,7 @@ ls -l
 #
 ./ffmpeg/configure --enable-nonfree --enable-cuda-nvcc --enable-libnpp --extra-cflags=-I/usr/local/cuda/include --extra-ldflags=-L/usr/local/cuda/lib64 --disable-static --enable-shared
 #
-make -j 8
+make -j $(nproc)
 #
 make install
+#
