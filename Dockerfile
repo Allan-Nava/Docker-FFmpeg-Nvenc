@@ -9,7 +9,7 @@ ENV TZ=Europe/Rome
 WORKDIR /workspace
 COPY . . 
 RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
-RUN apt-get install -y git-all make
+RUN apt-get install -y git-all automake make
 #
 RUN ./ffmpeg-compile.sh
 #
