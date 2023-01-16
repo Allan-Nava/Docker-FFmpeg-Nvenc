@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.5.0-base-ubuntu20.04
+FROM nvidia/cuda:12.0.0-base-ubuntu20.04
 LABEL maintainer="allan.nava@hiway.media"
 #
 #RUN apt update && apt install -y software-properties-common
