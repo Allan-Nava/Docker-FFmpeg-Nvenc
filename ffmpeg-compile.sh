@@ -14,7 +14,7 @@ set -e
 #
 git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 
-cd nv-codec-headers &&  make install && cd –
+cd nv-codec-headers &&  make install && cd -
 
 git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg/
 #
