@@ -8,8 +8,8 @@
 # Abort on error
 set -e
 #
-apt-get update && apt-get install -y --no-install-recommends apt-utils
-apt-get install -y git-all
+#apt-get update && apt-get install -y --no-install-recommends apt-utils
+#apt-get install -y git-all
 #apt-get install git
 #
 git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git

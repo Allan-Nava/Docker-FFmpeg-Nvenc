@@ -8,6 +8,9 @@ ENV TZ=Europe/Rome
 #
 WORKDIR /workspace
 COPY . . 
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
+RUN apt-get install -y git-all
+#
 RUN ./ffmpeg-compile.sh
 #
 ENV NVIDIA_VISIBLE_DEVICES=all
