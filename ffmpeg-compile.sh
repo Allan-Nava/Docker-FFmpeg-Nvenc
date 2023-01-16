@@ -9,7 +9,7 @@
 set -e
 #
 apt-get update && apt-get install -y --no-install-recommends apt-utils
-apt-get install -y git-all build-essential yasm cmake libtool libc6 libc6-dev unzip wget libnuma1 libnuma-dev make
+apt-get install -y git-all
 #apt-get install git
 #
 git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
@@ -17,6 +17,8 @@ git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 cd nv-codec-headers &&  make install && cd –
 
 git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg/
+#
+apt-get install -y build-essential yasm cmake libtool libc6 libc6-dev unzip wget libnuma1 libnuma-dev make
 #
 ./configure --enable-nonfree --enable-cuda-nvcc --enable-libnpp --extra-cflags=-I/usr/local/cuda/include --extra-ldflags=-L/usr/local/cuda/lib64 --disable-static --enable-shared
 
