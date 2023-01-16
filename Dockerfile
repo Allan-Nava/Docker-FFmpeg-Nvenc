@@ -16,6 +16,7 @@ RUN ./compile-ffmpeg-nvenc.sh
 #
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
+ENV PATH="/usr/local/bin:$PATH"
 #
 ENTRYPOINT ["/bin/bash"]
 #
