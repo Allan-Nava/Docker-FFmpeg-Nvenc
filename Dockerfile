@@ -11,7 +11,8 @@ COPY . .
 RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
 RUN apt-get install -y git-all automake make
 #
-RUN ./ffmpeg-compile.sh
+RUN ./compile-ffmpeg-nvenc.sh
+#RUN ./ffmpeg-compile.sh
 #
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
