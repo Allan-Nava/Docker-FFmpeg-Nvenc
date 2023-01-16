@@ -17,7 +17,7 @@ InstallCUDASDK(){
 echo "Installing CUDA and the latest driver repositories from repositories"
 cd ~/ffmpeg_sources
 wget -c -v -nc https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-11-5_11.5.2-1_amd64.deb
- dpkg -i cuda-repo-ubuntu1604_9.2.88-1_amd64.deb
+ #dpkg -i cuda-repo-ubuntu1604_9.2.88-1_amd64.deb
  apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
  apt-get -y update
  apt-get -y install cuda
