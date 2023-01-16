@@ -47,8 +47,8 @@ jobs:
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
         #if: github.event_name != 'pull_request'
-        #uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
-        uses: docker/login-action@v2
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        #uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -66,8 +66,8 @@ jobs:
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
         id: build-and-push
-        #uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
+        #uses: docker/build-push-action@v2
         with:
           context: .
           #push: ${{ github.event_name != 'pull_request' }}
@@ -82,11 +82,11 @@ jobs:
       # repository is public to avoid leaking data.  If you would like to publish
       # transparency data even for private images, pass --force to cosign below.
       # https://github.com/sigstore/cosign
-      #- name: Sign the published Docker image
-      #  if: ${{ github.event_name != 'pull_request' }}
-      #  env:
-      #    COSIGN_EXPERIMENTAL: "true"
-      #  # This step uses the identity token to provision an ephemeral certificate
-      #  # against the sigstore community Fulcio instance.
-      #  run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
+      - name: Sign the published Docker image
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        # This step uses the identity token to provision an ephemeral certificate
+        # against the sigstore community Fulcio instance.
+        run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
 #
