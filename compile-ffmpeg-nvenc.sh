@@ -155,7 +155,9 @@ hash -r
 
 #The process
 cd ~
+pwd 
 mkdir ffmpeg_sources
+echo "init Process()"
 installLibs
 InstallCUDASDK
 installSDK
