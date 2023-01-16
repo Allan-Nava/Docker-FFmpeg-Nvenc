@@ -124,6 +124,8 @@ echo "Compiling ffmpeg"
 cd ~/ffmpeg_sources
 git clone https://github.com/FFmpeg/FFmpeg -b master
 cd FFmpeg
+echo "$HOME"
+#
 PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./configure \
   --prefix="$HOME/ffmpeg_build" \
   --extra-cflags="-I$HOME/ffmpeg_build/include" \
