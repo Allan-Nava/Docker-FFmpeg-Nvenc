@@ -51,5 +51,5 @@ For more detailed usage examples and additional information, please refer to the
 ## Contributing
 Contributions to Docker-FFmpeg-Nvenc are welcome! If you have any suggestions, improvements, or bug fixes, feel free to open an issue or submit a pull request.
 
-## License
+## License
 This project is licensed under the MIT License.
