@@ -1,5 +1,5 @@
 # Docker-ffmpeg-nvenc
-[![Docker FFmpeg 5.1.2 Nvenc 11.0](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish.yml)
+[![Docker FFmpeg 5.1.2 Nvenc 11.0](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish.yml)
 [![Docker FFmpeg6.0](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish-ffmpeg6.yml/badge.svg)](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish-ffmpeg6.yml)
 
 Docker-FFmpeg-Nvenc is a repository that provides a Docker image for FFmpeg with NVIDIA NVENC support. It enables hardware-accelerated video encoding using NVIDIA GPUs and allows you to perform high-performance video transcoding tasks.
