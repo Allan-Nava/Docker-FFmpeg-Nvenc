@@ -1,0 +1,21 @@
+# action.yml
+name: 'FFmpeg Nvenc Docker Github Actions'
+description: 'Docker with FFMPEG supports NVENC encoding'
+inputs:
+  token:
+    required: false
+    default: ${{ github.token }}
+  command:  # id of input
+    description: 'ffmpeg command'
+    required: true
+    default: '-i'
+#
+branding:
+  icon: 'video'
+  color: 'blue'
+#
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.command }}

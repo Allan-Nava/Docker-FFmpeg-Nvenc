@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
-FROM debian:10.10-slim
-#
+FROM debian:11-slim
+#AS builder
 MAINTAINER Allan-Nava
 #
 ENV NVIDIA_VISIBLE_DEVICES all
@@ -10,35 +10,33 @@ ENV DEBIAN_FRONTEND noninterac1tive
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 #
+#
 WORKDIR /app
 #
 ## Prepare
 RUN apt-get update
 RUN apt-get install -y \
     curl diffutils file coreutils m4 xz-utils nasm python3 python3-pip appstream
-
+#
 ## Install dependencies
 RUN apt-get install -y \
     autoconf automake build-essential cmake git libass-dev libbz2-dev libfontconfig1-dev libfreetype6-dev libfribidi-dev libharfbuzz-dev libjansson-dev liblzma-dev libmp3lame-dev libnuma-dev libogg-dev libopus-dev libsamplerate-dev libspeex-dev libtheora-dev libtool libtool-bin libturbojpeg0-dev libvorbis-dev libx264-dev libxml2-dev libvpx-dev m4 make nasm ninja-build patch pkg-config python tar zlib1g-dev autopoint imagemagick gsfonts wget
-    
+#
 ## Intel CSV dependencies
 #RUN apt-get install -y libva-dev libdrm-dev
 #   
 #
-#RUN git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git \
-	#&& cd nv-codec-headers \
-RUN git clone -b sdk/11.0 https://github.com/FFmpeg/nv-codec-headers.git \
+RUN git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git \
 	&& cd nv-codec-headers \
 	&& make \
 	&& make install
 #
-
-RUN wget https://ffmpeg.org/releases/ffmpeg-5.1.2.tar.xz \
- && tar -xf ffmpeg-5.1.2.tar.xz \
- && rm ffmpeg-5.1.2.tar.xz
+RUN wget https://ffmpeg.org/releases/ffmpeg-6.0.tar.xz \
+ && tar -xf ffmpeg-6.0.tar.xz \
+ && rm ffmpeg-6.0.tar.xz
 #
 # Configure and build ffmpeg with nvenc support
-RUN cd ffmpeg-5.1.2 \
+RUN cd ffmpeg-6.0 \
  && ./configure --prefix=/usr/local \ 
     --enable-nonfree\
     --enable-nvenc\ 
@@ -87,6 +85,7 @@ RUN apt-get install -y \
     libc6 \
     libcairo2 \
     libdvdnav4 \
+    libdvdread8 \
     libgdk-pixbuf2.0-0 \
     libglib2.0-0 \
     libgstreamer-plugins-base1.0-0 \
@@ -101,15 +100,12 @@ RUN apt-get install -y \
     libtheora0 \
     libvorbis0a \
     libvorbisenc2 \
+    libx264-160 \
+    libx265-192 \
     libxml2 \
-    libturbojpeg0 \
-    libdvdread4 \
-    libx264-155 \
-    libx265-165 
+    libturbojpeg0
 #
-#
-#   
-#RUN echo "Compiled ffmpeg nvenc..."
+RUN echo "Compiled ffmpeg nvenc..."
 #
 ######################################################################
 #

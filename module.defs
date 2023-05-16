@@ -1,0 +1,211 @@
+__deps__ := BZIP2 ZLIB FDKAAC LIBDAV1D SVT-AV1 LIBVPX LAME LIBOPUS LIBSPEEX XZ ZIMG
+ifeq (1,$(FEATURE.qsv))
+__deps__ += LIBVPL
+endif
+ifeq (1,$(FEATURE.vce))
+__deps__ += AMF
+endif
+ifeq (1,$(FEATURE.nvenc))
+__deps__ += NVENC
+endif
+
+
+$(eval $(call import.MODULE.defs,FFMPEG,ffmpeg,$(__deps__)))
+$(eval $(call import.CONTRIB.defs,FFMPEG))
+
+FFMPEG.FETCH.url    = https://github.com/HandBrake/HandBrake-contribs/releases/download/contribs/ffmpeg-5.1.2.tar.bz2
+FFMPEG.FETCH.url   += https://ffmpeg.org/releases/ffmpeg-5.1.2.tar.bz2
+FFMPEG.FETCH.sha256 = 39a0bcc8d98549f16c570624678246a6ac736c066cebdb409f9502e915b22f2b
+
+FFMPEG.CONFIGURE.deps  =
+FFMPEG.CONFIGURE.host  =
+FFMPEG.CONFIGURE.build =
+FFMPEG.CONFIGURE.env.LOCAL_PATH = PATH="$(call fn.ABSOLUTE,$(CONTRIB.build/)bin):$(PATH)"
+FFMPEG.BUILD.env                = PATH="$(call fn.ABSOLUTE,$(CONTRIB.build/)bin):$(PATH)"
+
+ifneq (,$(filter $(HOST.system),freebsd netbsd openbsd))
+	FFMPEG.CONFIGURE.env += CFLAGS=-I$(LOCALBASE)/include
+	FFMPEG.CONFIGURE.env += LDFLAGS=-L$(LOCALBASE)/lib
+endif
+
+FFMPEG.CONFIGURE.extra = \
+    --enable-gpl \
+    --disable-doc \
+    --disable-programs \
+    --disable-ffplay \
+    --enable-ffprobe \
+    --enable-ffmpeg \
+    --enable-filter=scale_npp \
+    --disable-avdevice \
+   --disable-muxers \
+   --disable-network \
+    --enable-libzimg \
+    --disable-hwaccels \
+    --disable-vdpau \
+    --disable-encoders \
+    --enable-libmp3lame \
+    --disable-libsrt \
+   --enable-encoder=aac \
+   --enable-encoder=ac3 \
+   --enable-encoder=jpeg2000 \
+   --enable-encoder=libopenjpeg \
+   --enable-encoder=jpegls \
+   --enable-encoder=ljpeg \
+   --enable-encoder=mjpeg \
+   --enable-encoder=eac3 \
+   --enable-encoder=flac \
+   --enable-encoder=mpeg2video \
+   --enable-encoder=mpeg4 \
+    --enable-encoder=libmp3lame \
+    --enable-libopus \
+    --enable-encoder=libopus \
+    --enable-libspeex \
+   --disable-encoder=libspeex \
+   --enable-decoder=libspeex \
+    --enable-libvpx \
+    --disable-decoder=libvpx_* \
+    --enable-encoder=libvpx_vp8 \
+    --enable-encoder=libvpx_vp9 \
+    --enable-libsvtav1 \
+    --enable-encoder=libsvtav1 \
+    --disable-decoder=*_crystalhd \
+    --enable-demuxer=av1 \
+    --enable-demuxer=obu \
+    --enable-decoder=av1 \
+    --enable-libdav1d \
+    --enable-decoder=libdav1d \
+    --enable-filter=null \ 
+    --enable-demuxer=null \ 
+    --enable-muxer=null \
+    --cc="$(FFMPEG.GCC.gcc)" \
+    --extra-ldflags="$(call fn.ARGS,FFMPEG.GCC,*archs *sysroot *minver ?extra) -L$(call fn.ABSOLUTE,$(CONTRIB.build/)lib) $(FFMPEG.GCC.args.extra-ldflags)"
+
+ifeq (size-aggressive,$(GCC.O))
+FFMPEG.CONFIGURE.extra += \
+    --enable-small
+endif
+
+ifeq (on,$(GCC.lto))
+    FFMPEG.CONFIGURE.extra += --enable-lto
+endif
+
+ifneq (,$(filter $(FEATURE.qsv)-$(HOST.system),1-linux 1-freebsd))
+    FFMPEG.CONFIGURE.extra += --enable-vaapi
+    FFMPEG.CONFIGURE.extra += --disable-xlib
+else
+    FFMPEG.CONFIGURE.extra += --disable-vaapi
+endif
+
+ifeq (1,$(FEATURE.fdk_aac))
+FFMPEG.CONFIGURE.extra += \
+    --enable-nonfree \
+    --enable-libfdk-aac \
+    --enable-encoder=libfdk_aac
+endif
+
+FFMPEG.CONFIGURE.extra += \
+    --enable-muxer=matroska \
+    --enable-muxer=webm \
+    --enable-muxer=mov \
+    --enable-muxer=mp4 \
+    --enable-muxer=psp \
+    --enable-muxer=ipod \
+    --enable-muxer=hls \
+    --enable-muxer=flv \
+    --enable-muxer=mjpeg \
+    --enable-muxer=mpjpeg \
+    --enable-muxer=singlejpeg \
+    --enable-muxer=smjpeg \
+    --enable-muxer=image2 \
+    --enable-muxer=image2pipe
+
+ifeq (darwin,$(HOST.system))
+    FFMPEG.CONFIGURE.extra += --disable-audiotoolbox --disable-coreimage
+
+    ifeq (x86_64,$(HOST.arch))
+        FFMPEG.CONFIGURE.extra += --arch=x86_64
+    else ifeq (arm64,$(HOST.arch))
+        FFMPEG.CONFIGURE.extra += --arch=arm64
+    endif
+
+    ifeq (1,$(HOST.cross))
+        FFMPEG.CONFIGURE.extra += --enable-cross-compile
+    endif
+endif
+
+## check against tuple: B-SYSTEM where B is { 0 | 1 } for cross-compiling flag
+ifeq (0-cygwin,$(HOST.cross)-$(HOST.system))
+    FFMPEG.GCC.args.extra += -fno-common
+else ifeq (1-mingw,$(HOST.cross)-$(HOST.system))
+    FFMPEG.CONFIGURE.extra += \
+        --target-os=mingw32 \
+        --arch=$(HOST.machine) \
+        --cross-prefix=$(HOST.cross.prefix) \
+        --pkg-config=$(PKGCONFIG.exe) \
+        --pkg-config-flags="--static"
+    FFMPEG.GCC.args.extra += -fno-common
+    FFMPEG.GCC.args.extra-ldflags = -static-libgcc -static-libstdc++ -static
+else ifeq (darwin,$(HOST.system))
+    FFMPEG.GCC.args.extra-ldflags = -lc++
+else
+    FFMPEG.CONFIGURE.extra += --extra-libs="-lm -lstdc++"
+endif
+
+ifneq (none,$(FFMPEG.GCC.g))
+    FFMPEG.CONFIGURE.extra += --enable-debug
+    ifeq (max,$(FFMPEG.GCC.g))
+        FFMPEG.CONFIGURE.extra += --extra-cflags="$(call fn.ARGS,FFMPEG.GCC,*archs *sysroot *minver ?extra) -I$(call fn.ABSOLUTE,$(CONTRIB.build/)include) -DDEBUG"
+    else
+        FFMPEG.CONFIGURE.extra += --extra-cflags="$(call fn.ARGS,FFMPEG.GCC,*archs *sysroot *minver ?extra) -I$(call fn.ABSOLUTE,$(CONTRIB.build/)include) -DNDEBUG"
+    endif
+else
+    FFMPEG.CONFIGURE.extra += --disable-debug
+    FFMPEG.CONFIGURE.extra += --extra-cflags="$(call fn.ARGS,FFMPEG.GCC,*archs *sysroot *minver ?extra) -I$(call fn.ABSOLUTE,$(CONTRIB.build/)include) -DNDEBUG"
+endif
+
+ifeq (none,$(FFMPEG.GCC.O))
+    FFMPEG.CONFIGURE.extra += --disable-optimizations
+endif
+
+ifeq (1,$(FEATURE.qsv))
+  FFMPEG.CONFIGURE.extra += --enable-libvpl
+endif
+
+#
+ifeq (1,$(FEATURE.vce))
+  FFMPEG.CONFIGURE.extra += --enable-amf --enable-encoder=h264_amf --enable-encoder=hevc_amf
+endif
+
+ifeq (1,$(FEATURE.nvenc))
+FFMPEG.CONFIGURE.extra += \
+     --enable-ffnvcodec \
+     --enable-encoder=h264_nvenc \
+     --enable-encoder=hevc_nvenc
+endif
+
+ifeq (1,$(FEATURE.nvdec))
+FFMPEG.CONFIGURE.extra += \
+     --enable-hwaccels \
+     --enable-nvdec \
+     --enable-cuda-llvm \
+     --enable-cuda
+endif
+
+ifeq (1,$(FEATURE.mf))
+FFMPEG.CONFIGURE.extra += \
+      --enable-encoder=h264_mf \
+      --enable-encoder=hevc_mf
+endif
+
+## enable compile verbosity
+FFMPEG.BUILD.extra = V=1
+
+## For POSIX.1-2001
+ifeq (solaris,$(HOST.system))
+    FFMPEG.CONFIGURE.extra += --extra-libs=/usr/lib/values-xpg6.o
+endif
+
+## MPC8 Doesn't compile on SPARC
+ifeq (solaris-sparc,$(HOST.system)-$(HOST.machine))
+    FFMPEG.CONFIGURE.extra += --disable-demuxer=mpc8
+endif
