@@ -56,7 +56,7 @@ jobs:
                 echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
             # Set up Buildx env
             - uses: webgtx/gcr-podman-action@v2
-            with:
+             with:
                 project_id: docker-ffmpeg-nvenc
                 image_id: ${{ fromJson(steps.repo.outputs.result).name }}:${{ steps.prep.outputs.version }}
                 #access_token: ${{ secrets.GOOGLE_JSON_KEY }}
