@@ -92,7 +92,7 @@ jobs:
         run: ./tests/smoke.sh ffmpeg-nvenc:candidate ${{ matrix.ffmpeg }}
 
       - name: Login su GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
