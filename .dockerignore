@@ -1,1 +1,11 @@
+# Il build context serve solo al Dockerfile: tutto il resto e peso inutile.
+.git
 .github
+.gitignore
+.dockerignore
+.hadolint.yaml
+docs
+tests
+*.md
+LICENSE
+action.yml

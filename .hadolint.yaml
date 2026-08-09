@@ -1,0 +1,5 @@
+failure-threshold: warning
+ignored:
+  # DL3008: pin delle versioni apt. Non praticabile qui: le versioni Debian
+  # cambiano ad ogni point release e bloccherebbero le patch di sicurezza.
+  - DL3008

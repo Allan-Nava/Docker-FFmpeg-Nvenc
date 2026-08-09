@@ -1,55 +1,114 @@
-# Docker-ffmpeg-nvenc
-[![Docker FFmpeg 5.1.2 Nvenc 11.0](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish.yml)
-[![Docker FFmpeg6.0](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish-ffmpeg6.yml/badge.svg)](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish-ffmpeg6.yml)
+# Docker-FFmpeg-Nvenc
 
-Docker-FFmpeg-Nvenc is a repository that provides a Docker image for FFmpeg with NVIDIA NVENC support. It enables hardware-accelerated video encoding using NVIDIA GPUs and allows you to perform high-performance video transcoding tasks.
+[![CI](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/ci.yml/badge.svg)](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/ci.yml)
+[![Publish](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish.yml)
 
-## Features
+Immagine container con **FFmpeg compilato con supporto NVIDIA NVENC** (`h264_nvenc`, `hevc_nvenc`) per transcodifica accelerata da GPU.
 
-- Docker image with FFmpeg and NVIDIA NVENC integration.
-- GPU-accelerated video encoding and transcoding.
-- Support for a wide range of input and output video formats.
-- Customizable parameters and encoding settings.
-- Easy integration with existing Docker-based workflows.
+Build multi-stage su Debian 12: nell'immagine finale ci sono solo i binari e le librerie condivise necessarie, nessun toolchain di compilazione.
 
-## Prerequisites
+## Immagini pubblicate
 
-To use Docker-FFmpeg-Nvenc, ensure that you have the following:
-
-- A machine with an NVIDIA GPU that supports NVENC.
-- Docker installed on the machine.
-- NVIDIA Docker runtime installed (for GPU support).
-
-## Usage
-To utilize Docker-FFmpeg-Nvenc, follow these steps:
-
-1. Pull the Docker-FFmpeg-Nvenc image from Docker Hub:
-
-```shell
-Copy code
-docker pull allannava/docker-ffmpeg-nvenc:latest
-```
-
-2. Run the Docker container with your desired FFmpeg command. For example:
-
-
-```shell
-Copy code
-docker run --gpus all \
-  --volume /path/to/input:/data/input \
-  --volume /path/to/output:/data/output \
-  allannava/docker-ffmpeg-nvenc:latest \
-  ffmpeg -i /data/input/input.mp4 -c:v h264_nvenc -preset fast /data/output/output.mp4
+Registry: **GitHub Container Registry** (`ghcr.io`), non Docker Hub.
 
 ```
-Customize the input and output paths and the FFmpeg command as per your requirements. This example uses ffmpeg with the h264_nvenc codec to encode an input video (input.mp4) to an output video (output.mp4) using the "fast" preset.
+ghcr.io/allan-nava/docker-ffmpeg-nvenc
+```
 
-3. Monitor the video encoding process and retrieve the encoded video from the output directory.
+| Variante | FFmpeg | nv-codec-headers | Driver NVIDIA minimo | Tag |
+|---|---|---|---|---|
+| default | 7.1.1 | `sdk/12.1` | ≥ 530 | `latest`, `vX.Y.Z`, `latest-ffmpeg7.1.1`, `vX.Y.Z-ffmpeg7.1.1` |
+| | 6.0 | `sdk/12.0` | ≥ 530 | `latest-ffmpeg6.0`, `vX.Y.Z-ffmpeg6.0` |
+| | 5.1.2 | `sdk/11.0` | ≥ 470 | `latest-ffmpeg5.1.2`, `vX.Y.Z-ffmpeg5.1.2` |
 
-For more detailed usage examples and additional information, please refer to the documentation.
+Il branch di `nv-codec-headers` determina il **driver NVIDIA minimo** dell'host: se ottieni `This NVENC API is not compatible with the installed driver`, usa una variante più bassa o aggiorna il driver.
 
-## Contributing
-Contributions to Docker-FFmpeg-Nvenc are welcome! If you have any suggestions, improvements, or bug fixes, feel free to open an issue or submit a pull request.
+## Prerequisiti
 
-## License
-This project is licensed under the MIT License.
+- GPU NVIDIA con NVENC ([matrice di supporto](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new))
+- Driver NVIDIA (vedi tabella sopra)
+- Docker + [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) (per `--gpus`)
+
+## Uso
+
+L'immagine ha **`ENTRYPOINT ["ffmpeg"]`**: gli argomenti che passi a `docker run` vanno direttamente a ffmpeg, non serve ripetere `ffmpeg`.
+
+```shell
+docker pull ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest
+```
+
+Transcodifica accelerata da GPU:
+
+```shell
+docker run --rm --gpus all \
+  --user "$(id -u):$(id -g)" \
+  -v "$PWD/input:/data/input:ro" \
+  -v "$PWD/output:/data/output" \
+  ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest \
+  -i /data/input/input.mp4 -c:v h264_nvenc -preset p4 /data/output/output.mp4
+```
+
+Verifica che gli encoder ci siano (non serve GPU):
+
+```shell
+docker run --rm ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest -hide_banner -encoders | grep nvenc
+```
+
+Shell dentro il container (per debug):
+
+```shell
+docker run --rm -it --entrypoint /bin/bash ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest
+```
+
+### Note operative
+
+- Il container gira come utente **non root** (uid 1000, `ffmpeg`), working dir `/data`. Se i volumi montati appartengono a un altro utente, passa `--user "$(id -u):$(id -g)"` come nell'esempio.
+- `ffprobe` è incluso. `ffplay` no (build headless).
+- `NVIDIA_DRIVER_CAPABILITIES` è impostato a `video,compute,utility` — il minimo per transcodificare.
+
+## Codec abilitati
+
+Encoder: `h264_nvenc`, `hevc_nvenc`, `libx264`, `libx265`, `libvpx-vp8/vp9`, `libmp3lame`, `libopus`, `libvorbis`, `libtheora`.
+Filtri testo: `fontconfig`, `libfreetype`, `libass`.
+
+Non è abilitato il **CUDA toolkit**: niente `scale_npp`, `libnpp`, `nvdec`/`cuvid` hardware-decode. NVENC richiede solo gli header `ffnvcodec`, che è quanto l'immagine installa. Se ti serve il decode accelerato, va aggiunta una base `nvidia/cuda:*-devel` e le opzioni `--enable-cuda-nvcc --enable-nvdec --enable-cuvid --enable-libnpp`.
+
+## GitHub Action
+
+Il repo espone anche una Action che esegue ffmpeg nell'immagine pre-buildata:
+
+```yaml
+- uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2
+  with:
+    command: '-i input.mp4 -c:v libx264 -preset fast output.mp4'
+```
+
+⚠️ I runner GitHub-hosted **non hanno GPU**: dentro la Action gli encoder `*_nvenc` non sono utilizzabili. Serve un self-hosted runner con GPU e NVIDIA Container Toolkit.
+
+## Sviluppo
+
+Un solo `Dockerfile` parametrizzato genera tutte le varianti:
+
+```shell
+docker build \
+  --build-arg FFMPEG_VERSION=6.0 \
+  --build-arg NVCODEC_BRANCH=sdk/12.0 \
+  -t ffmpeg-nvenc:6.0 .
+
+./tests/smoke.sh ffmpeg-nvenc:6.0 6.0     # non richiede GPU
+./tests/gpu.sh   ffmpeg-nvenc:6.0         # richiede GPU NVIDIA
+```
+
+La CI (`.github/workflows/ci.yml`) esegue lint (hadolint, shellcheck, actionlint), builda e testa tutte e tre le varianti su ogni push/PR, e gira **settimanalmente** per intercettare il marcire delle base image. La pubblicazione (`docker-publish.yml`) parte solo su push di tag `v*` e passa dagli stessi smoke test prima del push.
+
+Vedi [CLAUDE.md](CLAUDE.md) / [AGENTS.md](AGENTS.md) per le convenzioni di lavoro e le trappole note, e [docs/audit/](docs/audit/) per l'audit del progetto.
+
+## Contribuire
+
+Issue e pull request benvenute. Ogni PR deve passare la CI: build + smoke test di tutte le varianti.
+
+## Licenza
+
+I file di questo repository sono **MIT** (vedi [LICENSE](LICENSE)).
+
+L'**immagine prodotta** è un'altra cosa: FFmpeg è compilato con `--enable-gpl --enable-version3` e collegato a libx264/libx265, quindi il binario è distribuito sotto **GPL-3.0-or-later**. La build non usa `--enable-nonfree`, quindi l'immagine è ridistribuibile.

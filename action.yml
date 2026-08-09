@@ -1,21 +1,33 @@
 # action.yml
-name: 'FFmpeg Nvenc Docker Github Actions'
-description: 'Docker with FFMPEG supports NVENC encoding'
+name: 'FFmpeg NVENC'
+description: 'Esegue FFmpeg (build con supporto NVIDIA NVENC) dentro un container'
+author: 'Allan Nava'
+
 inputs:
-  token:
-    required: false
-    default: ${{ github.token }}
-  command:  # id of input
-    description: 'ffmpeg command'
+  command:
+    description: >
+      Argomenti passati a ffmpeg, es. "-i input.mp4 -c:v libx264 output.mp4".
+      ATTENZIONE: i runner GitHub-hosted NON hanno GPU NVIDIA, quindi gli encoder
+      *_nvenc non sono utilizzabili qui. Per NVENC serve un self-hosted runner con
+      GPU e NVIDIA Container Toolkit.
     required: true
-    default: '-i'
-#
+  image:
+    description: 'Immagine da usare (override per pinnare una versione specifica)'
+    required: false
+    default: 'ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest'
+
 branding:
   icon: 'video'
   color: 'blue'
-#
+
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  # Immagine pre-buildata: la versione precedente ricompilava FFmpeg da sorgente
+  # ad ogni invocazione della action (decine di minuti per job).
+  image: 'docker://ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest'
+  # L'immagine ha ENTRYPOINT ["ffmpeg"]: passando `command` come singolo elemento
+  # di `args` finirebbe come UN argomento solo. Il wrapper shell fa lo splitting.
+  entrypoint: '/bin/bash'
   args:
-    - ${{ inputs.command }}
+    - '-c'
+    - 'ffmpeg ${{ inputs.command }}'

@@ -2,6 +2,8 @@
 
 Audit statico del repository `github.com/Allan-Nava/Docker-FFmpeg-Nvenc` allo stato del commit `b536c4d` (branch `main`, working tree pulito).
 
+> **Stato: risolto in v2.0.0 (2026-08-09).** Questo documento e la fotografia del repo **prima** degli interventi e va letto al passato: i file che cita (`Containerfile`, `Dockerfile-ffmpeg6`, `module.defs`, `scripts/`, `docker-publish-ffmpeg6.yml`) non esistono piu. Cosa e stato fatto per ciascun punto: `CHANGELOG.md`, sezione `[2.0.0]`. Verifica post-fix: le tre varianti (FFmpeg 5.1.2 / 6.0 / 7.1.1) buildano e passano 17/17 asserzioni di `tests/smoke.sh`.
+
 **Esito sintetico: entrambe le immagini pubblicate dal repo non sono più costruibili.** Il `Dockerfile` principale muore su `apt-get update` (Debian buster fuori archivio), `Dockerfile-ffmpeg6` muore sull'installazione delle dipendenze (pacchetto `python` inesistente in bullseye). Il `Containerfile` è rotto per costruzione. Sotto, dettaglio e priorità.
 
 > Le verifiche marcate **[verificato]** sono state eseguite con richieste reali ai repository upstream in data 2026-08-09. Nessuna `docker build` è stata lanciata in questo audit: le rotture sono dedotte da fatti verificati sui repository di pacchetti, non da un run di build.

@@ -4,64 +4,65 @@ Repo di build di immagini container con **FFmpeg compilato con supporto NVIDIA N
 
 Questo file definisce le regole operative per gli agent (Copilot, Claude, altri tool AI) quando lavorano in questo repository. Contenuto allineato a `CLAUDE.md`: se modifichi uno, aggiorna l'altro.
 
-Struttura:
+```
+Dockerfile              -> sorgente UNICA, multi-stage, parametrizzata
+                           ARG FFMPEG_VERSION / NVCODEC_BRANCH / DEBIAN_VERSION
+tests/smoke.sh          -> 17 asserzioni, nessuna GPU richiesta (gate di CI e di publish)
+tests/gpu.sh            -> encoding NVENC reale, richiede host con GPU NVIDIA
+action.yml              -> GitHub Action su immagine pre-buildata da GHCR
+.github/workflows/ci.yml              -> lint + build&test matrice + scan; push/PR + settimanale
+.github/workflows/docker-publish.yml  -> build -> test -> push su GHCR; solo su tag v*
+docs/audit/             -> audit del progetto
+```
 
-```
-Dockerfile            -> FFmpeg 5.1.2 su debian:10.10-slim + nv-codec-headers sdk/11.0   (workflow docker-publish.yml)
-Dockerfile-ffmpeg6    -> FFmpeg 6.0   su debian:11-slim   + nv-codec-headers master      (workflow docker-publish-ffmpeg6.yml)
-Containerfile         -> variante UBI8 (NON referenziata da nessun workflow, rotta)
-action.yml            -> GitHub Action "docker" che builda il Dockerfile e passa `command` come arg
-module.defs           -> frammento make di HandBrake-contribs (NON usato dalla build)
-scripts/              -> build ffmpeg "from source" fuori da Docker (NON usati dai Dockerfile)
-.github/workflows/    -> build+push su GHCR, trigger SOLO su push di tag
-```
+Le varianti sono una **matrice nei workflow**, non file duplicati:
+
+| FFmpeg | `NVCODEC_BRANCH` | driver NVIDIA min | default |
+|---|---|---|---|
+| 7.1.1 | `sdk/12.1` | >= 530 | si (`latest`) |
+| 6.0 | `sdk/12.0` | >= 530 | no |
+| 5.1.2 | `sdk/11.0` | >= 470 | no |
 
 ## Regole di lavoro (SEMPRE)
 
-- **Un tag = una pubblicazione immagine.** I workflow girano **solo** su `push` di tag (`tags: ['*']`): ogni tag `vX.Y.Z` fa partire due build e pubblica su GHCR. Non taggare "per igiene": si taggano solo cambi che devono produrre un'immagine nuova. Bump `minor` per novita sostanziali (nuova versione FFmpeg, nuova base image, nuovo target), `patch` per fix.
-- **Ogni release taggata = sezione in `CHANGELOG.md`** (Keep a Changelog, in italiano) + `git tag -a vX.Y.Z -m "Release X.Y.Z"`. ATTENZIONE: il `CHANGELOG.md` **non esiste ancora**; alla prima release va creato ricostruendo lo storico dai tag esistenti (`v0.1.0`, `v0.1.1`, `v0.1.2`, `v1.0.0`, `v1.0.1`).
-- **MAI `git push`**: lo fa sempre l'utente (qui vale doppio, un push di tag pubblica un'immagine pubblica su GHCR). **MAI `Co-Authored-By`** nei commit.
+- **Un tag = una pubblicazione immagine.** Il workflow di publish gira **solo** su push di tag `v*`: ogni tag builda, testa e pubblica tutte e tre le varianti su GHCR. Non taggare "per igiene". Bump `major` per cambi non retrocompatibili nell'uso dell'immagine (ENTRYPOINT, utente, path), `minor` per novita sostanziali (nuova variante FFmpeg, nuova base image), `patch` per fix.
+- **Ogni release taggata = sezione in `CHANGELOG.md`** (Keep a Changelog, in italiano) + `git tag -a vX.Y.Z -m "Release X.Y.Z"`.
+- **MAI `git push`**: lo fa sempre l'utente (qui vale doppio, un push di tag pubblica immagini pubbliche su GHCR). **MAI `Co-Authored-By`** nei commit.
 - **Documentare SEMPRE** audit, interventi, debug di build: doc `.md` in `docs/` (audit in `docs/audit/`, incident in `docs/incidents/`), senza chiederlo. Ogni doc: **schema/diagramma ASCII**, log allegati in `logs/`, riga nel CHANGELOG.
-- **Allineare tutto**: ogni modifica fattuale va propagata a `Dockerfile`, `Dockerfile-ffmpeg6`, `Containerfile`, `README.md`, `action.yml`, workflow, CHANGELOG. I tre file di build sono **quasi-cloni**: un fix in uno va valutato per gli altri due o esplicitamente motivato.
-- **Nessuna modifica dichiarata "fatta" senza build verificata.** Il repo non ha test: l'unica prova che un cambio al Dockerfile funzioni e `docker build`. Prima di dire che un fix funziona, buildare e riportare l'output reale.
-- **Verificare la disponibilita reale dei pacchetti** prima di asserire che una base image funzioni: le base Debian usate qui sono EOL e i repo si spostano su `archive.debian.org`.
+- **Allineare tutto**: ogni modifica fattuale va propagata a `Dockerfile`, `README.md`, `action.yml`, workflow, `tests/`, `CHANGELOG.md`, e a `CLAUDE.md` + questo file (che vanno tenuti allineati fra loro).
+- **Nessuna modifica dichiarata "fatta" senza build verificata.** L'unica prova che un cambio al Dockerfile funzioni e `docker build` seguito da `./tests/smoke.sh`. Riportare l'output reale, non l'intenzione.
+- **Attenzione a leggere l'exit code giusto**: in `docker build ... > log; echo $?; tail log` l'exit riportato e quello di `tail`. Verificare l'assenza di `ERROR: failed to solve` nel log, non solo il codice finale.
+- **Ogni nuova capability va coperta da un'asserzione in `tests/smoke.sh`.** Se una regressione non e rilevabile dai test, il test e incompleto.
 
 ## Pattern per interventi sulle immagini
 
-1. **Preflight**: verificare che la base image sia ancora supportata (repo APT raggiungibili) e che i pacchetti citati esistano in quella suite (`https://api.ftp-master.debian.org/madison?package=<pkg>&s=<suite>`).
-2. **Build locale**: `docker build -f <Dockerfile> -t ffmpeg-nvenc:test .` con log su file (`| tee logs/build-<data>.log`); run lunghi in background.
-3. **Smoke test funzionale** (non basta che la build passi):
-   ```
-   docker run --rm ffmpeg-nvenc:test ffmpeg -version
-   docker run --rm ffmpeg-nvenc:test ffmpeg -hide_banner -encoders | grep nvenc   # attesi h264_nvenc, hevc_nvenc
-   ```
-   e, su host con GPU, una transcodifica reale con `--gpus all`.
-4. **Dimensione**: `docker images`, annotare la size prima/dopo. L'immagine attuale porta dentro tutto il toolchain di build.
-5. **Chiusura**: doc `.md` + log in `logs/` + CHANGELOG + tag (solo se va pubblicata) + README allineato.
+1. **Preflight**: base image ancora supportata (repo APT raggiungibili) e pacchetti esistenti in quella suite: `https://api.ftp-master.debian.org/madison?package=<pkg>&s=<suite>`. Per FFmpeg, il vincolo `ffnvcodec` si legge dal `configure` della release: `curl -s https://raw.githubusercontent.com/FFmpeg/FFmpeg/n<ver>/configure | grep "ffnvcodec >="`.
+2. **Build locale**: `docker build --build-arg FFMPEG_VERSION=... --build-arg NVCODEC_BRANCH=... -t ffmpeg-nvenc:test .` con log su file; run lunghi in background.
+3. **Smoke test**: `./tests/smoke.sh ffmpeg-nvenc:test <versione-attesa>`, deve chiudere 17/17.
+4. **Lint**: `hadolint` (via container), `shellcheck tests/*.sh`, `actionlint` **dalla root del repo** (fuori dal repo esce 3 "no project was found").
+5. **Su GPU**: `./tests/gpu.sh` su un host con NVIDIA prima di promuovere un tag.
+6. **Chiusura**: doc `.md` + log in `logs/` + CHANGELOG + README allineato + tag (solo se va pubblicata).
 
 ## Trappole note / regole tecniche
 
-- **Debian 10 (buster) e fuori archivio**: `deb.debian.org/debian/dists/buster` risponde **404** (verificato 2026-08-09), il contenuto e su `archive.debian.org`. Il `Dockerfile` principale (`debian:10.10-slim`) **non builda piu**: muore su `apt-get update`.
-- **Il pacchetto `python` non esiste in Debian 11 (bullseye)**: rimosso, esistono solo `python2`/`python3`. `Dockerfile-ffmpeg6` lo installa nella lista deps -> **build fallita**. Usare `python3`.
-- **`Containerfile` e rotto per costruzione**: base `registry.access.redhat.com/ubi8/ubi` ma usa `apt-get` e pacchetti Debian. Non e referenziato da nessun workflow. O si porta a `dnf` o si elimina.
-- **`ENV DEBIAN_FRONTEND noninterac1tive`**: typo presente in **tutti e tre** i file di build; il valore non e valido. Se si tocca un file di build, correggerlo in tutti.
-- **`apt-get update` e `apt-get install` in `RUN` separati**: cache di layer stantia. Vanno uniti nello stesso `RUN`, con `--no-install-recommends` e `rm -rf /var/lib/apt/lists/*` in coda.
-- **`\` seguito da spazio** a fine riga nei blocchi `./configure`: BuildKit lo accetta ma emette warning; normalizzare quando si tocca quel blocco.
-- **`--extra-cflags=-I/usr/local/cuda/include` / `--extra-ldflags=-L/usr/local/cuda/lib64` sono rumore**: nell'immagine **non c'e il CUDA toolkit**. NVENC richiede solo `nv-codec-headers` (pkg-config `ffnvcodec`).
-- **`:latest` non viene MAI pubblicato**: la `VERSION` finisce sempre con suffisso `-ffmpeg5.1.2`/`-ffmpeg6.0`, quindi la regex semver `^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$` non matcha mai e il ramo che aggiunge `:latest`/`:MAJOR`/`:MINOR` e codice morto.
-- **README vs realta del registry**: il README dice `docker pull allannava/docker-ffmpeg-nvenc:latest` (Docker Hub), la CI pubblica su `ghcr.io/allan-nava/docker-ffmpeg-nvenc:<tag>-ffmpeg5.1.2`.
-- **`scripts/` e `module.defs` sono codice morto**: nessun Dockerfile/workflow li usa. `scripts/build-ffmpeg.sh` legge `${PREFIX}/ffmpeg_configure_options` e `${PREFIX}/ffmpeg_extra_libs`, file che **nessuno genera** -> fallisce comunque.
-- **`nv-codec-headers` non pinnato in `Dockerfile-ffmpeg6`** (clone di `master`): build non riproducibile. Il `Dockerfile` principale e pinnato a `sdk/11.0`, quello e il pattern corretto.
-- **Action deprecate nei workflow**: `::set-output`, `actions/github-script@v4` (usa `github.repos.get`, da v5 e `github.rest.repos.get`), `actions/checkout@v3`. Aggiornarle insieme, non a pezzi.
-- **`action.yml` non e utilizzabile cosi com'e**: `runs.using: docker` con `image: Dockerfile` ricompila FFmpeg ad ogni invocazione e passa `${{ inputs.command }}` come **singolo argomento** a un'immagine senza `ENTRYPOINT` (`CMD ["/bin/bash"]`). Serve `image: docker://ghcr.io/...` + `ENTRYPOINT`.
-- **`.dockerignore` contiene solo `.github`**: `scripts/`, `module.defs`, `README.md` finiscono nel build context inutilmente.
-- **Nessun `LICENSE`** benche il README dichiari MIT, e la build usa `--enable-gpl --enable-nonfree` che rende l'**artefatto binario non ridistribuibile**.
-- **`MAINTAINER` e deprecato**: usare `LABEL org.opencontainers.image.authors=`.
-- **Piattaforma singola**: build `linux/amd64` only.
+- **`ffmpeg ... | grep -q` fallisce con exit 141 anche quando il test passa.** `grep -q` esce al primo match, ffmpeg riceve SIGPIPE e con `pipefail` la pipeline ritorna 141. Riguarda i gate nel `Dockerfile` (`SHELL ... -o pipefail`) **e gli step `run:` dei workflow** (Actions usa `bash -e -o pipefail` di default). Pattern corretto: redirigere su file, poi `grep` sul file. Gia costato una build in questo repo.
+- **Le base Debian marciscono in silenzio.** buster e fuori da `deb.debian.org` (404, contenuto su `archive.debian.org`): e cosi che il repo si e rotto senza che nessuno se ne accorgesse. Bookworm e gia `oldstable`. Lo **schedule settimanale in `ci.yml` esiste apposta**: se fallisce di lunedi senza che nessuno abbia toccato il codice, quasi certamente e marcita una base o un repo APT.
+- **Verificare che un pacchetto esista nella suite prima di usarlo.** `python` non esiste da bullseye in poi (solo `python2`/`python3`) e questo bloccava la variante FFmpeg 6.0.
+- **I nomi versionati dei pacchetti runtime sono legati alla suite**: `libx264-164`, `libx265-199`, `libvpx7` sono bookworm. Cambiando `DEBIAN_VERSION` vanno riallineati o lo stage runtime non installa nulla.
+- **`NVCODEC_BRANCH` determina il driver NVIDIA minimo dell'host.** Non alzarlo senza motivo: `sdk/13.0` richiede driver molto recenti. Il vincolo minimo e quello del `configure` di FFmpeg (5.1 -> >= 9.1.23.1, 6.0 -> >= 12.0.16.0, 7.1 -> >= 12.1.14.0); scegliere il branch **piu basso** che lo soddisfa. Sintomo di mismatch a runtime: `This NVENC API is not compatible with the installed driver`.
+- **NVENC non richiede il CUDA toolkit**, bastano gli header `ffnvcodec`. Non reintrodurre `--extra-cflags=-I/usr/local/cuda/include` / `--extra-ldflags=-L/usr/local/cuda/lib64`: nell'immagine quelle directory non esistono e suggeriscono capacita assenti. Servono solo se si abilita davvero `--enable-cuda-nvcc`/`--enable-libnpp`/`--enable-nvdec`, che richiedono una base `nvidia/cuda:*-devel`.
+- **MAI `--enable-nonfree`** su un'immagine pubblicata: rende il binario **non ridistribuibile**. `tests/smoke.sh` ha un'asserzione dedicata. Lo stesso vale per `libfdk-aac`. L'immagine e GPL-3.0-or-later (per libx264/libx265), il repo e MIT: sono due licenze diverse, non confonderle.
+- **L'immagine ha `ENTRYPOINT ["ffmpeg"]` e gira come utente non root (uid 1000)**, workdir `/data`. Gli esempi in doc vanno scritti senza ripetere `ffmpeg`; per una shell serve `--entrypoint /bin/bash`; su volumi montati serve `--user "$(id -u):$(id -g)"`.
+- **La GitHub Action non puo usare NVENC sui runner GitHub-hosted** (nessuna GPU): solo encoding CPU, oppure self-hosted runner con NVIDIA Container Toolkit. `action.yml` passa il comando via wrapper `bash -c` perche con `ENTRYPOINT ffmpeg` un singolo elemento in `args` arriverebbe come **un solo argomento**.
+- **Il tagging dei workflow usa `docker/metadata-action`**, con `suffix=-ffmpeg<ver>` per variante piu un secondo blocco senza suffisso per la sola variante `default: true`. La versione precedente applicava una regex semver a una stringa che il suffisso rendeva strutturalmente non-matchabile: `:latest` non veniva mai pubblicato. Se si tocca il tagging, verificare i tag effettivi su GHCR dopo il primo tag.
+- **`shellcheck` esce 1 anche su finding `info`**: un `SC20xx` informativo basta a rompere la CI. Usare direttive `# shellcheck disable=` mirate e motivate.
+- **`hadolint`**: `DL3008` (pin versioni apt) e ignorato in `.hadolint.yaml`, pinnare le versioni Debian bloccherebbe le patch di sicurezza ad ogni point release.
+- **Il build context passa dal `.dockerignore`**: `docs/`, `tests/`, `*.md` sono esclusi. Se un file nuovo serve alla build, va tolto dall'ignore.
 
 ## Puntatori
 
-- Audit iniziale del progetto: `docs/audit/2026-08-09-audit-iniziale.md`
-- Registry immagini: `https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/pkgs/container/docker-ffmpeg-nvenc`
-- Workflow: `.github/workflows/docker-publish.yml` (FFmpeg 5.1.2), `.github/workflows/docker-publish-ffmpeg6.yml` (FFmpeg 6.0)
-- Riferimenti upstream: `nv-codec-headers` (`github.com/FFmpeg/nv-codec-headers`, branch `sdk/<ver>`), matrice driver/SDK NVENC nella doc NVIDIA Video Codec SDK
+- Audit del progetto: `docs/audit/2026-08-09-audit-iniziale.md`
+- Registry: `https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/pkgs/container/docker-ffmpeg-nvenc`
+- Matrice GPU/NVENC NVIDIA: `https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new`
+- `nv-codec-headers`: `https://github.com/FFmpeg/nv-codec-headers` (branch `sdk/<ver>`)
+- Codice rimosso in v2.0.0 (recuperabile): `git checkout v1.0.1 -- scripts/ module.defs Containerfile`

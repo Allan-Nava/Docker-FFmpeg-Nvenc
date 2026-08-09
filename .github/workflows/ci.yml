@@ -1,0 +1,129 @@
+name: CI
+
+# Gira su ogni push/PR e una volta a settimana: lo schedule serve a intercettare
+# il marcire delle base image (e' esattamente cosi' che il repo si e' rotto in
+# silenzio quando Debian buster e' finito su archive.debian.org).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Hadolint (Dockerfile)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: warning
+
+      - name: ShellCheck (tests/)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends shellcheck
+          shellcheck tests/*.sh
+
+      - name: actionlint (workflow)
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color
+
+  build-test:
+    name: Build & test (ffmpeg ${{ matrix.ffmpeg }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ffmpeg: '7.1.1'
+            nvcodec: 'sdk/12.1'
+          - ffmpeg: '6.0'
+            nvcodec: 'sdk/12.0'
+          - ffmpeg: '5.1.2'
+            nvcodec: 'sdk/11.0'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: ffmpeg-nvenc:ci-${{ matrix.ffmpeg }}
+          build-args: |
+            FFMPEG_VERSION=${{ matrix.ffmpeg }}
+            NVCODEC_BRANCH=${{ matrix.nvcodec }}
+          cache-from: type=gha,scope=ffmpeg-${{ matrix.ffmpeg }}
+          cache-to: type=gha,scope=ffmpeg-${{ matrix.ffmpeg }},mode=max
+
+      - name: Smoke test
+        run: ./tests/smoke.sh ffmpeg-nvenc:ci-${{ matrix.ffmpeg }} ${{ matrix.ffmpeg }}
+
+      - name: Dimensione immagine
+        run: |
+          SIZE=$(docker image inspect ffmpeg-nvenc:ci-${{ matrix.ffmpeg }} --format '{{.Size}}')
+          echo "### FFmpeg ${{ matrix.ffmpeg }} — $((SIZE / 1024 / 1024)) MB" >> "$GITHUB_STEP_SUMMARY"
+          # niente `ffmpeg | head`: head chiude la pipe, ffmpeg prende SIGPIPE e
+          # il default `-o pipefail` di Actions fa fallire lo step con 141.
+          docker run --rm ffmpeg-nvenc:ci-${{ matrix.ffmpeg }} -hide_banner -version > version.txt
+          head -n 1 version.txt >> "$GITHUB_STEP_SUMMARY"
+
+  scan:
+    name: Scan vulnerabilita
+    runs-on: ubuntu-latest
+    needs: build-test
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build immagine di default
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: ffmpeg-nvenc:scan
+          cache-from: type=gha,scope=ffmpeg-7.1.1
+
+      - name: Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ffmpeg-nvenc:scan
+          format: sarif
+          output: trivy.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Carica risultati su code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
