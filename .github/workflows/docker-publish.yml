@@ -42,7 +42,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # Tag con suffisso di variante: v1.2.3-ffmpeg7.1.1, latest-ffmpeg7.1.1, ...
       - name: Metadata (variante)
