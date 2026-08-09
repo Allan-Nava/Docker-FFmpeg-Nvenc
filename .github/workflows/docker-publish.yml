@@ -47,7 +47,7 @@ jobs:
       # Tag con suffisso di variante: v1.2.3-ffmpeg7.1.1, latest-ffmpeg7.1.1, ...
       - name: Metadata (variante)
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ github.repository }}
           flavor: |
@@ -62,7 +62,7 @@ jobs:
       - name: Metadata (default, senza suffisso)
         id: meta_default
         if: matrix.default
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ github.repository }}
           flavor: latest=true
