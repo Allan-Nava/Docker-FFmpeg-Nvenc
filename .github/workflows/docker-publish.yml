@@ -74,7 +74,7 @@ jobs:
       # Build locale per poter testare PRIMA di pubblicare. La push successiva
       # riusa la cache, quindi non ricompila.
       - name: Build per test
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
@@ -100,7 +100,7 @@ jobs:
 
       - name: Build e push
         id: push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
