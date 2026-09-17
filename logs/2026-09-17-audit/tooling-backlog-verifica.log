@@ -1,0 +1,69 @@
+# verifica locale del tooling backlog (2026-09-17)
+## backlog-lint.py
+backlog-lint: 13 item (12 open) · 4 milestone distinte
+
+backlog-lint OK
+
+## backlog-lint.py su un backlog deliberatamente rotto
+backlog-lint: 3 item (3 open) · 2 milestone distinte
+  WARN  milestone scritta in modi diversi (stessa milestone?): «Alfa» · «alfa» → uniformare il titolo (match esatto per carattere)
+  FAIL  id duplicato `a-b` (righe 1, 10)
+  FAIL  riga 1 [a-b]: status `bogus` non valido (atteso ['done', 'open'])
+  FAIL  riga 5 [a-b]: chiave meta sconosciuta `prioriti` (note: ['labels', 'milestone', 'owner', 'priority', 'ref', 'status']) — refuso?
+  FAIL  riga 1 [a-b]: chiave meta `status` ripetuta (righe 2, 6) — vince l'ultima
+  FAIL  riga 1 [a-b]: chiave meta `labels` ripetuta (righe 3, 4) — vince l'ultima
+
+backlog-lint: 5 problema/i bloccante/i.
+exit=1
+
+## generate-roadmap.py --check
+roadmap.md aggiornata.
+
+## sync-backlog-to-issues.py (dry-run offline)
+backlog: 13 item totali · 12 attivi (open) · 1 done
+
+Nessun token → dry-run OFFLINE (non confronto con le issue esistenti).
+  Item che verrebbero garantiti OPEN:
+      - [tag-v2-0-0] Tutta la riparazione v2.0.0 e su main ma NON pubblicata: su GHCR `:latest` e l'immagine del 2023  labels=['backlog-sync', 'bug', 'docker', 'release']  milestone=«Pubblicazione v2.0.0»
+      - [action-ref-e-input-image] La Action pubblica punta a `:latest` mobile, `@v2` non esiste e `inputs.image` e codice morto  labels=['backlog-sync', 'bug', 'documentation', 'github_actions']  milestone=«Pubblicazione v2.0.0»
+      - [ghcr-tag-igiene] Sul registry restano `main`, `pr-2`…`pr-5` e le immagini v0.1.x del 2023  labels=['backlog-sync', 'cleanup', 'docker']  milestone=«Pubblicazione v2.0.0»
+      - [ffmpeg-bump-7-1-5] La variante default e ferma a FFmpeg 7.1.1, upstream e a 7.1.5  labels=['backlog-sync', 'docker', 'sicurezza', 'upgrade']  milestone=«Manutenzione immagine & upstream»
+      - [dependabot-pr-arretrate] 4 PR dependabot major aperte da 5 settimane + 2 PR fossili del 2023  labels=['backlog-sync', 'dependencies', 'github_actions']  milestone=«Manutenzione immagine & upstream»
+      - [ffmpeg-8-e-9-varianti] Valutare FFmpeg 8.1.x / 9.0.x nella matrice (e quale diventa default)  labels=['backlog-sync', 'docker', 'upgrade']  milestone=«Manutenzione immagine & upstream»
+      - [debian-13-trixie] La base `debian:12-slim` e oldstable  labels=['backlog-sync', 'docker', 'upgrade']  milestone=«Manutenzione immagine & upstream»
+      - [gpu-gate-prima-del-tag] `tests/gpu.sh` non e invocato da nessun workflow: il publish e cieco su NVENC  labels=['backlog-sync', 'ci', 'test']  milestone=«Automazione repo»
+      - [trivy-non-e-un-gate] Lo scan gira su una sola variante e non blocca nulla  labels=['backlog-sync', 'ci', 'sicurezza']  milestone=«Supply chain & sicurezza»
+      - [cosign-firma-immagini] Le immagini pubblicate non sono firmate  labels=['backlog-sync', 'sicurezza', 'supply-chain']  milestone=«Supply chain & sicurezza»
+      - [multiarch-arm64] Solo `linux/amd64`  labels=['backlog-sync', 'docker']  milestone=«Manutenzione immagine & upstream»
+      - [backlog-sync-primo-run] Verificare il primo run reale del sync backlog → issue  labels=['backlog-sync', 'ci', 'documentation']  milestone=«Automazione repo»
+
+## actionlint (dalla root)
+actionlint: nessun finding
+
+## shellcheck tests/*.sh
+shellcheck: nessun finding
+
+## sync-backlog-to-issues.py (dry-run AUTENTICATO contro il repo reale, sola lettura)
+backlog: 13 item totali · 12 attivi (open) · 1 done
+
+=== Piano sync (DRY-RUN) su Allan-Nava/Docker-FFmpeg-Nvenc ===
+  CREATE : 12
+  UPDATE : 0
+  REOPEN : 0
+  CLOSE  : 0
+  SKIP   : 0 (gia allineate)
+
+  + CREATE [tag-v2-0-0] Tutta la riparazione v2.0.0 e su main ma NON pubblicata: su GHCR `:latest` e l'immagine del 2023  milestone=«Pubblicazione v2.0.0»
+  + CREATE [action-ref-e-input-image] La Action pubblica punta a `:latest` mobile, `@v2` non esiste e `inputs.image` e codice morto  milestone=«Pubblicazione v2.0.0»
+  + CREATE [ghcr-tag-igiene] Sul registry restano `main`, `pr-2`…`pr-5` e le immagini v0.1.x del 2023  milestone=«Pubblicazione v2.0.0»
+  + CREATE [ffmpeg-bump-7-1-5] La variante default e ferma a FFmpeg 7.1.1, upstream e a 7.1.5  milestone=«Manutenzione immagine & upstream»
+  + CREATE [dependabot-pr-arretrate] 4 PR dependabot major aperte da 5 settimane + 2 PR fossili del 2023  milestone=«Manutenzione immagine & upstream»
+  + CREATE [ffmpeg-8-e-9-varianti] Valutare FFmpeg 8.1.x / 9.0.x nella matrice (e quale diventa default)  milestone=«Manutenzione immagine & upstream»
+  + CREATE [debian-13-trixie] La base `debian:12-slim` e oldstable  milestone=«Manutenzione immagine & upstream»
+  + CREATE [gpu-gate-prima-del-tag] `tests/gpu.sh` non e invocato da nessun workflow: il publish e cieco su NVENC  milestone=«Automazione repo»
+  + CREATE [trivy-non-e-un-gate] Lo scan gira su una sola variante e non blocca nulla  milestone=«Supply chain & sicurezza»
+  + CREATE [cosign-firma-immagini] Le immagini pubblicate non sono firmate  milestone=«Supply chain & sicurezza»
+  + CREATE [multiarch-arm64] Solo `linux/amd64`  milestone=«Manutenzione immagine & upstream»
+  + CREATE [backlog-sync-primo-run] Verificare il primo run reale del sync backlog → issue  milestone=«Automazione repo»
+
+(DRY-RUN: nessuna modifica. Rilancia con --apply per applicare.)

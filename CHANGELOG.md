@@ -3,6 +3,49 @@
 Tutte le modifiche rilevanti a questo progetto sono documentate qui.
 Formato basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); versionamento [SemVer](https://semver.org/lang/it/).
 
+## [Non rilasciato]
+
+Solo documentazione e tooling: nessun cambiamento all'immagine, quindi **nessun tag** (vedi la regola
+"un tag = una pubblicazione immagine" in `CLAUDE.md`). Viaggera col prossimo tag.
+
+### Aggiunto
+
+- **Audit dello stato del repo**: `docs/audit/2026-09-17-audit-stato-e-automazione.md` con log integrali in
+  `logs/2026-09-17-audit/`. Finding bloccante: **la v2.0.0 non e mai stata taggata**, quindi su GHCR
+  `:latest` e ancora il manifest del 16/01/2023 (root, `ENTRYPOINT /bin/bash`, `NVIDIA_REQUIRE_CUDA` con
+  `driver<471` -> non si avvia sugli host con driver recenti), e `action.yml`/`README.md` puntano la
+  propria utenza a quell'immagine. La CI settimanale e verde: builda e testa un artefatto che non viene
+  pubblicato. 13 finding in tutto, ciascuno tracciato da un item di backlog.
+- **`docs/backlog.md`**: sorgente unica dei todo (13 item, 4 milestone), con `id` stabili e convenzioni
+  di scrittura documentate.
+- **Sync backlog -> issue/milestone GitHub**: `docs/scripts/sync-backlog-to-issues.py` (idempotente,
+  fingerprint `<!-- backlog-id: … | hash: … -->` nel corpo issue; crea le milestone mancanti),
+  `docs/scripts/backlog-lint.py`, `docs/scripts/generate-roadmap.py`, libreria condivisa
+  `docs/scripts/lib/backlog.py`, runbook `docs/scripts/README.md`. Solo stdlib Python 3.
+- **`docs/roadmap.md`**: vista per milestone, **generata** dal backlog e committata (gate `--check` in CI).
+- **Workflow `backlog.yml`**: `lint` (backlog-lint + roadmap `--check`) su push/PR ai path del backlog;
+  `sync` su schedule del lunedi e su `workflow_dispatch` (input `apply`), mai su pull request - su una PR
+  da fork il `GITHUB_TOKEN` e in sola lettura.
+- Regola di lint sulle **chiavi meta ripetute** in un item: vince l'ultima e la prima si perde in
+  silenzio. Aggiunta dopo averla sbagliata scrivendo il primo backlog (`- **labels**:` duplicata).
+
+### Corretto
+
+- `CHANGELOG` `[2.0.0]`: dichiarava **18** asserzioni di `tests/smoke.sh`, sono **17** (come gia scritto in
+  `CLAUDE.md`, `AGENTS.md` e `README.md`). Conteggio: 2 binari + 1 versione + 2 NVENC + 5 codec +
+  2 licenza + 1 transcodifica + 4 igiene container.
+- `README.md`: l'esempio `uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2` e la tabella dei tag descrivevano
+  artefatti **non ancora pubblicati**. Aggiunto un avviso esplicito su cosa c'e davvero su GHCR oggi.
+
+### Modificato
+
+- `CLAUDE.md` / `AGENTS.md` (tenuti allineati): stato di consegna in testa, regole su backlog e pagine
+  generate, gate `tests/gpu.sh` prima del tag, `## [Non rilasciato]` per i cambiamenti non pubblicabili,
+  e tre trappole nuove - `runs.image` di una Action non accetta `${{ inputs… }}` (quindi `inputs.image`
+  in `action.yml` e codice morto), `PATCH /issues` sostituisce l'intero set di label, `GET /issues`
+  include le pull request. Piu il fatto misurato che il vincolo `ffnvcodec` resta `12.1.14.0` fino a
+  FFmpeg 9.0.1: **salire di versione non alza il driver NVIDIA minimo**.
+
 ## [2.0.0] - 2026-08-09
 
 Release di riparazione: al momento dell'audit **nessuna delle due immagini pubblicate era piu costruibile**. Contiene modifiche non retrocompatibili nell'uso dell'immagine.
@@ -33,7 +76,7 @@ Release di riparazione: al momento dell'audit **nessuna delle due immagini pubbl
 ### Aggiunto
 
 - **Workflow `ci.yml`**: lint (hadolint, shellcheck, actionlint), build + smoke test di tutte e tre le varianti su ogni push/PR, scan vulnerabilita Trivy con upload su code scanning. Include uno **schedule settimanale** per intercettare il marcire delle base image — e' esattamente cosi' che il repo si era rotto in silenzio.
-- **`tests/smoke.sh`**: 18 asserzioni senza bisogno di GPU (presenza encoder NVENC, codec di contorno, assenza di `--enable-nonfree`, transcodifica reale end-to-end, non-root, assenza di toolchain e sorgenti nell'immagine finale).
+- **`tests/smoke.sh`**: 17 asserzioni senza bisogno di GPU (presenza encoder NVENC, codec di contorno, assenza di `--enable-nonfree`, transcodifica reale end-to-end, non-root, assenza di toolchain e sorgenti nell'immagine finale).
 - **`tests/gpu.sh`**: encoding reale `h264_nvenc`/`hevc_nvenc` su host con GPU NVIDIA.
 - **Gate NVENC dentro il Dockerfile**: la build fallisce se gli encoder non finiscono nel binario, in entrambi gli stage.
 - **Smoke test come gate di pubblicazione**: nessuna immagine viene pushata su GHCR senza aver passato i test.

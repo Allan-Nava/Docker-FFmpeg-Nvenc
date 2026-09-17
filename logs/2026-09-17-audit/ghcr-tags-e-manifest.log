@@ -1,0 +1,185 @@
+# ghcr.io/allan-nava/docker-ffmpeg-nvenc — tag list e config dei manifest (2026-09-17)
+
+## GET /v2/allan-nava/docker-ffmpeg-nvenc/tags/list
+{
+    "name": "allan-nava/docker-ffmpeg-nvenc",
+    "tags": [
+        "main",
+        "pr-3",
+        "pr-2",
+        "pr-5",
+        "pr-4",
+        "v0.1.1",
+        "latest",
+        "v0.1.2",
+        "v1.0.1-ffmpeg5.1.2",
+        "v1.0.1-ffmpeg6.0"
+    ]
+}
+
+## config blob del tag :latest
+manifest mediaType: application/vnd.docker.distribution.manifest.v2+json  layers: 10  config: sha256:fbaaeb497d1e3608df4e82335e14a6c14a4deec8c0f2eb1149ef61eb6260ba65
+{
+    "architecture": "amd64",
+    "config": {
+        "Env": [
+            "PATH=/usr/local/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "NVARCH=x86_64",
+            "NVIDIA_REQUIRE_CUDA=cuda>=11.5 brand=tesla,driver>=418,driver<419 brand=tesla,driver>=450,driver<451 brand=tesla,driver>=470,driver<471 brand=unknown,driver>=470,driver<471 brand=nvidia,driver>=470,driver<471 brand=nvidiartx,driver>=470,driver<471 brand=geforce,driver>=470,driver<471 brand=geforcertx,driver>=470,driver<471 brand=quadro,driver>=470,driver<471 brand=quadrortx,driver>=470,driver<471 brand=titan,driver>=470,driver<471 brand=titanrtx,driver>=470,driver<471",
+            "NV_CUDA_CUDART_VERSION=11.5.50-1",
+            "NV_CUDA_COMPAT_PACKAGE=cuda-compat-11-5",
+            "CUDA_VERSION=11.5.0",
+            "LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64",
+            "NVIDIA_VISIBLE_DEVICES=all",
+            "NVIDIA_DRIVER_CAPABILITIES=compute,utility,video",
+            "TZ=Europe/Rome"
+        ],
+        "Entrypoint": [
+            "/bin/bash"
+        ],
+        "WorkingDir": "/workspace",
+        "Labels": {
+            "maintainer": "allan.nava@hiway.media",
+            "org.opencontainers.image.created": "2023-01-16T16:39:25.663Z",
+            "org.opencontainers.image.description": "Base Docker image with ffmpeg nvenc",
+            "org.opencontainers.image.licenses": "",
+            "org.opencontainers.image.revision": "a8a20cf98348ad67f3db620f309926ac9aa39647",
+            "org.opencontainers.image.source": "https://github.com/Allan-Nava/Docker-ffmpeg-nvenc",
+            "org.opencontainers.image.title": "Docker-ffmpeg-nvenc",
+            "org.opencontainers.image.url": "https://github.com/Allan-Nava/Docker-ffmpeg-nvenc",
+            "org.opencontainers.image.version": "v0.1.2"
+        },
+        "OnBuild": null
+    },
+    "created": "2023-01-16T16:52:50.190909682Z",
+    "history": [
+        {
+            "created": "2022-12-09T01:20:21.30286184Z",
+            "created_by": "/bin/sh -c #(nop) ADD file:9d282119af0c42bc823c95b4192a3350cf2cad670622017356dd2e637762e425 in / "
+        },
+        {
+            "created": "2022-12-09T01:20:21.654215477Z",
+            "created_by": "/bin/sh -c #(nop)  CMD [\"bash\"]",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "ENV NVARCH=x86_64",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "ENV NVIDIA_REQUIRE_CUDA=cuda>=11.5 brand=tesla,driver>=418,driver<419 brand=tesla,driver>=450,driver<451 brand=tesla,driver>=470,driver<471 brand=unknown,driver>=470,driver<471 brand=nvidia,driver>=470,driver<471 brand=nvidiartx,driver>=470,driver<471 brand=geforce,driver>=470,driver<471 brand=geforcertx,driver>=470,driver<471 brand=quadro,driver>=470,driver<471 brand=quadrortx,driver>=470,driver<471 brand=titan,driver>=470,driver<471 brand=titanrtx,driver>=470,driver<471",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "ENV NV_CUDA_CUDART_VERSION=11.5.50-1",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "ENV NV_CUDA_COMPAT_PACKAGE=cuda-compat-11-5",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "ARG TARGETARCH",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "LABEL maintainer=NVIDIA CORPORATION <cudatools@nvidia.com>",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+
+## config blob del tag :main
+manifest mediaType: application/vnd.docker.distribution.manifest.v2+json  layers: 10  config: sha256:02c3f8d11f9c33b81f8f82fa068d18de7b0f408d225f51525dfe3d41293af01d
+{
+    "architecture": "amd64",
+    "config": {
+        "Env": [
+            "PATH=/usr/local/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "NVARCH=x86_64",
+            "NVIDIA_REQUIRE_CUDA=cuda>=11.5 brand=tesla,driver>=418,driver<419 brand=tesla,driver>=450,driver<451 brand=tesla,driver>=470,driver<471 brand=unknown,driver>=470,driver<471 brand=nvidia,driver>=470,driver<471 brand=nvidiartx,driver>=470,driver<471 brand=geforce,driver>=470,driver<471 brand=geforcertx,driver>=470,driver<471 brand=quadro,driver>=470,driver<471 brand=quadrortx,driver>=470,driver<471 brand=titan,driver>=470,driver<471 brand=titanrtx,driver>=470,driver<471",
+            "NV_CUDA_CUDART_VERSION=11.5.50-1",
+            "NV_CUDA_COMPAT_PACKAGE=cuda-compat-11-5",
+            "CUDA_VERSION=11.5.0",
+            "LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64",
+            "NVIDIA_VISIBLE_DEVICES=all",
+            "NVIDIA_DRIVER_CAPABILITIES=compute,utility,video",
+            "TZ=Europe/Rome"
+        ],
+        "Entrypoint": [
+            "/bin/bash"
+        ],
+        "WorkingDir": "/workspace",
+        "Labels": {
+            "maintainer": "allan.nava@hiway.media",
+            "org.opencontainers.image.created": "2023-01-19T15:49:44.269Z",
+            "org.opencontainers.image.description": "Base Docker image with ffmpeg nvenc",
+            "org.opencontainers.image.licenses": "",
+            "org.opencontainers.image.revision": "f48dd57b213110e0b11482e903b08547abe5c390",
+            "org.opencontainers.image.source": "https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc",
+            "org.opencontainers.image.title": "Docker-FFmpeg-Nvenc",
+            "org.opencontainers.image.url": "https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc",
+            "org.opencontainers.image.version": "main"
+        },
+        "OnBuild": null
+    },
+    "created": "2023-01-19T16:03:55.858780122Z",
+    "history": [
+        {
+            "created": "2022-12-09T01:20:21.30286184Z",
+            "created_by": "/bin/sh -c #(nop) ADD file:9d282119af0c42bc823c95b4192a3350cf2cad670622017356dd2e637762e425 in / "
+        },
+        {
+            "created": "2022-12-09T01:20:21.654215477Z",
+            "created_by": "/bin/sh -c #(nop)  CMD [\"bash\"]",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "ENV NVARCH=x86_64",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "ENV NVIDIA_REQUIRE_CUDA=cuda>=11.5 brand=tesla,driver>=418,driver<419 brand=tesla,driver>=450,driver<451 brand=tesla,driver>=470,driver<471 brand=unknown,driver>=470,driver<471 brand=nvidia,driver>=470,driver<471 brand=nvidiartx,driver>=470,driver<471 brand=geforce,driver>=470,driver<471 brand=geforcertx,driver>=470,driver<471 brand=quadro,driver>=470,driver<471 brand=quadrortx,driver>=470,driver<471 brand=titan,driver>=470,driver<471 brand=titanrtx,driver>=470,driver<471",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "ENV NV_CUDA_CUDART_VERSION=11.5.50-1",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "ENV NV_CUDA_COMPAT_PACKAGE=cuda-compat-11-5",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "ARG TARGETARCH",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2022-12-14T22:49:45.141460599Z",
+            "created_by": "LABEL maintainer=NVIDIA CORPORATION <cudatools@nvidia.com>",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+

@@ -5,6 +5,7 @@
 .dockerignore
 .hadolint.yaml
 docs
+logs
 tests
 *.md
 LICENSE

@@ -1,0 +1,45 @@
+# stato GitHub del repo (2026-09-17)
+## git tag
+v1.0.1
+v1.0.0
+v0.1.2
+v0.1.1
+v0.1.0
+
+## gh release list
+v1.0.1	Latest	v1.0.1	2023-05-16T15:16:47Z
+v1.0.0		v1.0.0	2023-05-16T15:12:33Z
+v0.1.2		v0.1.2	2023-01-16T16:38:58Z
+v0.1.1		v0.1.1	2023-01-16T15:26:07Z
+v0.1.0		v0.1.0	2023-01-16T13:17:57Z
+
+## gh run list (ultimi)
+completed	success	CI	CI	main	schedule	34829933836	6m53s	2026-09-14T09:48:51Z
+completed	success	docker in /. - Update #1574603023	Dependabot Updates	main	dynamic	34809150288	31s	2026-09-14T05:18:25Z
+completed	success	CI	CI	main	schedule	34105214122	1m31s	2026-09-07T09:17:53Z
+completed	success	docker in /. - Update #1560609521	Dependabot Updates	main	dynamic	34086225878	27s	2026-09-07T05:17:16Z
+completed	success	CI	CI	main	schedule	33384106930	7m3s	2026-08-31T10:48:59Z
+completed	success	docker in /. - Update #1546418034	Dependabot Updates	main	dynamic	33359997342	26s	2026-08-31T05:17:14Z
+completed	success	docker in /. - Update #1537684442	Dependabot Updates	main	dynamic	32693096179	32s	2026-08-24T05:19:06Z
+completed	success	CI	CI	main	schedule	32691941602	6m46s	2026-08-24T04:58:59Z
+completed	success	docker in /. - Update #1528057346	Dependabot Updates	main	dynamic	31997255043	29s	2026-08-17T05:15:23Z
+completed	success	CI	CI	main	schedule	31996121887	1m12s	2026-08-17T04:55:39Z
+completed	success	CI	CI	main	schedule	31359461243	1m32s	2026-08-10T05:42:43Z
+completed	success	docker in /. - Update #1516445297	Dependabot Updates	main	dynamic	31358224222	34s	2026-08-10T05:19:24Z
+completed	success	Bump docker/login-action from 3 to 4	CI	dependabot/github_actions/docker/login-action-4	pull_request	31305579577	7m19s	2026-08-09T09:18:12Z
+completed	success	Bump docker/setup-buildx-action from 3 to 4	CI	dependabot/github_actions/docker/setup-buildx-action-4	pull_request	31305524306	7m6s	2026-08-09T09:16:48Z
+completed	success	Bump docker/build-push-action from 6 to 7	CI	dependabot/github_actions/docker/build-push-action-7	pull_request	31305517618	7m1s	2026-08-09T09:16:38Z
+
+## gh pr list
+23	Bump docker/login-action from 3 to 4	dependabot/github_actions/docker/login-action-4	OPEN	2026-08-09T09:18:08Z
+22	Bump docker/setup-buildx-action from 3 to 4	dependabot/github_actions/docker/setup-buildx-action-4	OPEN	2026-08-09T09:16:44Z
+21	Bump docker/build-push-action from 6 to 7	dependabot/github_actions/docker/build-push-action-7	OPEN	2026-08-09T09:16:35Z
+20	Bump docker/metadata-action from 5 to 6	dependabot/github_actions/docker/metadata-action-6	OPEN	2026-08-09T09:16:26Z
+18	Bump nvidia/cuda from 11.5.0-base-ubuntu20.04 to 12.1.0-base-ubuntu20.04	dependabot/docker/nvidia/cuda-12.1.0-base-ubuntu20.04	OPEN	2023-03-13T06:03:19Z
+5	Bump sigstore/cosign-installer from 2.6.0 to 2.8.1	dependabot/github_actions/sigstore/cosign-installer-2.8.1	OPEN	2023-01-16T13:38:47Z
+
+## gh issue list
+(nessuna issue)
+
+## milestones
+[]

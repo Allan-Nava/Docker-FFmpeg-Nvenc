@@ -11,6 +11,13 @@ Build multi-stage su Debian 12: nell'immagine finale ci sono solo i binari e le 
 
 Registry: **GitHub Container Registry** (`ghcr.io`), non Docker Hub.
 
+> ⚠️ **Stato al 17/09/2026: i tag qui sotto non sono ancora stati pubblicati.** L'ultimo tag del repo e
+> `v1.0.1` (2023) e su GHCR `:latest` e ancora l'immagine del gennaio 2023: gira come **root**, ha
+> `ENTRYPOINT /bin/bash` e un `NVIDIA_REQUIRE_CUDA` che ne impedisce l'avvio sugli host con driver
+> recenti. L'immagine descritta in questa pagina e quella prodotta da `main`, pubblicata al primo tag
+> `v2.0.0`. Dettagli: [audit 2026-09-17](docs/audit/2026-09-17-audit-stato-e-automazione.md) - stato:
+> item `tag-v2-0-0` del [backlog](docs/backlog.md).
+
 ```
 ghcr.io/allan-nava/docker-ffmpeg-nvenc
 ```
@@ -78,7 +85,7 @@ Non è abilitato il **CUDA toolkit**: niente `scale_npp`, `libnpp`, `nvdec`/`cuv
 Il repo espone anche una Action che esegue ffmpeg nell'immagine pre-buildata:
 
 ```yaml
-- uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2
+- uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2      # disponibile dal tag v2.0.0 (vedi avviso sopra)
   with:
     command: '-i input.mp4 -c:v libx264 -preset fast output.mp4'
 ```
@@ -103,9 +110,27 @@ La CI (`.github/workflows/ci.yml`) esegue lint (hadolint, shellcheck, actionlint
 
 Vedi [CLAUDE.md](CLAUDE.md) / [AGENTS.md](AGENTS.md) per le convenzioni di lavoro e le trappole note, e [docs/audit/](docs/audit/) per l'audit del progetto.
 
+### Backlog e roadmap
+
+I todo del repo stanno in [`docs/backlog.md`](docs/backlog.md), che e la **sorgente unica**: uno script
+idempotente apre, aggiorna e chiude una issue GitHub per ogni item (label `backlog-sync`) e crea le
+milestone mancanti, schedulato da [`.github/workflows/backlog.yml`](.github/workflows/backlog.yml).
+[`docs/roadmap.md`](docs/roadmap.md) e la vista per milestone, **generata** dal backlog.
+
+```shell
+python3 docs/scripts/backlog-lint.py             # valida il backlog (gate di CI)
+python3 docs/scripts/generate-roadmap.py         # rigenera docs/roadmap.md (da committare)
+python3 docs/scripts/sync-backlog-to-issues.py   # dry-run del sync verso le issue
+```
+
+Convenzioni degli item e trappole dell'API GitHub: [`docs/scripts/README.md`](docs/scripts/README.md).
+
 ## Contribuire
 
 Issue e pull request benvenute. Ogni PR deve passare la CI: build + smoke test di tutte le varianti.
+
+Le issue con label `backlog-sync` sono **generate** da [`docs/backlog.md`](docs/backlog.md): per
+modificarne titolo o descrizione si edita il backlog, non la issue (il prossimo sync la riallinea).
 
 ## Licenza
 
