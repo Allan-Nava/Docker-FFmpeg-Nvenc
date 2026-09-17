@@ -4105,3 +4105,498 @@
 #14 69.68 CC	libavcodec/vp9data.o
 #14 69.75 CC	libavcodec/vp9dsp.o
 #14 69.79 CC	libavcodec/vp9dsp_10bpp.o
+#14 70.50 CC	libavcodec/vp9dsp_12bpp.o
+#14 70.94 CC	libavcodec/vp9dsp_8bpp.o
+#14 71.69 CC	libavcodec/vp9lpf.o
+#14 71.83 CC	libavcodec/vp9mvs.o
+#14 72.22 CC	libavcodec/vp9prob.o
+#14 72.44 CC	libavcodec/vp9recon.o
+#14 72.57 CC	libavcodec/vpx_rac.o
+#14 72.57 CC	libavcodec/vqavideo.o
+#14 72.61 CC	libavcodec/vqcdec.o
+#14 72.74 CC	libavcodec/wavarc.o
+#14 72.77 CC	libavcodec/wavpack.o
+#14 72.96 CC	libavcodec/wavpackdata.o
+#14 72.98 CC	libavcodec/wavpackenc.o
+#14 73.41 CC	libavcodec/wbmpdec.o
+#14 73.46 CC	libavcodec/wbmpenc.o
+#14 73.51 CC	libavcodec/wcmv.o
+#14 73.51 CC	libavcodec/webp.o
+#14 73.53 CC	libavcodec/webp_parser.o
+#14 73.57 CC	libavcodec/webvttdec.o
+#14 73.59 CC	libavcodec/webvttenc.o
+#14 73.61 CC	libavcodec/wma.o
+#14 73.65 CC	libavcodec/wma_common.o
+#14 73.67 CC	libavcodec/wma_freqs.o
+#14 73.68 CC	libavcodec/wmadec.o
+#14 73.73 CC	libavcodec/wmaenc.o
+#14 73.78 libavcodec/wmadec.c: In function 'wma_decode_block':
+#14 73.78 libavcodec/wmadec.c:519:30: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+#14 73.78   519 |         s->channel_coded[ch] = a;
+#14 73.78       |         ~~~~~~~~~~~~~~~~~~~~~^~~
+#14 73.78 In file included from libavcodec/wmadec.c:45:
+#14 73.78 libavcodec/wma.h:112:13: note: at offset 2 into destination object 'channel_coded' of size 2
+#14 73.78   112 |     uint8_t channel_coded[MAX_CHANNELS];    ///< true if channel is coded
+#14 73.78       |             ^~~~~~~~~~~~~
+#14 73.86 CC	libavcodec/wmalosslessdec.o
+#14 73.91 CC	libavcodec/wmaprodec.o
+#14 73.99 CC	libavcodec/wmavoice.o
+#14 74.42 CC	libavcodec/wmv2.o
+#14 74.48 CC	libavcodec/wmv2data.o
+#14 74.49 CC	libavcodec/wmv2dec.o
+#14 74.54 CC	libavcodec/wmv2dsp.o
+#14 74.57 CC	libavcodec/wmv2enc.o
+#14 74.67 CC	libavcodec/wnv1.o
+#14 74.67 CC	libavcodec/wrapped_avframe.o
+#14 74.68 CC	libavcodec/ws-snd1.o
+#14 74.71 CC	libavcodec/xan.o
+#14 74.73 CC	libavcodec/xbm_parser.o
+#14 74.73 CC	libavcodec/xbmdec.o
+#14 74.75 CC	libavcodec/xbmenc.o
+#14 74.76 CC	libavcodec/xface.o
+#14 74.78 CC	libavcodec/xfacedec.o
+#14 74.79 CC	libavcodec/xfaceenc.o
+#14 74.82 CC	libavcodec/xiph.o
+#14 74.83 CC	libavcodec/xl.o
+#14 74.84 CC	libavcodec/xma_parser.o
+#14 74.84 CC	libavcodec/xpmdec.o
+#14 74.86 CC	libavcodec/xsubdec.o
+#14 74.87 CC	libavcodec/xsubenc.o
+#14 74.88 CC	libavcodec/xvididct.o
+#14 74.94 CC	libavcodec/xwd_parser.o
+#14 74.95 CC	libavcodec/xwddec.o
+#14 74.95 CC	libavcodec/xwdenc.o
+#14 74.97 CC	libavcodec/xxan.o
+#14 74.98 CC	libavcodec/y41pdec.o
+#14 75.01 CC	libavcodec/y41penc.o
+#14 75.02 CC	libavcodec/ylc.o
+#14 75.02 CC	libavcodec/yop.o
+#14 75.05 CC	libavcodec/yuv4dec.o
+#14 75.08 CC	libavcodec/yuv4enc.o
+#14 75.08 CC	libavcodec/zerocodec.o
+#14 75.09 CC	libavcodec/zlib_wrapper.o
+#14 75.12 CC	libavcodec/zmbv.o
+#14 75.13 CC	libavcodec/zmbvenc.o
+#14 75.13 GEN	libavcodec/libavcodec.pc
+#14 75.13 CC	libpostproc/postprocess.o
+#14 75.15 CC	libpostproc/version.o
+#14 75.17 GEN	libpostproc/libpostproc.pc
+#14 75.17 CC	libswresample/aarch64/audio_convert_init.o
+#14 75.20 AS	libswresample/aarch64/audio_convert_neon.o
+#14 75.21 AS	libswresample/aarch64/resample.o
+#14 75.22 CC	libswresample/aarch64/resample_init.o
+#14 75.22 CC	libswresample/audioconvert.o
+#14 75.24 CC	libswresample/dither.o
+#14 75.27 CC	libswresample/options.o
+#14 75.30 CC	libswresample/rematrix.o
+#14 75.34 CC	libswresample/resample.o
+#14 75.43 CC	libswresample/resample_dsp.o
+#14 75.46 CC	libswresample/swresample.o
+#14 75.56 CC	libswresample/swresample_frame.o
+#14 75.56 CC	libswresample/version.o
+#14 75.59 GEN	libswresample/libswresample.pc
+#14 75.60 AS	libswscale/aarch64/hscale.o
+#14 75.61 AS	libswscale/aarch64/output.o
+#14 75.62 CC	libswscale/aarch64/rgb2rgb.o
+#14 75.62 AS	libswscale/aarch64/rgb2rgb_neon.o
+#14 75.63 CC	libswscale/aarch64/swscale.o
+#14 75.65 CC	libswscale/aarch64/swscale_unscaled.o
+#14 75.69 AS	libswscale/aarch64/yuv2rgb_neon.o
+#14 75.70 CC	libswscale/alphablend.o
+#14 75.72 CC	libswscale/gamma.o
+#14 75.74 CC	libswscale/half2float.o
+#14 75.75 CC	libswscale/hscale.o
+#14 75.76 CC	libswscale/hscale_fast_bilinear.o
+#14 75.80 CC	libswscale/input.o
+#14 75.81 CC	libswscale/options.o
+#14 75.83 CC	libswscale/output.o
+#14 75.84 CC	libswscale/rgb2rgb.o
+#14 76.03 CC	libswscale/slice.o
+#14 76.08 CC	libswscale/swscale.o
+#14 76.13 CC	libswscale/swscale_unscaled.o
+#14 76.36 CC	libswscale/utils.o
+#14 76.46 CC	libswscale/version.o
+#14 76.49 CC	libswscale/vscale.o
+#14 76.57 CC	libswscale/yuv2rgb.o
+#14 76.77 GEN	libswscale/libswscale.pc
+#14 76.77 CC	libavutil/aarch64/cpu.o
+#14 76.78 CC	libavutil/aarch64/float_dsp_init.o
+#14 76.79 AS	libavutil/aarch64/float_dsp_neon.o
+#14 76.80 CC	libavutil/aarch64/tx_float_init.o
+#14 76.83 AS	libavutil/aarch64/tx_float_neon.o
+#14 76.85 CC	libavutil/adler32.o
+#14 76.87 CC	libavutil/aes.o
+#14 76.95 CC	libavutil/aes_ctr.o
+#14 76.97 CC	libavutil/ambient_viewing_environment.o
+#14 77.00 CC	libavutil/audio_fifo.o
+#14 77.02 CC	libavutil/avsscanf.o
+#14 77.06 CC	libavutil/avstring.o
+#14 77.16 CC	libavutil/base64.o
+#14 77.19 CC	libavutil/blowfish.o
+#14 77.24 CC	libavutil/bprint.o
+#14 77.28 CC	libavutil/buffer.o
+#14 77.35 CC	libavutil/camellia.o
+#14 77.35 CC	libavutil/cast5.o
+#14 77.38 CC	libavutil/channel_layout.o
+#14 77.42 CC	libavutil/cpu.o
+#14 77.48 CC	libavutil/crc.o
+#14 77.49 CC	libavutil/csp.o
+#14 77.54 CC	libavutil/des.o
+#14 77.55 CC	libavutil/detection_bbox.o
+#14 77.58 CC	libavutil/dict.o
+#14 77.58 CC	libavutil/display.o
+#14 77.61 CC	libavutil/dovi_meta.o
+#14 77.61 CC	libavutil/downmix_info.o
+#14 77.64 CC	libavutil/encryption_info.o
+#14 77.64 CC	libavutil/error.o
+#14 77.65 CC	libavutil/eval.o
+#14 77.66 CC	libavutil/fifo.o
+#14 77.72 CC	libavutil/file.o
+#14 77.75 CC	libavutil/file_open.o
+#14 77.76 CC	libavutil/film_grain_params.o
+#14 77.79 CC	libavutil/fixed_dsp.o
+#14 77.80 CC	libavutil/float_dsp.o
+#14 77.80 CC	libavutil/frame.o
+#14 77.84 CC	libavutil/hash.o
+#14 77.85 CC	libavutil/hdr_dynamic_metadata.o
+#14 77.88 CC	libavutil/hdr_dynamic_vivid_metadata.o
+#14 77.88 CC	libavutil/hmac.o
+#14 77.90 CC	libavutil/hwcontext.o
+#14 77.91 CC	libavutil/hwcontext_cuda.o
+#14 77.93 CC	libavutil/hwcontext_stub.o
+#14 77.94 CC	libavutil/imgutils.o
+#14 77.95 CC	libavutil/integer.o
+#14 78.01 CC	libavutil/intmath.o
+#14 78.01 CC	libavutil/lfg.o
+#14 78.04 CC	libavutil/lls.o
+#14 78.04 CC	libavutil/log.o
+#14 78.10 CC	libavutil/log2_tab.o
+#14 78.10 CC	libavutil/lzo.o
+#14 78.11 CC	libavutil/mastering_display_metadata.o
+#14 78.12 CC	libavutil/mathematics.o
+#14 78.13 CC	libavutil/md5.o
+#14 78.14 CC	libavutil/mem.o
+#14 78.16 CC	libavutil/murmur3.o
+#14 78.18 CC	libavutil/opt.o
+#14 78.21 CC	libavutil/parseutils.o
+#14 78.21 CC	libavutil/pixdesc.o
+#14 78.23 CC	libavutil/pixelutils.o
+#14 78.28 CC	libavutil/random_seed.o
+#14 78.32 CC	libavutil/rational.o
+#14 78.34 CC	libavutil/rc4.o
+#14 78.37 CC	libavutil/reverse.o
+#14 78.38 CC	libavutil/ripemd.o
+#14 78.38 CC	libavutil/samplefmt.o
+#14 78.40 CC	libavutil/sha.o
+#14 78.44 CC	libavutil/sha512.o
+#14 78.55 CC	libavutil/slicethread.o
+#14 78.56 CC	libavutil/spherical.o
+#14 78.58 CC	libavutil/stereo3d.o
+#14 78.59 CC	libavutil/tea.o
+#14 78.61 CC	libavutil/threadmessage.o
+#14 78.62 CC	libavutil/time.o
+#14 78.71 CC	libavutil/timecode.o
+#14 78.73 CC	libavutil/tree.o
+#14 78.75 CC	libavutil/twofish.o
+#14 78.79 CC	libavutil/tx.o
+#14 78.79 libavutil/timecode.c: In function 'av_timecode_make_string':
+#14 78.79 libavutil/timecode.c:123:60: warning: '%0*d' directive output may be truncated writing between 1 and 10 bytes into a region of size between 2 and 14 [-Wformat-truncation=]
+#14 78.79   123 |     snprintf(buf, AV_TIMECODE_STR_SIZE, "%s%02d:%02d:%02d%c%0*d",
+#14 78.79       |                                                            ^~~~
+#14 78.79 libavutil/timecode.c:123:41: note: directive argument in the range [0, 2147483647]
+#14 78.79   123 |     snprintf(buf, AV_TIMECODE_STR_SIZE, "%s%02d:%02d:%02d%c%0*d",
+#14 78.79       |                                         ^~~~~~~~~~~~~~~~~~~~~~~~
+#14 78.79 libavutil/timecode.c:123:5: note: 'snprintf' output between 11 and 32 bytes into a destination of size 23
+#14 78.79   123 |     snprintf(buf, AV_TIMECODE_STR_SIZE, "%s%02d:%02d:%02d%c%0*d",
+#14 78.79       |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#14 78.79   124 |              neg ? "-" : "",
+#14 78.79       |              ~~~~~~~~~~~~~~~
+#14 78.79   125 |              hh, mm, ss, drop ? ';' : ':', ff_len, ff);
+#14 78.79       |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#14 78.81 CC	libavutil/tx_double.o
+#14 78.83 CC	libavutil/tx_float.o
+#14 78.84 CC	libavutil/tx_int32.o
+#14 78.90 CC	libavutil/utils.o
+#14 78.95 CC	libavutil/uuid.o
+#14 78.98 CC	libavutil/version.o
+#14 79.01 CC	libavutil/video_enc_params.o
+#14 79.04 CC	libavutil/xga_font_data.o
+#14 79.07 CC	libavutil/xtea.o
+#14 79.08 GEN	libavutil/libavutil.pc
+#14 79.08 CC	fftools/ffmpeg_demux.o
+#14 79.30 CC	fftools/ffmpeg_filter.o
+#14 79.51 CC	fftools/ffmpeg_hw.o
+#14 79.56 CC	fftools/ffmpeg_mux.o
+#14 79.60 CC	fftools/ffmpeg_mux_init.o
+#14 79.68 CC	fftools/ffmpeg_opt.o
+#14 79.89 CC	fftools/objpool.o
+#14 79.92 CC	fftools/sync_queue.o
+#14 80.00 CC	fftools/thread_queue.o
+#14 80.05 CC	fftools/cmdutils.o
+#14 80.16 CC	fftools/opt_common.o
+#14 80.21 CC	fftools/ffmpeg.o
+#14 80.28 CC	fftools/ffprobe.o
+#14 80.34 AR	libavdevice/libavdevice.a
+#14 80.35 AR	libavfilter/libavfilter.a
+#14 80.44 AR	libavformat/libavformat.a
+#14 80.46 AR	libavcodec/libavcodec.a
+#14 80.51 AR	libpostproc/libpostproc.a
+#14 80.52 AR	libswresample/libswresample.a
+#14 80.53 AR	libswscale/libswscale.a
+#14 80.54 AR	libavutil/libavutil.a
+#14 81.08 LD	ffmpeg_g
+#14 81.36 LD	ffprobe_g
+#14 81.49 STRIP	ffmpeg
+#14 81.72 STRIP	ffprobe
+#14 81.97 INSTALL	install-progs-yes
+#14 81.97 INSTALL	ffmpeg
+#14 81.97 INSTALL	ffprobe
+#14 82.00 INSTALL	presets/libvpx-1080p.ffpreset
+#14 82.00 INSTALL	presets/libvpx-1080p50_60.ffpreset
+#14 82.00 INSTALL	presets/libvpx-360p.ffpreset
+#14 82.00 INSTALL	presets/libvpx-720p.ffpreset
+#14 82.00 INSTALL	presets/libvpx-720p50_60.ffpreset
+#14 82.00 INSTALL	doc/ffprobe.xsd
+#14 82.00 INSTALL	doc/examples/avio_http_serve_files.c
+#14 82.00 INSTALL	doc/examples/avio_list_dir.c
+#14 82.00 INSTALL	doc/examples/avio_read_callback.c
+#14 82.00 INSTALL	doc/examples/decode_audio.c
+#14 82.00 INSTALL	doc/examples/decode_filter_audio.c
+#14 82.00 INSTALL	doc/examples/decode_filter_video.c
+#14 82.00 INSTALL	doc/examples/decode_video.c
+#14 82.00 INSTALL	doc/examples/demux_decode.c
+#14 82.00 INSTALL	doc/examples/encode_audio.c
+#14 82.00 INSTALL	doc/examples/encode_video.c
+#14 82.00 INSTALL	doc/examples/extract_mvs.c
+#14 82.00 INSTALL	doc/examples/filter_audio.c
+#14 82.00 INSTALL	doc/examples/hw_decode.c
+#14 82.00 INSTALL	doc/examples/mux.c
+#14 82.00 INSTALL	doc/examples/qsv_decode.c
+#14 82.00 INSTALL	doc/examples/qsv_transcode.c
+#14 82.00 INSTALL	doc/examples/remux.c
+#14 82.00 INSTALL	doc/examples/resample_audio.c
+#14 82.00 INSTALL	doc/examples/scale_video.c
+#14 82.00 INSTALL	doc/examples/show_metadata.c
+#14 82.00 INSTALL	doc/examples/transcode.c
+#14 82.00 INSTALL	doc/examples/transcode_aac.c
+#14 82.00 INSTALL	doc/examples/vaapi_encode.c
+#14 82.00 INSTALL	doc/examples/vaapi_transcode.c
+#14 82.00 INSTALL	doc/examples/README
+#14 82.00 INSTALL	doc/examples/Makefile
+#14 82.00 INSTALL	doc/examples/avio_http_serve_files.c
+#14 82.00 INSTALL	doc/examples/avio_list_dir.c
+#14 82.00 INSTALL	doc/examples/avio_read_callback.c
+#14 82.00 INSTALL	doc/examples/decode_audio.c
+#14 82.00 INSTALL	doc/examples/decode_filter_audio.c
+#14 82.00 INSTALL	doc/examples/decode_filter_video.c
+#14 82.00 INSTALL	doc/examples/decode_video.c
+#14 82.00 INSTALL	doc/examples/demux_decode.c
+#14 82.00 INSTALL	doc/examples/encode_audio.c
+#14 82.00 INSTALL	doc/examples/encode_video.c
+#14 82.00 INSTALL	doc/examples/extract_mvs.c
+#14 82.00 INSTALL	doc/examples/filter_audio.c
+#14 82.00 INSTALL	doc/examples/hw_decode.c
+#14 82.00 INSTALL	doc/examples/mux.c
+#14 82.00 INSTALL	doc/examples/qsv_decode.c
+#14 82.00 INSTALL	doc/examples/qsv_transcode.c
+#14 82.00 INSTALL	doc/examples/remux.c
+#14 82.00 INSTALL	doc/examples/resample_audio.c
+#14 82.00 INSTALL	doc/examples/scale_video.c
+#14 82.00 INSTALL	doc/examples/show_metadata.c
+#14 82.00 INSTALL	doc/examples/transcode.c
+#14 82.00 INSTALL	doc/examples/transcode_aac.c
+#14 82.00 INSTALL	doc/examples/vaapi_encode.c
+#14 82.00 INSTALL	doc/examples/vaapi_transcode.c
+#14 82.00 INSTALL	doc/examples/README
+#14 82.00 INSTALL	doc/examples/Makefile
+#14 82.01 INSTALL	libavdevice/libavdevice.a
+#14 82.01 INSTALL	libavfilter/libavfilter.a
+#14 82.07 INSTALL	libavformat/libavformat.a
+#14 82.14 INSTALL	libavcodec/libavcodec.a
+#14 82.28 INSTALL	libpostproc/libpostproc.a
+#14 82.29 INSTALL	libswresample/libswresample.a
+#14 82.29 INSTALL	libswscale/libswscale.a
+#14 82.30 INSTALL	libavutil/libavutil.a
+#14 82.32 INSTALL	libavdevice/avdevice.h
+#14 82.32 INSTALL	libavdevice/version.h
+#14 82.32 INSTALL	libavdevice/version_major.h
+#14 82.32 INSTALL	libavdevice/libavdevice.pc
+#14 82.32 INSTALL	libavfilter/avfilter.h
+#14 82.32 INSTALL	libavfilter/buffersink.h
+#14 82.32 INSTALL	libavfilter/buffersrc.h
+#14 82.32 INSTALL	libavfilter/version.h
+#14 82.32 INSTALL	libavfilter/version_major.h
+#14 82.32 INSTALL	libavfilter/libavfilter.pc
+#14 82.32 INSTALL	libavformat/avformat.h
+#14 82.32 INSTALL	libavformat/avio.h
+#14 82.32 INSTALL	libavformat/version.h
+#14 82.32 INSTALL	libavformat/version_major.h
+#14 82.33 INSTALL	libavformat/libavformat.pc
+#14 82.33 INSTALL	libavcodec/ac3_parser.h
+#14 82.33 INSTALL	libavcodec/adts_parser.h
+#14 82.33 INSTALL	libavcodec/avcodec.h
+#14 82.33 INSTALL	libavcodec/avdct.h
+#14 82.33 INSTALL	libavcodec/avfft.h
+#14 82.33 INSTALL	libavcodec/bsf.h
+#14 82.33 INSTALL	libavcodec/codec.h
+#14 82.33 INSTALL	libavcodec/codec_desc.h
+#14 82.33 INSTALL	libavcodec/codec_id.h
+#14 82.33 INSTALL	libavcodec/codec_par.h
+#14 82.33 INSTALL	libavcodec/d3d11va.h
+#14 82.33 INSTALL	libavcodec/defs.h
+#14 82.33 INSTALL	libavcodec/dirac.h
+#14 82.33 INSTALL	libavcodec/dv_profile.h
+#14 82.33 INSTALL	libavcodec/dxva2.h
+#14 82.33 INSTALL	libavcodec/jni.h
+#14 82.33 INSTALL	libavcodec/mediacodec.h
+#14 82.33 INSTALL	libavcodec/packet.h
+#14 82.33 INSTALL	libavcodec/qsv.h
+#14 82.33 INSTALL	libavcodec/vdpau.h
+#14 82.33 INSTALL	libavcodec/version.h
+#14 82.33 INSTALL	libavcodec/version_major.h
+#14 82.33 INSTALL	libavcodec/videotoolbox.h
+#14 82.33 INSTALL	libavcodec/vorbis_parser.h
+#14 82.33 INSTALL	libavcodec/xvmc.h
+#14 82.33 INSTALL	libavcodec/libavcodec.pc
+#14 82.33 INSTALL	libpostproc/postprocess.h
+#14 82.33 INSTALL	libpostproc/version.h
+#14 82.33 INSTALL	libpostproc/version_major.h
+#14 82.34 INSTALL	libpostproc/libpostproc.pc
+#14 82.34 INSTALL	libswresample/swresample.h
+#14 82.34 INSTALL	libswresample/version.h
+#14 82.34 INSTALL	libswresample/version_major.h
+#14 82.34 INSTALL	libswresample/libswresample.pc
+#14 82.34 INSTALL	libswscale/swscale.h
+#14 82.34 INSTALL	libswscale/version.h
+#14 82.34 INSTALL	libswscale/version_major.h
+#14 82.34 INSTALL	libswscale/libswscale.pc
+#14 82.35 INSTALL	libavutil/adler32.h
+#14 82.35 INSTALL	libavutil/aes.h
+#14 82.35 INSTALL	libavutil/aes_ctr.h
+#14 82.35 INSTALL	libavutil/ambient_viewing_environment.h
+#14 82.35 INSTALL	libavutil/attributes.h
+#14 82.35 INSTALL	libavutil/audio_fifo.h
+#14 82.35 INSTALL	libavutil/avassert.h
+#14 82.35 INSTALL	libavutil/avstring.h
+#14 82.35 INSTALL	libavutil/avutil.h
+#14 82.35 INSTALL	libavutil/base64.h
+#14 82.35 INSTALL	libavutil/blowfish.h
+#14 82.35 INSTALL	libavutil/bprint.h
+#14 82.35 INSTALL	libavutil/bswap.h
+#14 82.35 INSTALL	libavutil/buffer.h
+#14 82.35 INSTALL	libavutil/cast5.h
+#14 82.35 INSTALL	libavutil/camellia.h
+#14 82.35 INSTALL	libavutil/channel_layout.h
+#14 82.35 INSTALL	libavutil/common.h
+#14 82.35 INSTALL	libavutil/cpu.h
+#14 82.35 INSTALL	libavutil/crc.h
+#14 82.35 INSTALL	libavutil/csp.h
+#14 82.35 INSTALL	libavutil/des.h
+#14 82.35 INSTALL	libavutil/detection_bbox.h
+#14 82.35 INSTALL	libavutil/dict.h
+#14 82.35 INSTALL	libavutil/display.h
+#14 82.35 INSTALL	libavutil/dovi_meta.h
+#14 82.35 INSTALL	libavutil/downmix_info.h
+#14 82.35 INSTALL	libavutil/encryption_info.h
+#14 82.35 INSTALL	libavutil/error.h
+#14 82.35 INSTALL	libavutil/eval.h
+#14 82.35 INSTALL	libavutil/fifo.h
+#14 82.35 INSTALL	libavutil/file.h
+#14 82.35 INSTALL	libavutil/frame.h
+#14 82.35 INSTALL	libavutil/hash.h
+#14 82.35 INSTALL	libavutil/hdr_dynamic_metadata.h
+#14 82.35 INSTALL	libavutil/hdr_dynamic_vivid_metadata.h
+#14 82.35 INSTALL	libavutil/hmac.h
+#14 82.35 INSTALL	libavutil/hwcontext.h
+#14 82.35 INSTALL	libavutil/hwcontext_cuda.h
+#14 82.35 INSTALL	libavutil/hwcontext_d3d11va.h
+#14 82.35 INSTALL	libavutil/hwcontext_drm.h
+#14 82.35 INSTALL	libavutil/hwcontext_dxva2.h
+#14 82.35 INSTALL	libavutil/hwcontext_qsv.h
+#14 82.35 INSTALL	libavutil/hwcontext_mediacodec.h
+#14 82.35 INSTALL	libavutil/hwcontext_opencl.h
+#14 82.35 INSTALL	libavutil/hwcontext_vaapi.h
+#14 82.35 INSTALL	libavutil/hwcontext_videotoolbox.h
+#14 82.35 INSTALL	libavutil/hwcontext_vdpau.h
+#14 82.35 INSTALL	libavutil/hwcontext_vulkan.h
+#14 82.35 INSTALL	libavutil/imgutils.h
+#14 82.35 INSTALL	libavutil/intfloat.h
+#14 82.35 INSTALL	libavutil/intreadwrite.h
+#14 82.35 INSTALL	libavutil/lfg.h
+#14 82.35 INSTALL	libavutil/log.h
+#14 82.35 INSTALL	libavutil/lzo.h
+#14 82.35 INSTALL	libavutil/macros.h
+#14 82.35 INSTALL	libavutil/mathematics.h
+#14 82.35 INSTALL	libavutil/mastering_display_metadata.h
+#14 82.35 INSTALL	libavutil/md5.h
+#14 82.35 INSTALL	libavutil/mem.h
+#14 82.35 INSTALL	libavutil/motion_vector.h
+#14 82.35 INSTALL	libavutil/murmur3.h
+#14 82.35 INSTALL	libavutil/opt.h
+#14 82.35 INSTALL	libavutil/parseutils.h
+#14 82.35 INSTALL	libavutil/pixdesc.h
+#14 82.35 INSTALL	libavutil/pixelutils.h
+#14 82.35 INSTALL	libavutil/pixfmt.h
+#14 82.35 INSTALL	libavutil/random_seed.h
+#14 82.35 INSTALL	libavutil/rc4.h
+#14 82.35 INSTALL	libavutil/rational.h
+#14 82.35 INSTALL	libavutil/replaygain.h
+#14 82.35 INSTALL	libavutil/ripemd.h
+#14 82.35 INSTALL	libavutil/samplefmt.h
+#14 82.35 INSTALL	libavutil/sha.h
+#14 82.35 INSTALL	libavutil/sha512.h
+#14 82.35 INSTALL	libavutil/spherical.h
+#14 82.35 INSTALL	libavutil/stereo3d.h
+#14 82.35 INSTALL	libavutil/threadmessage.h
+#14 82.35 INSTALL	libavutil/time.h
+#14 82.35 INSTALL	libavutil/timecode.h
+#14 82.35 INSTALL	libavutil/timestamp.h
+#14 82.35 INSTALL	libavutil/tree.h
+#14 82.35 INSTALL	libavutil/twofish.h
+#14 82.35 INSTALL	libavutil/uuid.h
+#14 82.35 INSTALL	libavutil/version.h
+#14 82.35 INSTALL	libavutil/video_enc_params.h
+#14 82.35 INSTALL	libavutil/xtea.h
+#14 82.35 INSTALL	libavutil/tea.h
+#14 82.35 INSTALL	libavutil/tx.h
+#14 82.35 INSTALL	libavutil/film_grain_params.h
+#14 82.35 INSTALL	libavutil/avconfig.h
+#14 82.35 INSTALL	libavutil/ffversion.h
+#14 82.35 INSTALL	libavutil/libavutil.pc
+#14 DONE 82.5s
+
+#15 [builder 7/7] RUN /usr/local/bin/ffmpeg -hide_banner -encoders > /tmp/encoders.txt  && grep -q h264_nvenc /tmp/encoders.txt  && grep -q hevc_nvenc /tmp/encoders.txt  && rm /tmp/encoders.txt
+#15 DONE 0.2s
+
+#16 [runtime 3/6] COPY --from=builder /usr/local/bin/ffmpeg  /usr/local/bin/ffmpeg
+#16 DONE 0.0s
+
+#17 [runtime 4/6] COPY --from=builder /usr/local/bin/ffprobe /usr/local/bin/ffprobe
+#17 DONE 0.1s
+
+#18 [runtime 5/6] RUN ffmpeg -hide_banner -version  && ffmpeg -hide_banner -encoders > /tmp/encoders.txt  && grep -q h264_nvenc /tmp/encoders.txt  && rm /tmp/encoders.txt
+#18 0.124 ffmpeg version 6.0.1 Copyright (c) 2000-2023 the FFmpeg developers
+#18 0.124 built with gcc 12 (Debian 12.2.0-14+deb12u1)
+#18 0.124 configuration: --prefix=/usr/local --enable-gpl --enable-version3 --disable-debug --disable-doc --disable-ffplay --disable-indev=sndio --disable-outdev=sndio --enable-nvenc --enable-fontconfig --enable-gray --enable-libass --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libspeex --enable-libtheora --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxml2
+#18 0.124 libavutil      58.  2.100 / 58.  2.100
+#18 0.124 libavcodec     60.  3.100 / 60.  3.100
+#18 0.124 libavformat    60.  3.100 / 60.  3.100
+#18 0.124 libavdevice    60.  1.100 / 60.  1.100
+#18 0.124 libavfilter     9.  3.100 /  9.  3.100
+#18 0.124 libswscale      7.  1.100 /  7.  1.100
+#18 0.124 libswresample   4. 10.100 /  4. 10.100
+#18 0.124 libpostproc    57.  1.100 / 57.  1.100
+#18 DONE 0.1s
+
+#19 [runtime 6/6] WORKDIR /data
+#19 DONE 0.0s
+
+#20 exporting to image
+#20 exporting layers
+#20 exporting layers 0.3s done
+#20 writing image sha256:38d90b1087b677fb18633c242a7f21b7e8877f56eb2a09deead3ff4ab5c383ce done
+#20 naming to docker.io/library/ffmpeg-nvenc:test-6.0.1 done
+#20 DONE 0.3s
+
+What's Next?
+  View a summary of image vulnerabilities and recommendations → docker scout quickview

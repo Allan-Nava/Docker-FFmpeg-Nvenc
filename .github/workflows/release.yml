@@ -1,0 +1,112 @@
+name: Release
+
+# Every commit on main becomes a tagged release.
+#
+# What it does NOT do: publish images. The tag is created with the GITHUB_TOKEN, which by design
+# does not trigger other workflows, so `docker-publish.yml` stays an explicit act (push a tag by
+# hand, or use its workflow_dispatch). Publishing means three ~90-minute builds and public
+# artefacts on GHCR: that stays a decision, not a side effect of committing.
+#
+# The version comes from `docs/scripts/next-version.py` (tested in tests/test_release.py):
+# a CHANGELOG section above the latest tag is a pending release and gets tagged as-is; otherwise
+# the latest tag is bumped by the strongest conventional-commit marker since it.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version, tag and release
+    runs-on: ubuntu-latest
+    # Belt and braces: a GITHUB_TOKEN push does not re-trigger workflows, and the release commit
+    # is skipped explicitly anyway.
+    if: "!startsWith(github.event.head_commit.message, 'release:')"
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout (full history, tags included)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # A release is only as good as the gate in front of it.
+      - name: Tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Generated pages are up to date
+        run: |
+          python3 docs/scripts/backlog-lint.py
+          python3 docs/scripts/generate-roadmap.py --check
+          python3 site/build.py --check
+
+      - name: Decide the version
+        id: version
+        run: |
+          VERSION=$(python3 docs/scripts/next-version.py)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          python3 docs/scripts/next-version.py --explain 2>&1 >/dev/null | tee reason.txt
+          echo "reason=$(cat reason.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Already tagged?
+        id: exists
+        run: |
+          if git rev-parse -q --verify "refs/tags/v${{ steps.version.outputs.version }}" >/dev/null; then
+            echo "tagged=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tagged=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prepare CHANGELOG and notes
+        if: steps.exists.outputs.tagged == 'false'
+        run: |
+          python3 docs/scripts/next-version.py --apply --notes-out release-notes.md
+          git --no-pager diff --stat
+
+      - name: Commit, tag and push
+        if: steps.exists.outputs.tagged == 'false'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          if git diff --cached --quiet; then
+            echo "CHANGELOG unchanged; tagging the current tree"
+          else
+            git commit -m "release: v$VERSION"
+          fi
+          git tag -a "v$VERSION" -m "Release $VERSION"
+          git push origin HEAD:main --follow-tags
+
+      - name: GitHub Release
+        if: steps.exists.outputs.tagged == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "v$VERSION" --title "v$VERSION" --notes-file release-notes.md
+
+      - name: Summary
+        if: always()
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          REASON: ${{ steps.version.outputs.reason }}
+          TAGGED: ${{ steps.exists.outputs.tagged }}
+        run: |
+          {
+            echo "### Release"
+            if [ "$TAGGED" = "true" ]; then
+              echo "- \`v$VERSION\` already exists: nothing to do."
+            else
+              echo "- released **v$VERSION** — $REASON"
+              echo "- images NOT published: run \`Publish\` with version \`v$VERSION\` when you want them on GHCR."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

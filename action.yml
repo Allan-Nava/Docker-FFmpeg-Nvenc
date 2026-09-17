@@ -1,20 +1,16 @@
 # action.yml
 name: 'FFmpeg NVENC'
-description: 'Esegue FFmpeg (build con supporto NVIDIA NVENC) dentro un container'
+description: 'Runs FFmpeg (built with NVIDIA NVENC support) inside a container'
 author: 'Allan Nava'
 
 inputs:
   command:
     description: >
-      Argomenti passati a ffmpeg, es. "-i input.mp4 -c:v libx264 output.mp4".
-      ATTENZIONE: i runner GitHub-hosted NON hanno GPU NVIDIA, quindi gli encoder
-      *_nvenc non sono utilizzabili qui. Per NVENC serve un self-hosted runner con
-      GPU e NVIDIA Container Toolkit.
+      Arguments passed to ffmpeg, e.g. "-i input.mp4 -c:v libx264 output.mp4".
+      WARNING: GitHub-hosted runners have NO NVIDIA GPU, so the *_nvenc encoders
+      are not usable here. NVENC needs a self-hosted runner with a GPU and the
+      NVIDIA Container Toolkit.
     required: true
-  image:
-    description: 'Immagine da usare (override per pinnare una versione specifica)'
-    required: false
-    default: 'ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest'
 
 branding:
   icon: 'video'
@@ -22,11 +18,16 @@ branding:
 
 runs:
   using: 'docker'
-  # Immagine pre-buildata: la versione precedente ricompilava FFmpeg da sorgente
-  # ad ogni invocazione della action (decine di minuti per job).
+  # Prebuilt image: the previous version rebuilt FFmpeg from source on every
+  # invocation of the action (tens of minutes per job).
+  #
+  # NOTE: `runs.image` is static by specification — it does not accept
+  # `${{ inputs… }}`, which is why there is no `image` input to override it (one
+  # used to exist and did nothing). To pin a version, pin the action itself:
+  # `uses: Allan-Nava/Docker-FFmpeg-Nvenc@vX.Y.Z`. Backlog: `action-ref-and-image-input`.
   image: 'docker://ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest'
-  # L'immagine ha ENTRYPOINT ["ffmpeg"]: passando `command` come singolo elemento
-  # di `args` finirebbe come UN argomento solo. Il wrapper shell fa lo splitting.
+  # The image has ENTRYPOINT ["ffmpeg"]: passing `command` as a single element of
+  # `args` would arrive as ONE argument. The shell wrapper does the splitting.
   entrypoint: '/bin/bash'
   args:
     - '-c'

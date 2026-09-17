@@ -1,8 +1,8 @@
 name: CI
 
-# Gira su ogni push/PR e una volta a settimana: lo schedule serve a intercettare
-# il marcire delle base image (e' esattamente cosi' che il repo si e' rotto in
-# silenzio quando Debian buster e' finito su archive.debian.org).
+# Runs on every push/PR and once a week: the schedule is there to catch base images rotting away
+# (that is exactly how this repository broke in silence when Debian buster moved to
+# archive.debian.org).
 on:
   push:
     branches: [main]
@@ -38,10 +38,29 @@ jobs:
           sudo apt-get install -y --no-install-recommends shellcheck
           shellcheck tests/*.sh
 
-      - name: actionlint (workflow)
+      - name: actionlint (workflows)
         run: |
           bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
           ./actionlint -color
+
+  tests:
+    name: Tests (tooling and page generator)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Stdlib only, no setup-python: these run in seconds and gate the generated artefacts below.
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Backlog lint
+        run: python3 docs/scripts/backlog-lint.py
+
+      - name: Generated pages are up to date
+        run: |
+          python3 docs/scripts/generate-roadmap.py --check
+          python3 site/build.py --check
 
   build-test:
     name: Build & test (ffmpeg ${{ matrix.ffmpeg }})
@@ -81,17 +100,17 @@ jobs:
       - name: Smoke test
         run: ./tests/smoke.sh ffmpeg-nvenc:ci-${{ matrix.ffmpeg }} ${{ matrix.ffmpeg }}
 
-      - name: Dimensione immagine
+      - name: Image size
         run: |
           SIZE=$(docker image inspect ffmpeg-nvenc:ci-${{ matrix.ffmpeg }} --format '{{.Size}}')
           echo "### FFmpeg ${{ matrix.ffmpeg }} — $((SIZE / 1024 / 1024)) MB" >> "$GITHUB_STEP_SUMMARY"
-          # niente `ffmpeg | head`: head chiude la pipe, ffmpeg prende SIGPIPE e
-          # il default `-o pipefail` di Actions fa fallire lo step con 141.
+          # No `ffmpeg | head`: head closes the pipe, ffmpeg takes SIGPIPE and Actions' default
+          # `-o pipefail` fails the step with 141.
           docker run --rm ffmpeg-nvenc:ci-${{ matrix.ffmpeg }} -hide_banner -version > version.txt
           head -n 1 version.txt >> "$GITHUB_STEP_SUMMARY"
 
   scan:
-    name: Scan vulnerabilita
+    name: Vulnerability scan
     runs-on: ubuntu-latest
     needs: build-test
     permissions:
@@ -104,7 +123,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build immagine di default
+      - name: Build the default image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -123,7 +142,7 @@ jobs:
           severity: CRITICAL,HIGH
           ignore-unfixed: true
 
-      - name: Carica risultati su code scanning
+      - name: Upload results to code scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy.sarif

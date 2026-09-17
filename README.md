@@ -3,52 +3,54 @@
 [![CI](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/ci.yml/badge.svg)](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/ci.yml)
 [![Publish](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/workflows/docker-publish.yml)
 
-Immagine container con **FFmpeg compilato con supporto NVIDIA NVENC** (`h264_nvenc`, `hevc_nvenc`) per transcodifica accelerata da GPU.
+Container image with **FFmpeg built with NVIDIA NVENC support** (`h264_nvenc`, `hevc_nvenc`) for GPU-accelerated transcoding.
 
-Build multi-stage su Debian 12: nell'immagine finale ci sono solo i binari e le librerie condivise necessarie, nessun toolchain di compilazione.
+Multi-stage build on Debian 12: the final image carries only the binaries and the shared libraries they need — no build toolchain.
 
-## Immagini pubblicate
+## Published images
 
-Registry: **GitHub Container Registry** (`ghcr.io`), non Docker Hub.
-
-> ⚠️ **Stato al 17/09/2026: i tag qui sotto non sono ancora stati pubblicati.** L'ultimo tag del repo e
-> `v1.0.1` (2023) e su GHCR `:latest` e ancora l'immagine del gennaio 2023: gira come **root**, ha
-> `ENTRYPOINT /bin/bash` e un `NVIDIA_REQUIRE_CUDA` che ne impedisce l'avvio sugli host con driver
-> recenti. L'immagine descritta in questa pagina e quella prodotta da `main`, pubblicata al primo tag
-> `v2.0.0`. Dettagli: [audit 2026-09-17](docs/audit/2026-09-17-audit-stato-e-automazione.md) - stato:
-> item `tag-v2-0-0` del [backlog](docs/backlog.md).
+Registry: **GitHub Container Registry** (`ghcr.io`), not Docker Hub.
 
 ```
 ghcr.io/allan-nava/docker-ffmpeg-nvenc
 ```
 
-| Variante | FFmpeg | nv-codec-headers | Driver NVIDIA minimo | Tag |
+> ⚠️ **Status on 2026-09-17: the tags below have not been published yet.** The repository's latest tag is
+> `v1.0.1` (2023) and `:latest` on GHCR is still the January 2023 image: it runs as **root**, has
+> `ENTRYPOINT /bin/bash`, and carries an `NVIDIA_REQUIRE_CUDA` constraint that prevents it from starting on
+> hosts with recent drivers. The image described on this page is the one `main` produces, published with the
+> first `v2.0.0` tag. Details: [audit 2026-09-17](docs/audit/2026-09-17-state-and-automation-audit.md) —
+> tracked as `publish-v2-0-0` in the [backlog](docs/backlog.md).
+
+| Variant | FFmpeg | nv-codec-headers | Minimum NVIDIA driver | Tags |
 |---|---|---|---|---|
 | default | 7.1.5 | `sdk/12.1` | ≥ 530 | `latest`, `vX.Y.Z`, `latest-ffmpeg7.1.5`, `vX.Y.Z-ffmpeg7.1.5` |
 | | 6.0.1 | `sdk/12.0` | ≥ 530 | `latest-ffmpeg6.0.1`, `vX.Y.Z-ffmpeg6.0.1` |
 | | 5.1.10 | `sdk/11.0` | ≥ 470 | `latest-ffmpeg5.1.10`, `vX.Y.Z-ffmpeg5.1.10` |
 
-Ogni variante pinna l'**ultima release di manutenzione** del suo ramo. Il branch `sdk/*` non cambia
-con le patch: il vincolo `ffnvcodec` del `configure` e identico in tutto il ramo, quindi il driver
-minimo dell'host resta quello in tabella.
+Every variant pins the **latest maintenance release** of its branch. The `sdk/*` branch does not move with
+those patches: the `ffnvcodec` constraint in `configure` is identical across a branch, so the host's minimum
+driver stays the one in the table.
 
-Il branch di `nv-codec-headers` determina il **driver NVIDIA minimo** dell'host: se ottieni `This NVENC API is not compatible with the installed driver`, usa una variante più bassa o aggiorna il driver.
+The `nv-codec-headers` branch is what sets the **minimum NVIDIA driver** on the host: if you get
+`This NVENC API is not compatible with the installed driver`, either use a lower variant or update the driver.
 
-## Prerequisiti
+## Requirements
 
-- GPU NVIDIA con NVENC ([matrice di supporto](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new))
-- Driver NVIDIA (vedi tabella sopra)
-- Docker + [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) (per `--gpus`)
+- NVIDIA GPU with NVENC ([support matrix](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new))
+- NVIDIA driver (see the table above)
+- Docker + [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) (for `--gpus`)
 
-## Uso
+## Usage
 
-L'immagine ha **`ENTRYPOINT ["ffmpeg"]`**: gli argomenti che passi a `docker run` vanno direttamente a ffmpeg, non serve ripetere `ffmpeg`.
+The image has **`ENTRYPOINT ["ffmpeg"]`**: whatever you pass to `docker run` goes straight to ffmpeg, so you
+don't repeat `ffmpeg`.
 
 ```shell
 docker pull ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest
 ```
 
-Transcodifica accelerata da GPU:
+GPU-accelerated transcode:
 
 ```shell
 docker run --rm --gpus all \
@@ -59,46 +61,51 @@ docker run --rm --gpus all \
   -i /data/input/input.mp4 -c:v h264_nvenc -preset p4 /data/output/output.mp4
 ```
 
-Verifica che gli encoder ci siano (non serve GPU):
+Check that the encoders are there (no GPU needed):
 
 ```shell
 docker run --rm ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest -hide_banner -encoders | grep nvenc
 ```
 
-Shell dentro il container (per debug):
+Shell inside the container (for debugging):
 
 ```shell
 docker run --rm -it --entrypoint /bin/bash ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest
 ```
 
-### Note operative
+### Operational notes
 
-- Il container gira come utente **non root** (uid 1000, `ffmpeg`), working dir `/data`. Se i volumi montati appartengono a un altro utente, passa `--user "$(id -u):$(id -g)"` come nell'esempio.
-- `ffprobe` è incluso. `ffplay` no (build headless).
-- `NVIDIA_DRIVER_CAPABILITIES` è impostato a `video,compute,utility` — il minimo per transcodificare.
+- The container runs as a **non-root** user (uid 1000, `ffmpeg`), working directory `/data`. If the mounted
+  volumes belong to another user, pass `--user "$(id -u):$(id -g)"` as in the example above.
+- `ffprobe` is included. `ffplay` is not (headless build).
+- `NVIDIA_DRIVER_CAPABILITIES` is set to `video,compute,utility` — the minimum needed to transcode.
 
-## Codec abilitati
+## Enabled codecs
 
-Encoder: `h264_nvenc`, `hevc_nvenc`, `libx264`, `libx265`, `libvpx-vp8/vp9`, `libmp3lame`, `libopus`, `libvorbis`, `libtheora`.
-Filtri testo: `fontconfig`, `libfreetype`, `libass`.
+Encoders: `h264_nvenc`, `hevc_nvenc`, `libx264`, `libx265`, `libvpx-vp8/vp9`, `libmp3lame`, `libopus`,
+`libvorbis`, `libtheora`.
+Text filters: `fontconfig`, `libfreetype`, `libass`.
 
-Non è abilitato il **CUDA toolkit**: niente `scale_npp`, `libnpp`, `nvdec`/`cuvid` hardware-decode. NVENC richiede solo gli header `ffnvcodec`, che è quanto l'immagine installa. Se ti serve il decode accelerato, va aggiunta una base `nvidia/cuda:*-devel` e le opzioni `--enable-cuda-nvcc --enable-nvdec --enable-cuvid --enable-libnpp`.
+The **CUDA toolkit** is not enabled: no `scale_npp`, `libnpp`, or `nvdec`/`cuvid` hardware decode. NVENC only
+needs the `ffnvcodec` headers, which is what the image installs. If you need accelerated decode, that takes an
+`nvidia/cuda:*-devel` base plus `--enable-cuda-nvcc --enable-nvdec --enable-cuvid --enable-libnpp`.
 
 ## GitHub Action
 
-Il repo espone anche una Action che esegue ffmpeg nell'immagine pre-buildata:
+The repository also ships an Action that runs ffmpeg inside the prebuilt image:
 
 ```yaml
-- uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2      # disponibile dal tag v2.0.0 (vedi avviso sopra)
+- uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2      # available from the v2.0.0 tag (see the notice above)
   with:
     command: '-i input.mp4 -c:v libx264 -preset fast output.mp4'
 ```
 
-⚠️ I runner GitHub-hosted **non hanno GPU**: dentro la Action gli encoder `*_nvenc` non sono utilizzabili. Serve un self-hosted runner con GPU e NVIDIA Container Toolkit.
+⚠️ GitHub-hosted runners have **no GPU**: the `*_nvenc` encoders are unusable inside the Action. You need a
+self-hosted runner with a GPU and the NVIDIA Container Toolkit.
 
-## Sviluppo
+## Development
 
-Un solo `Dockerfile` parametrizzato genera tutte le varianti:
+A single parameterised `Dockerfile` produces every variant:
 
 ```shell
 docker build \
@@ -106,38 +113,59 @@ docker build \
   --build-arg NVCODEC_BRANCH=sdk/12.0 \
   -t ffmpeg-nvenc:6.0.1 .
 
-./tests/smoke.sh ffmpeg-nvenc:6.0.1 6.0.1   # non richiede GPU
-./tests/gpu.sh   ffmpeg-nvenc:6.0.1         # richiede GPU NVIDIA
+./tests/smoke.sh ffmpeg-nvenc:6.0.1 6.0.1   # no GPU required
+./tests/gpu.sh   ffmpeg-nvenc:6.0.1         # requires an NVIDIA GPU
 ```
 
-La CI (`.github/workflows/ci.yml`) esegue lint (hadolint, shellcheck, actionlint), builda e testa tutte e tre le varianti su ogni push/PR, e gira **settimanalmente** per intercettare il marcire delle base image. La pubblicazione (`docker-publish.yml`) parte solo su push di tag `v*` e passa dagli stessi smoke test prima del push.
+CI (`.github/workflows/ci.yml`) runs the linters (hadolint, shellcheck, actionlint), builds and tests all three
+variants on every push/PR, and runs **weekly** to catch base images rotting away. Publishing
+(`docker-publish.yml`) only fires on `v*` tag pushes and goes through the same smoke tests before pushing.
 
-Vedi [CLAUDE.md](CLAUDE.md) / [AGENTS.md](AGENTS.md) per le convenzioni di lavoro e le trappole note, e [docs/audit/](docs/audit/) per l'audit del progetto.
-
-### Backlog e roadmap
-
-I todo del repo stanno in [`docs/backlog.md`](docs/backlog.md), che e la **sorgente unica**: uno script
-idempotente apre, aggiorna e chiude una issue GitHub per ogni item (label `backlog-sync`) e crea le
-milestone mancanti, schedulato da [`.github/workflows/backlog.yml`](.github/workflows/backlog.yml).
-[`docs/roadmap.md`](docs/roadmap.md) e la vista per milestone, **generata** dal backlog.
+The Python tooling and the page generator are covered by tests — stdlib `unittest`, no dependencies:
 
 ```shell
-python3 docs/scripts/backlog-lint.py             # valida il backlog (gate di CI)
-python3 docs/scripts/generate-roadmap.py         # rigenera docs/roadmap.md (da committare)
-python3 docs/scripts/sync-backlog-to-issues.py   # dry-run del sync verso le issue
+python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
-Convenzioni degli item e trappole dell'API GitHub: [`docs/scripts/README.md`](docs/scripts/README.md).
+See [CLAUDE.md](CLAUDE.md) / [AGENTS.md](AGENTS.md) for working conventions and known traps, and
+[docs/audit/](docs/audit/) for the project audits.
 
-## Contribuire
+### Backlog and roadmap
 
-Issue e pull request benvenute. Ogni PR deve passare la CI: build + smoke test di tutte le varianti.
+The repository's todos live in [`docs/backlog.md`](docs/backlog.md), which is the **single source of truth**: an
+idempotent script opens, updates and closes one GitHub issue per item (label `backlog-sync`) and creates the
+missing milestones, scheduled by [`.github/workflows/backlog.yml`](.github/workflows/backlog.yml).
+[`docs/roadmap.md`](docs/roadmap.md) is the per-milestone view, **generated** from the backlog.
 
-Le issue con label `backlog-sync` sono **generate** da [`docs/backlog.md`](docs/backlog.md): per
-modificarne titolo o descrizione si edita il backlog, non la issue (il prossimo sync la riallinea).
+```shell
+python3 docs/scripts/backlog-lint.py             # validate the backlog (CI gate)
+python3 docs/scripts/generate-roadmap.py         # regenerate docs/roadmap.md (commit it)
+python3 docs/scripts/sync-backlog-to-issues.py   # dry-run of the issue sync
+```
 
-## Licenza
+Item conventions and GitHub API traps: [`docs/scripts/README.md`](docs/scripts/README.md).
 
-I file di questo repository sono **MIT** (vedi [LICENSE](LICENSE)).
+### Project page
 
-L'**immagine prodotta** è un'altra cosa: FFmpeg è compilato con `--enable-gpl --enable-version3` e collegato a libx264/libx265, quindi il binario è distribuito sotto **GPL-3.0-or-later**. La build non usa `--enable-nonfree`, quindi l'immagine è ridistribuibile.
+[allan-nava.github.io/Docker-FFmpeg-Nvenc](https://allan-nava.github.io/Docker-FFmpeg-Nvenc/) is generated from
+this README plus the files that actually decide things — the publish matrix, the `Dockerfile`, `tests/smoke.sh`:
+
+```shell
+python3 site/build.py            # writes site/dist/
+python3 site/build.py --check    # CI gate: fails if site/dist is stale
+```
+
+## Contributing
+
+Issues and pull requests welcome. Every PR has to pass CI: build plus smoke tests of all variants.
+
+Issues labelled `backlog-sync` are **generated** from [`docs/backlog.md`](docs/backlog.md): to change a title or
+a description, edit the backlog, not the issue (the next sync would realign it anyway).
+
+## Licence
+
+The files in this repository are **MIT** (see [LICENSE](LICENSE)).
+
+The **image it produces** is a different matter: FFmpeg is built with `--enable-gpl --enable-version3` and linked
+against libx264/libx265, so the binary is distributed under **GPL-3.0-or-later**. The build does not use
+`--enable-nonfree`, so the image is redistributable.

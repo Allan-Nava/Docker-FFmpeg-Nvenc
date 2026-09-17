@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 #
-# Test end-to-end su GPU NVIDIA reale.
+# End-to-end test on a real NVIDIA GPU.
 #
-#   ./tests/gpu.sh <immagine>
+#   ./tests/gpu.sh <image>
 #
-# Richiede: GPU NVIDIA con NVENC, driver installato e NVIDIA Container Toolkit
-# (`docker run --gpus all`). NON gira sui runner GitHub-hosted: eseguirlo su un
-# host di transcodifica prima di promuovere un tag in produzione.
+# Requires: an NVIDIA GPU with NVENC, the driver installed, and the NVIDIA Container Toolkit
+# (`docker run --gpus all`). It does NOT run on GitHub-hosted runners: run it on a transcoding
+# host before promoting a tag to production.
 
 set -euo pipefail
 
-IMAGE="${1:?uso: $0 <immagine>}"
+IMAGE="${1:?usage: $0 <image>}"
 
 if ! docker run --rm --gpus all --entrypoint nvidia-smi "$IMAGE" -L >/dev/null 2>&1; then
-  echo "SKIP: nessuna GPU NVIDIA disponibile al container (serve --gpus all + NVIDIA Container Toolkit)" >&2
+  echo "SKIP: no NVIDIA GPU available to the container (needs --gpus all + NVIDIA Container Toolkit)" >&2
   exit 0
 fi
 
-echo "GPU visibili al container:"
+echo "GPUs visible to the container:"
 docker run --rm --gpus all --entrypoint nvidia-smi "$IMAGE" -L
 
 echo
-echo "Transcodifica h264_nvenc su GPU..."
+echo "h264_nvenc transcode on the GPU..."
 docker run --rm --gpus all --entrypoint /bin/bash "$IMAGE" -c '
   set -euo pipefail
   ffmpeg -hide_banner -loglevel error \
@@ -32,7 +32,7 @@ docker run --rm --gpus all --entrypoint /bin/bash "$IMAGE" -c '
 '
 
 echo
-echo "Transcodifica hevc_nvenc su GPU..."
+echo "hevc_nvenc transcode on the GPU..."
 docker run --rm --gpus all --entrypoint /bin/bash "$IMAGE" -c '
   set -euo pipefail
   ffmpeg -hide_banner -loglevel error \
@@ -43,4 +43,4 @@ docker run --rm --gpus all --entrypoint /bin/bash "$IMAGE" -c '
 '
 
 echo
-echo "OK: encoding NVENC verificato su GPU."
+echo "OK: NVENC encoding verified on the GPU."

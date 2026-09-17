@@ -1,15 +1,21 @@
 name: Publish
 
-# Un push di tag pubblica tutte le varianti su GHCR.
-# Ogni variante viene buildata, TESTATA e solo dopo pushata.
+# A tag push publishes every variant to GHCR. Each one is built, TESTED, and only then pushed.
 #
-# NB: niente `workflow_dispatch` — i tag sono generati da `type=semver`, che
-# produce risultati solo su eventi tag: un run manuale finirebbe con lista tag
-# vuota e push fallito. Per pubblicare si tagga.
+# `type=semver` only yields tags from a tag event, so the manual run passes the version explicitly
+# (`value=`): without that, a dispatch would end up with an empty tag list and a failed push.
+# Releases are created by `release.yml`, which tags without publishing — this workflow is the
+# explicit act of putting images on the registry.
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Tag to publish, e.g. v2.0.0 (it must already exist)'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -27,7 +33,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # `default: true` pubblica ANCHE i tag senza suffisso (v1.2.3, v1.2, v1, latest).
+          # `default: true` also publishes the unsuffixed tags (v1.2.3, v1.2, v1, latest).
           - ffmpeg: '7.1.5'
             nvcodec: 'sdk/12.1'
             default: true
@@ -40,12 +46,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version || github.ref }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Tag con suffisso di variante: v1.2.3-ffmpeg7.1.5, latest-ffmpeg7.1.5, ...
-      - name: Metadata (variante)
+      # Variant-suffixed tags: v1.2.3-ffmpeg7.1.5, latest-ffmpeg7.1.5, ...
+      - name: Metadata (variant)
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -54,12 +62,12 @@ jobs:
             latest=true
             suffix=-ffmpeg${{ matrix.ffmpeg }},onlatest=true
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=semver,pattern={{version}},value=${{ inputs.version || github.ref_name }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.version || github.ref_name }}
+            type=semver,pattern={{major}},value=${{ inputs.version || github.ref_name }}
 
-      # Solo per la variante di default: v1.2.3, v1.2, v1, latest (senza suffisso).
-      - name: Metadata (default, senza suffisso)
+      # Default variant only: v1.2.3, v1.2, v1, latest (no suffix).
+      - name: Metadata (default, unsuffixed)
         id: meta_default
         if: matrix.default
         uses: docker/metadata-action@v5
@@ -67,13 +75,13 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           flavor: latest=true
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=semver,pattern={{version}},value=${{ inputs.version || github.ref_name }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.version || github.ref_name }}
+            type=semver,pattern={{major}},value=${{ inputs.version || github.ref_name }}
 
-      # Build locale per poter testare PRIMA di pubblicare. La push successiva
-      # riusa la cache, quindi non ricompila.
-      - name: Build per test
+      # Local build so the image can be tested BEFORE publishing. The push below reuses the
+      # cache, so nothing is compiled twice.
+      - name: Build for testing
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -88,17 +96,17 @@ jobs:
           cache-from: type=gha,scope=ffmpeg-${{ matrix.ffmpeg }}
           cache-to: type=gha,scope=ffmpeg-${{ matrix.ffmpeg }},mode=max
 
-      - name: Smoke test (gate di pubblicazione)
+      - name: Smoke test (publication gate)
         run: ./tests/smoke.sh ffmpeg-nvenc:candidate ${{ matrix.ffmpeg }}
 
-      - name: Login su GitHub Container Registry
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build e push
+      - name: Build and push
         id: push
         uses: docker/build-push-action@v6
         with:
@@ -117,7 +125,7 @@ jobs:
           provenance: true
           sbom: true
 
-      - name: Riepilogo
+      - name: Summary
         run: |
           {
             echo "### FFmpeg ${{ matrix.ffmpeg }} (nv-codec-headers ${{ matrix.nvcodec }})"

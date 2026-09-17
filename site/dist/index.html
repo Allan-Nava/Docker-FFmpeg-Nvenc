@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docker-FFmpeg-Nvenc — FFmpeg 7.1.5 with NVENC, on GHCR</title>
+<meta name="description" content="Container image with FFmpeg built with NVIDIA NVENC support (h264_nvenc, hevc_nvenc) for GPU-accelerated transcoding.">
+<link rel="canonical" href="https://allan-nava.github.io/Docker-FFmpeg-Nvenc/">
+<meta name="theme-color" content="#1f7a5a" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f100f" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Docker-FFmpeg-Nvenc">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://allan-nava.github.io/Docker-FFmpeg-Nvenc/">
+<meta property="og:title" content="Docker-FFmpeg-Nvenc — FFmpeg 7.1.5 with NVENC, on GHCR">
+<meta property="og:description" content="Container image with FFmpeg built with NVIDIA NVENC support (h264_nvenc, hevc_nvenc) for GPU-accelerated transcoding.">
+<meta property="og:image" content="https://allan-nava.github.io/Docker-FFmpeg-Nvenc/assets/social-preview.svg">
+<meta property="og:image:alt" content="Docker-FFmpeg-Nvenc — FFmpeg 7.1.5 with NVENC, on GHCR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Docker-FFmpeg-Nvenc — FFmpeg 7.1.5 with NVENC, on GHCR">
+<meta name="twitter:description" content="Container image with FFmpeg built with NVIDIA NVENC support (h264_nvenc, hevc_nvenc) for GPU-accelerated transcoding.">
+<meta name="twitter:image" content="https://allan-nava.github.io/Docker-FFmpeg-Nvenc/assets/social-preview.svg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 role=%22img%22 aria-label=%22Docker-FFmpeg-Nvenc%22><title>Docker-FFmpeg-Nvenc</title><rect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%2311201a%22/><g fill=%22%235ed3a4%22><rect x=%2210%22 y=%2214%22 width=%226%22 height=%226%22 rx=%221.5%22/><rect x=%2210%22 y=%2229%22 width=%226%22 height=%226%22 rx=%221.5%22/><rect x=%2210%22 y=%2244%22 width=%226%22 height=%226%22 rx=%221.5%22/><rect x=%2248%22 y=%2214%22 width=%226%22 height=%226%22 rx=%221.5%22/><rect x=%2248%22 y=%2229%22 width=%226%22 height=%226%22 rx=%221.5%22/><rect x=%2248%22 y=%2244%22 width=%226%22 height=%226%22 rx=%221.5%22/></g><path d=%22M26 19.5 46 32 26 44.5Z%22 fill=%22%23fbfaf8%22/><rect x=%2220%22 y=%2210%22 width=%2224%22 height=%2244%22 rx=%224%22 fill=%22none%22 stroke=%22%235ed3a4%22 stroke-width=%222.5%22 opacity=%22.55%22/></svg>">
+<link rel="apple-touch-icon" href="assets/logo.svg">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "@id": "https://allan-nava.github.io/Docker-FFmpeg-Nvenc/#website", "url": "https://allan-nava.github.io/Docker-FFmpeg-Nvenc/", "name": "Docker-FFmpeg-Nvenc", "description": "Container image with FFmpeg built with NVIDIA NVENC support (h264_nvenc, hevc_nvenc) for GPU-accelerated transcoding.", "inLanguage": "en"}, {"@type": "SoftwareSourceCode", "@id": "https://allan-nava.github.io/Docker-FFmpeg-Nvenc/#repo", "name": "Docker-FFmpeg-Nvenc", "description": "Container image with FFmpeg built with NVIDIA NVENC support (h264_nvenc, hevc_nvenc) for GPU-accelerated transcoding.", "url": "https://allan-nava.github.io/Docker-FFmpeg-Nvenc/", "codeRepository": "https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc", "programmingLanguage": "Dockerfile", "runtimePlatform": "Docker", "license": "https://www.gnu.org/licenses/gpl-3.0.html", "author": {"@type": "Person", "name": "Allan Nava"}}]}</script>
+<style>
+:root {
+  --bg:#fbfaf8; --panel:#fff; --line:#e6e1d9; --ink:#1b1a18; --muted:#6b665e;
+  --accent:#1f7a5a; --accent-soft:#e3f2eb; --warn:#9a4a1f; --warn-soft:#fbeade; --code-bg:#f4f1ec;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0f100f; --panel:#161817; --line:#282c29; --ink:#e9ece9; --muted:#96a09a;
+          --accent:#5ed3a4; --accent-soft:#12251d; --warn:#e8a87c; --warn-soft:#271a12; --code-bg:#181b19; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:5rem}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:62rem;margin:0 auto;padding:0 1.5rem}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+h2,h3{letter-spacing:-.01em;line-height:1.25}
+code{font-family:var(--mono);font-size:.88em}
+:not(pre)>code{background:var(--code-bg);padding:.12em .38em;border-radius:4px}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;overflow-x:auto;font-size:.84rem;line-height:1.6}
+pre code{background:none;padding:0}
+table{width:100%;border-collapse:collapse;font-size:.93rem;margin:1.2rem 0}
+th,td{text-align:left;padding:.6rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+blockquote{margin:1.4rem 0;padding:.9rem 1.1rem;background:var(--warn-soft);border-left:3px solid var(--warn);border-radius:0 8px 8px 0}
+blockquote p{margin:0;color:var(--ink)}
+header.top{position:sticky;top:0;z-index:10;backdrop-filter:blur(10px);background:color-mix(in srgb,var(--bg) 86%,transparent);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:1.5rem;height:3.75rem}
+.brand{display:inline-flex;align-items:center;gap:.55rem;font-weight:650;letter-spacing:.04em;color:var(--ink);text-decoration:none}
+header.top nav{margin-left:auto;display:flex;gap:1.1rem;flex-wrap:wrap}
+header.top nav a{color:var(--muted);text-decoration:none;font-size:.86rem}
+header.top nav a:hover{color:var(--ink)}
+.hero{padding:4rem 0 1rem}
+.eyebrow{display:inline-block;font:600 .72rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:.45rem .8rem;margin-bottom:1.4rem}
+.hero h1{font-size:clamp(2.4rem,6.5vw,3.9rem);line-height:1.02;margin:0 0 1.1rem;letter-spacing:-.03em}
+.lede{font-size:clamp(1.02rem,2.2vw,1.24rem);color:var(--muted);max-width:44rem;margin:0 0 1.6rem}
+.lede strong{color:var(--ink);font-weight:600}
+.cta{display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:.5rem}
+.btn{display:inline-block;padding:.62rem 1.05rem;border-radius:8px;font-size:.92rem;font-weight:600;text-decoration:none;border:1px solid var(--line)}
+.btn-primary{background:var(--accent);color:var(--bg);border-color:transparent}
+.btn-ghost{color:var(--ink)}
+.pull{display:flex;gap:.6rem;align-items:center;margin:1.6rem 0 0;font-family:var(--mono);font-size:.8rem;color:var(--muted);flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:1rem;margin:2.5rem 0 1rem}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem}
+.stat b{display:block;font-size:1.65rem;letter-spacing:-.02em;line-height:1.1}
+.stat span{font-size:.8rem;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:1rem;margin:1.4rem 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.15rem}
+.card.is-default{border-color:var(--accent)}
+.card h3{margin:.1rem 0 .5rem;font-size:1.15rem;font-family:var(--mono)}
+.card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:.25rem .7rem;font-size:.88rem}
+.card dt{color:var(--muted)}
+.card dd{margin:0}
+.tag{display:inline-block;font-family:var(--mono);font-size:.74rem;background:var(--code-bg);border:1px solid var(--line);border-radius:99px;padding:.18rem .5rem;margin:.2rem .2rem 0 0;color:var(--muted)}
+.tag.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.badge{display:inline-block;font:600 .7rem/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:.3rem .45rem;margin-left:.5rem;vertical-align:middle}
+section{padding:2.2rem 0;border-top:1px solid var(--line)}
+section h2{font-size:clamp(1.4rem,3vw,1.85rem);margin:0 0 1rem}
+section h2 a{color:inherit;text-decoration:none}
+section h2 a:hover{color:var(--accent)}
+footer{border-top:1px solid var(--line);padding:2.5rem 0 3.5rem;color:var(--muted);font-size:.88rem}
+footer a{color:var(--muted)}
+@media (max-width:640px){ .hero{padding-top:2.5rem} .card dl{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top"><svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Docker-FFmpeg-Nvenc">
+  <title>Docker-FFmpeg-Nvenc</title>
+  <rect width="64" height="64" rx="14" fill="#11201a"/>
+  <g fill="#5ed3a4">
+    <rect x="10" y="14" width="6" height="6" rx="1.5"/>
+    <rect x="10" y="29" width="6" height="6" rx="1.5"/>
+    <rect x="10" y="44" width="6" height="6" rx="1.5"/>
+    <rect x="48" y="14" width="6" height="6" rx="1.5"/>
+    <rect x="48" y="29" width="6" height="6" rx="1.5"/>
+    <rect x="48" y="44" width="6" height="6" rx="1.5"/>
+  </g>
+  <path d="M26 19.5 46 32 26 44.5Z" fill="#fbfaf8"/>
+  <rect x="20" y="10" width="24" height="44" rx="4" fill="none" stroke="#5ed3a4" stroke-width="2.5" opacity=".55"/>
+</svg>
+ Docker-FFmpeg-Nvenc</a>
+    <nav>
+<a href="#published-images">Published images</a>
+<a href="#requirements">Requirements</a>
+<a href="#usage">Usage</a>
+<a href="#enabled-codecs">Enabled codecs</a>
+<a href="#github-action">GitHub Action</a>
+      <a href="https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <div class="hero">
+    <span class="eyebrow">NVENC · GHCR · multi-stage</span>
+    <h1>FFmpeg with NVENC,<br>in a container that leaves the compiler behind</h1>
+    <p class="lede">Container image with <strong>FFmpeg built with NVIDIA NVENC support</strong> (<code>h264_nvenc</code>, <code>hevc_nvenc</code>) for GPU-accelerated transcoding.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#published-images">Images and tags</a>
+      <a class="btn btn-ghost" href="https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc">Code on GitHub</a>
+      <a class="btn btn-ghost" href="https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/blob/main/docs/roadmap.md">Roadmap</a>
+    </div>
+    <div class="pull"><code>docker pull ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest</code></div>
+
+    <div class="stats">
+      <div class="stat"><b>3</b><span>variants published on every tag</span></div>
+      <div class="stat"><b>17</b><span>smoke-test assertions gating the publish</span></div>
+      <div class="stat"><b>16</b><span><code>--enable-*</code> options in configure</span></div>
+      <div class="stat"><b>0</b><span><code>--enable-nonfree</code>: redistributable image</span></div>
+    </div>
+    <div class="cards">
+      <article class="card is-default">
+        <h3>FFmpeg 7.1.5<span class="badge">default</span></h3>
+        <dl>
+          <dt>nv-codec-headers</dt><dd><code>sdk/12.1</code></dd>
+          <dt>driver NVIDIA</dt><dd>&ge; 530</dd>
+        </dl>
+        <p><span class="tag">latest</span><span class="tag">vX.Y.Z</span><span class="tag">latest-ffmpeg7.1.5</span><span class="tag">vX.Y.Z-ffmpeg7.1.5</span></p>
+      </article>
+      <article class="card">
+        <h3>FFmpeg 6.0.1</h3>
+        <dl>
+          <dt>nv-codec-headers</dt><dd><code>sdk/12.0</code></dd>
+          <dt>driver NVIDIA</dt><dd>&ge; 530</dd>
+        </dl>
+        <p><span class="tag">latest-ffmpeg6.0.1</span><span class="tag">vX.Y.Z-ffmpeg6.0.1</span></p>
+      </article>
+      <article class="card">
+        <h3>FFmpeg 5.1.10</h3>
+        <dl>
+          <dt>nv-codec-headers</dt><dd><code>sdk/11.0</code></dd>
+          <dt>driver NVIDIA</dt><dd>&ge; 470</dd>
+        </dl>
+        <p><span class="tag">latest-ffmpeg5.1.10</span><span class="tag">vX.Y.Z-ffmpeg5.1.10</span></p>
+      </article>
+    </div>
+    <p class="lede" style="font-size:.95rem">Codecs and filters compiled into the binary:</p>
+    <p><span class="tag on">--enable-gpl</span><span class="tag">--enable-version3</span><span class="tag on">--enable-nvenc</span><span class="tag">--enable-fontconfig</span><span class="tag">--enable-gray</span><span class="tag">--enable-libass</span><span class="tag">--enable-libfreetype</span><span class="tag">--enable-libmp3lame</span><span class="tag">--enable-libopus</span><span class="tag">--enable-libspeex</span><span class="tag">--enable-libtheora</span><span class="tag">--enable-libvorbis</span><span class="tag">--enable-libvpx</span><span class="tag">--enable-libx264</span><span class="tag">--enable-libx265</span><span class="tag">--enable-libxml2</span></p>
+  </div>
+
+  <section id="published-images">
+    <h2><a href="#published-images">Published images</a></h2>
+<p>Registry: <strong>GitHub Container Registry</strong> (<code>ghcr.io</code>), not Docker Hub.</p>
+<pre><code>ghcr.io/allan-nava/docker-ffmpeg-nvenc</code></pre>
+<blockquote><p>⚠️ <strong>Status on 2026-09-17: the tags below have not been published yet.</strong> The repository&#x27;s latest tag is <code>v1.0.1</code> (2023) and <code>:latest</code> on GHCR is still the January 2023 image: it runs as <strong>root</strong>, has <code>ENTRYPOINT /bin/bash</code>, and carries an <code>NVIDIA_REQUIRE_CUDA</code> constraint that prevents it from starting on hosts with recent drivers. The image described on this page is the one <code>main</code> produces, published with the first <code>v2.0.0</code> tag. Details: <a href="docs/audit/2026-09-17-state-and-automation-audit.md">audit 2026-09-17</a> — tracked as <code>publish-v2-0-0</code> in the <a href="docs/backlog.md">backlog</a>.</p></blockquote>
+<table>
+<thead><tr><th>Variant</th><th>FFmpeg</th><th>nv-codec-headers</th><th>Minimum NVIDIA driver</th><th>Tags</th></tr></thead>
+<tbody>
+<tr><td>default</td><td>7.1.5</td><td><code>sdk/12.1</code></td><td>≥ 530</td><td><code>latest</code>, <code>vX.Y.Z</code>, <code>latest-ffmpeg7.1.5</code>, <code>vX.Y.Z-ffmpeg7.1.5</code></td></tr>
+<tr><td></td><td>6.0.1</td><td><code>sdk/12.0</code></td><td>≥ 530</td><td><code>latest-ffmpeg6.0.1</code>, <code>vX.Y.Z-ffmpeg6.0.1</code></td></tr>
+<tr><td></td><td>5.1.10</td><td><code>sdk/11.0</code></td><td>≥ 470</td><td><code>latest-ffmpeg5.1.10</code>, <code>vX.Y.Z-ffmpeg5.1.10</code></td></tr>
+</tbody>
+</table>
+<p>Every variant pins the <strong>latest maintenance release</strong> of its branch. The <code>sdk/*</code> branch does not move with those patches: the <code>ffnvcodec</code> constraint in <code>configure</code> is identical across a branch, so the host&#x27;s minimum driver stays the one in the table.</p>
+<p>The <code>nv-codec-headers</code> branch is what sets the <strong>minimum NVIDIA driver</strong> on the host: if you get <code>This NVENC API is not compatible with the installed driver</code>, either use a lower variant or update the driver.</p>
+  </section>
+  <section id="requirements">
+    <h2><a href="#requirements">Requirements</a></h2>
+<ul>
+<li>NVIDIA GPU with NVENC (<a href="https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new">support matrix</a>)</li>
+<li>NVIDIA driver (see the table above)</li>
+<li>Docker + <a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html">NVIDIA Container Toolkit</a> (for <code>--gpus</code>)</li>
+</ul>
+  </section>
+  <section id="usage">
+    <h2><a href="#usage">Usage</a></h2>
+<p>The image has <strong><code>ENTRYPOINT [&quot;ffmpeg&quot;]</code></strong>: whatever you pass to <code>docker run</code> goes straight to ffmpeg, so you don&#x27;t repeat <code>ffmpeg</code>.</p>
+<pre><code class="lang-shell">docker pull ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest</code></pre>
+<p>GPU-accelerated transcode:</p>
+<pre><code class="lang-shell">docker run --rm --gpus all \
+  --user &quot;$(id -u):$(id -g)&quot; \
+  -v &quot;$PWD/input:/data/input:ro&quot; \
+  -v &quot;$PWD/output:/data/output&quot; \
+  ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest \
+  -i /data/input/input.mp4 -c:v h264_nvenc -preset p4 /data/output/output.mp4</code></pre>
+<p>Check that the encoders are there (no GPU needed):</p>
+<pre><code class="lang-shell">docker run --rm ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest -hide_banner -encoders | grep nvenc</code></pre>
+<p>Shell inside the container (for debugging):</p>
+<pre><code class="lang-shell">docker run --rm -it --entrypoint /bin/bash ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest</code></pre>
+<h3>Operational notes</h3>
+<ul>
+<li>The container runs as a <strong>non-root</strong> user (uid 1000, <code>ffmpeg</code>), working directory <code>/data</code>. If the mounted</li>
+</ul>
+<p>volumes belong to another user, pass <code>--user &quot;$(id -u):$(id -g)&quot;</code> as in the example above.</p>
+<ul>
+<li><code>ffprobe</code> is included. <code>ffplay</code> is not (headless build).</li>
+<li><code>NVIDIA_DRIVER_CAPABILITIES</code> is set to <code>video,compute,utility</code> — the minimum needed to transcode.</li>
+</ul>
+  </section>
+  <section id="enabled-codecs">
+    <h2><a href="#enabled-codecs">Enabled codecs</a></h2>
+<p>Encoders: <code>h264_nvenc</code>, <code>hevc_nvenc</code>, <code>libx264</code>, <code>libx265</code>, <code>libvpx-vp8/vp9</code>, <code>libmp3lame</code>, <code>libopus</code>, <code>libvorbis</code>, <code>libtheora</code>. Text filters: <code>fontconfig</code>, <code>libfreetype</code>, <code>libass</code>.</p>
+<p>The <strong>CUDA toolkit</strong> is not enabled: no <code>scale_npp</code>, <code>libnpp</code>, or <code>nvdec</code>/<code>cuvid</code> hardware decode. NVENC only needs the <code>ffnvcodec</code> headers, which is what the image installs. If you need accelerated decode, that takes an <code>nvidia/cuda:*-devel</code> base plus <code>--enable-cuda-nvcc --enable-nvdec --enable-cuvid --enable-libnpp</code>.</p>
+  </section>
+  <section id="github-action">
+    <h2><a href="#github-action">GitHub Action</a></h2>
+<p>The repository also ships an Action that runs ffmpeg inside the prebuilt image:</p>
+<pre><code class="lang-yaml">- uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2      # available from the v2.0.0 tag (see the notice above)
+  with:
+    command: &#x27;-i input.mp4 -c:v libx264 -preset fast output.mp4&#x27;</code></pre>
+<p>⚠️ GitHub-hosted runners have <strong>no GPU</strong>: the <code>*_nvenc</code> encoders are unusable inside the Action. You need a self-hosted runner with a GPU and the NVIDIA Container Toolkit.</p>
+  </section>
+  <section id="development">
+    <h2><a href="#development">Development</a></h2>
+<p>A single parameterised <code>Dockerfile</code> produces every variant:</p>
+<pre><code class="lang-shell">docker build \
+  --build-arg FFMPEG_VERSION=6.0.1 \
+  --build-arg NVCODEC_BRANCH=sdk/12.0 \
+  -t ffmpeg-nvenc:6.0.1 .
+
+./tests/smoke.sh ffmpeg-nvenc:6.0.1 6.0.1   # no GPU required
+./tests/gpu.sh   ffmpeg-nvenc:6.0.1         # requires an NVIDIA GPU</code></pre>
+<p>CI (<code>.github/workflows/ci.yml</code>) runs the linters (hadolint, shellcheck, actionlint), builds and tests all three variants on every push/PR, and runs <strong>weekly</strong> to catch base images rotting away. Publishing (<code>docker-publish.yml</code>) only fires on <code>v*</code> tag pushes and goes through the same smoke tests before pushing.</p>
+<p>The Python tooling and the page generator are covered by tests — stdlib <code>unittest</code>, no dependencies:</p>
+<pre><code class="lang-shell">python3 -m unittest discover -s tests -p &#x27;test_*.py&#x27;</code></pre>
+<p>See <a href="CLAUDE.md">CLAUDE.md</a> / <a href="AGENTS.md">AGENTS.md</a> for working conventions and known traps, and <a href="docs/audit/">docs/audit/</a> for the project audits.</p>
+<h3>Backlog and roadmap</h3>
+<p>The repository&#x27;s todos live in <a href="docs/backlog.md"><code>docs/backlog.md</code></a>, which is the <strong>single source of truth</strong>: an idempotent script opens, updates and closes one GitHub issue per item (label <code>backlog-sync</code>) and creates the missing milestones, scheduled by <a href=".github/workflows/backlog.yml"><code>.github/workflows/backlog.yml</code></a>. <a href="docs/roadmap.md"><code>docs/roadmap.md</code></a> is the per-milestone view, <strong>generated</strong> from the backlog.</p>
+<pre><code class="lang-shell">python3 docs/scripts/backlog-lint.py             # validate the backlog (CI gate)
+python3 docs/scripts/generate-roadmap.py         # regenerate docs/roadmap.md (commit it)
+python3 docs/scripts/sync-backlog-to-issues.py   # dry-run of the issue sync</code></pre>
+<p>Item conventions and GitHub API traps: <a href="docs/scripts/README.md"><code>docs/scripts/README.md</code></a>.</p>
+<h3>Project page</h3>
+<p><a href="https://allan-nava.github.io/Docker-FFmpeg-Nvenc/">allan-nava.github.io/Docker-FFmpeg-Nvenc</a> is generated from this README plus the files that actually decide things — the publish matrix, the <code>Dockerfile</code>, <code>tests/smoke.sh</code>:</p>
+<pre><code class="lang-shell">python3 site/build.py            # writes site/dist/
+python3 site/build.py --check    # CI gate: fails if site/dist is stale</code></pre>
+  </section>
+  <section id="contributing">
+    <h2><a href="#contributing">Contributing</a></h2>
+<p>Issues and pull requests welcome. Every PR has to pass CI: build plus smoke tests of all variants.</p>
+<p>Issues labelled <code>backlog-sync</code> are <strong>generated</strong> from <a href="docs/backlog.md"><code>docs/backlog.md</code></a>: to change a title or a description, edit the backlog, not the issue (the next sync would realign it anyway).</p>
+  </section>
+  <section id="licence">
+    <h2><a href="#licence">Licence</a></h2>
+<p>The files in this repository are <strong>MIT</strong> (see <a href="LICENSE">LICENSE</a>).</p>
+<p>The <strong>image it produces</strong> is a different matter: FFmpeg is built with <code>--enable-gpl --enable-version3</code> and linked against libx264/libx265, so the binary is distributed under <strong>GPL-3.0-or-later</strong>. The build does not use <code>--enable-nonfree</code>, so the image is redistributable.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Page generated by <a href="https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/blob/main/site/build.py"><code>site/build.py</code></a> from
+    <a href="https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/blob/main/README.md"><code>README.md</code></a>, the matrix in
+    <a href="https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/blob/main/.github/workflows/docker-publish.yml"><code>docker-publish.yml</code></a>, the
+    <a href="https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/blob/main/Dockerfile"><code>Dockerfile</code></a> and
+    <a href="https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/blob/main/tests/smoke.sh"><code>tests/smoke.sh</code></a>: when the repository changes, the page changes.</p>
+    <p>MIT repository · GPL-3.0-or-later image (libx264/libx265) · &copy; Allan Nava</p>
+  </div>
+</footer>
+</body>
+</html>

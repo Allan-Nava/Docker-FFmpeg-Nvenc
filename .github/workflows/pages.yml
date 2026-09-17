@@ -1,0 +1,60 @@
+name: Pages
+
+# The project page is generated from README.md plus the files that actually decide things
+# (publish matrix, Dockerfile, tests/smoke.sh) by `site/build.py`. Tests run first: the page
+# asserts facts about the repository, so a stale generator must not reach the web.
+on:
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - site/**
+      - Dockerfile
+      - tests/smoke.sh
+      - .github/workflows/docker-publish.yml
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build page
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Build site/dist
+        run: python3 site/build.py
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

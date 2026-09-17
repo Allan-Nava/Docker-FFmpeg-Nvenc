@@ -1,0 +1,8 @@
+7.1.5    203 MB  ffmpeg version 7.1.5 Copyright (c) 2000-2026 the FFmpeg developers
+6.0.1    201 MB  ffmpeg version 6.0.1 Copyright (c) 2000-2023 the FFmpeg developers
+5.1.10   200 MB  ffmpeg version 5.1.10 Copyright (c) 2000-2026 the FFmpeg developers
+=== build FFmpeg 7.1.5 (sdk/12.1) → ffmpeg-nvenc:test-7.1.5  [2026-09-17T12:38:04Z]
+=== build FFmpeg 6.0.1 (sdk/12.0) → ffmpeg-nvenc:test-6.0.1  [2026-09-17T12:40:17Z]
+=== build FFmpeg 5.1.10 (sdk/11.0) → ffmpeg-nvenc:test-5.1.10  [2026-09-17T12:42:07Z]
+=== FINE (rc_all=0) [2026-09-17T12:43:50Z]
+linux/arm64

@@ -1,4 +1,4 @@
-# Il build context serve solo al Dockerfile: tutto il resto e peso inutile.
+# The build context only serves the Dockerfile: everything else is dead weight.
 .git
 .github
 .gitignore
@@ -6,6 +6,7 @@
 .hadolint.yaml
 docs
 logs
+site
 tests
 *.md
 LICENSE

@@ -1,82 +1,91 @@
 # CLAUDE.md — Docker-FFmpeg-Nvenc
 
-Repo di build di immagini container con **FFmpeg compilato con supporto NVIDIA NVENC** (`github.com/Allan-Nava/Docker-FFmpeg-Nvenc`). Pubblica su **GHCR** (`ghcr.io/allan-nava/docker-ffmpeg-nvenc`) via GitHub Actions, ed espone una **GitHub Action** riusabile (`action.yml`).
+Repository that builds container images of **FFmpeg compiled with NVIDIA NVENC support** (`github.com/Allan-Nava/Docker-FFmpeg-Nvenc`). It publishes to **GHCR** (`ghcr.io/allan-nava/docker-ffmpeg-nvenc`) through GitHub Actions and exposes a reusable **GitHub Action** (`action.yml`).
 
 ```
-Dockerfile              → sorgente UNICA, multi-stage, parametrizzata
+Dockerfile              → SINGLE source, multi-stage, parameterised
                           ARG FFMPEG_VERSION / NVCODEC_BRANCH / DEBIAN_VERSION
-tests/smoke.sh          → 17 asserzioni, nessuna GPU richiesta (gate di CI e di publish)
-tests/gpu.sh            → encoding NVENC reale, richiede host con GPU NVIDIA
-action.yml              → GitHub Action su immagine pre-buildata da GHCR
-.github/workflows/ci.yml              → lint + build&test matrice + scan; push/PR + settimanale
-.github/workflows/docker-publish.yml  → build → test → push su GHCR; solo su tag v*
-.github/workflows/backlog.yml         → lint del backlog + sync issue/milestone (schedule + dispatch)
-docs/backlog.md         → SORGENTE UNICA dei todo (item con id stabile → issue GitHub)
-docs/roadmap.md         → GENERATA da docs/backlog.md (non editare a mano)
-docs/scripts/           → tooling backlog (lint, roadmap, sync) — runbook in docs/scripts/README.md
-docs/audit/             → audit del progetto
-logs/                   → log integrali allegati ai doc (evidenze, non rigenerabili)
+tests/smoke.sh          → 17 assertions, no GPU needed (gate for CI and for publishing)
+tests/gpu.sh            → real NVENC encoding, needs an NVIDIA host
+tests/test_*.py         → stdlib unittest for the Python tooling and the page generator
+action.yml              → GitHub Action on the prebuilt GHCR image
+.github/workflows/ci.yml              → lint + tests + build&test matrix + scan; push/PR + weekly
+.github/workflows/docker-publish.yml  → build → test → push to GHCR; on v* tags or dispatch
+.github/workflows/release.yml         → every commit on main: version, CHANGELOG, tag, Release
+.github/workflows/backlog.yml         → backlog lint + issue/milestone sync (schedule + dispatch)
+.github/workflows/pages.yml           → builds and deploys the project page
+docs/backlog.md         → SINGLE source of todos (stable ids → GitHub issues)
+docs/roadmap.md         → GENERATED from docs/backlog.md (never edit by hand)
+docs/scripts/           → backlog and release tooling — runbook in docs/scripts/README.md
+docs/audit/             → project audits
+docs/interventions/     → what was changed, why, and the verification output
+site/                   → page generator (build.py) + assets; output in site/dist/ (committed)
+logs/                   → raw logs attached to the docs (evidence, not regenerable)
 ```
 
-Le varianti sono una **matrice nei workflow**, non file duplicati:
+The variants are a **matrix in the workflows**, not duplicated files:
 
-| FFmpeg | `NVCODEC_BRANCH` | driver NVIDIA min | default |
+| FFmpeg | `NVCODEC_BRANCH` | min NVIDIA driver | default |
 |---|---|---|---|
-| 7.1.5 | `sdk/12.1` | ≥ 530 | sì (`latest`) |
+| 7.1.5 | `sdk/12.1` | ≥ 530 | yes (`latest`) |
 | 6.0.1 | `sdk/12.0` | ≥ 530 | no |
 | 5.1.10 | `sdk/11.0` | ≥ 470 | no |
 
-Ogni variante pinna l'**ultima release di manutenzione** del suo ramo (bump del 17/09/2026). Salire di patch dentro il ramo non muove il vincolo `ffnvcodec`, quindi non alza il driver minimo: verificato su 5.1.10, 6.0.1, 7.1.5.
+Every variant pins the **latest maintenance release** of its branch (bumped 2026-09-17). Moving up a patch inside a branch does not move the `ffnvcodec` constraint, so it does not raise the minimum driver: verified on 5.1.10, 6.0.1, 7.1.5.
 
-⛔ **Stato di consegna al 17/09/2026: la v2.0.0 non è mai stata taggata.** Il `CHANGELOG` ha la sezione `[2.0.0]`, ma l'ultimo tag è `v1.0.1` (2023) e su GHCR `:latest` è ancora **l'immagine del 16/01/2023** (root, `ENTRYPOINT /bin/bash`, `NVIDIA_REQUIRE_CUDA … driver<471` → non parte su driver recenti). Non descrivere l'immagine pubblicata come se fosse quella di `main`: finché il tag non esiste, README e `action.yml` puntano a un artefatto rotto. Dettagli e piano: `docs/audit/2026-09-17-audit-stato-e-automazione.md`, item `tag-v2-0-0`.
+⛔ **Delivery status as of 2026-09-17: v2.0.0 has never been tagged.** The `CHANGELOG` has a `[2.0.0]` section, but the latest tag is `v1.0.1` (2023) and `:latest` on GHCR is still **the 2023-01-16 image** (root, `ENTRYPOINT /bin/bash`, `NVIDIA_REQUIRE_CUDA … driver<471` → it does not start on recent drivers). Never describe the published image as if it were the one on `main`: until the tag exists, the README and `action.yml` point at a broken artefact. Details and plan: `docs/audit/2026-09-17-state-and-automation-audit.md`, item `publish-v2-0-0`.
 
-## Regole di lavoro (SEMPRE)
+## Working rules (ALWAYS)
 
-- **Un tag = una pubblicazione immagine.** Il workflow di publish gira **solo** su push di tag `v*`: ogni tag builda, testa e pubblica tutte e tre le varianti su GHCR. Non taggare "per igiene": un cambiamento solo-doc/solo-tooling va in `## [Non rilasciato]` del CHANGELOG e viaggia col tag successivo. Bump `major` per cambi non retrocompatibili nell'uso dell'immagine (ENTRYPOINT, utente, path), `minor` per novità sostanziali (nuova variante FFmpeg, nuova base image), `patch` per fix.
-- **Ogni release taggata = sezione in `CHANGELOG.md`** (Keep a Changelog, in italiano) + `git tag -a vX.Y.Z -m "Release X.Y.Z"`.
-- **MAI `git push`** — lo fa sempre l'utente (qui vale doppio: un push di tag pubblica immagini pubbliche su GHCR). **MAI `Co-Authored-By`** nei commit.
-- **Documentare SEMPRE** audit, interventi, debug di build: doc `.md` in `docs/` (audit in `docs/audit/`, incident in `docs/incidents/`), **senza chiederlo**. Ogni doc: **schema/diagramma ASCII**, log allegati in `logs/<data>-<slug>/`, riga nel CHANGELOG.
-- **Todo → `docs/backlog.md`** (sorgente unica, item con `id` stabile, sync idempotente a issue GitHub). Non sparpagliare TODO nel codice o nei doc: un finding di audit si chiude con una riga nella tabella dei findings **e** un item nel backlog. Item hardening/cleanup = label `cleanup`/`backlog`, non proporli come "next".
-- **Se cambi `docs/backlog.md`, rigenera `docs/roadmap.md`** (`python3 docs/scripts/generate-roadmap.py`) e committala: il gate `generated-pages` del workflow `Backlog` gira `--check` e va rosso se diverge. Prima di committare il backlog: `python3 docs/scripts/backlog-lint.py`.
-- **Allineare tutto**: ogni modifica fattuale va propagata a `Dockerfile`, `README.md`, `action.yml`, workflow, `tests/`, `CHANGELOG.md`, `docs/backlog.md`, e a questo file + `AGENTS.md` (che vanno tenuti allineati fra loro).
-- **Nessuna modifica dichiarata "fatta" senza build verificata.** L'unica prova che un cambio al Dockerfile funzioni è `docker build` seguito da `./tests/smoke.sh`. Riportare l'output reale, non l'intenzione. Per il tooling Python vale lo stesso: il dry-run/lint eseguito, non "dovrebbe funzionare".
-- **Attenzione a leggere l'exit code giusto**: in `docker build ... > log; echo $?; tail log` l'exit riportato è quello di `tail`. Verificare l'assenza di `ERROR: failed to solve` nel log, non solo il codice finale.
-- **Ogni nuova capability va coperta da un'asserzione in `tests/smoke.sh`.** Se una regressione non è rilevabile dai test, il test è incompleto.
-- **`tests/gpu.sh` prima di promuovere un tag.** Nessun runner GitHub-hosted ha una GPU: lo smoke test prova che NVENC sia *compilato*, non che *encodi*. È l'unico gate che copre il mismatch driver/`NVCODEC_BRANCH`, ed è manuale (item `gpu-gate-prima-del-tag`).
+- **Test first, always (TDD).** Every new capability starts with a test that **fails**, then the code that makes it pass — tooling included (page generator, linters, parsers, version logic). Report the real output of both phases, never "it should work". If a regression would not be caught by the tests, the test is incomplete.
+- **Every commit on main becomes a tagged release.** `release.yml` computes the version with `docs/scripts/next-version.py` (a CHANGELOG section above the latest tag is a *pending release* and gets tagged as-is; otherwise the latest tag is bumped by the strongest conventional-commit marker), folds `## [Unreleased]` into the version section, tags, and creates the GitHub Release. Write commits as conventional commits (`feat:`, `fix:`, `docs:`, `feat!:`) — that is what decides the bump.
+- **Releasing is not publishing.** The tag is created with the `GITHUB_TOKEN`, which by design does not trigger other workflows, so images reach GHCR only through an explicit act: push a tag by hand or run `Publish` (`workflow_dispatch`, input `version: vX.Y.Z`). Publishing means three ~90-minute builds and public artefacts; it stays a decision.
+- **Work in progress goes under `## [Unreleased]`** in `CHANGELOG.md` (Keep a Changelog): the release workflow turns it into the version section.
+- **NEVER `git push`** — the user always does that (doubly so here: pushing a tag publishes public images to GHCR). **NEVER `Co-Authored-By`** in commits.
+- **ALWAYS document** audits, interventions and build debugging: a `.md` in `docs/` (audits in `docs/audit/`, interventions in `docs/interventions/`, incidents in `docs/incidents/`), **without being asked**. Every doc: an **ASCII diagram/schema**, raw logs in `logs/<date>-<slug>/`, a line in the CHANGELOG.
+- **Todos → `docs/backlog.md`** (single source, stable `id`s, idempotent sync to GitHub issues). Do not scatter TODOs through the code or the docs: an audit finding is closed by a row in the findings table **and** an item in the backlog. Hardening/cleanup items get the `cleanup` label; do not present them as "next".
+- **Change `docs/backlog.md` → regenerate `docs/roadmap.md`** (`python3 docs/scripts/generate-roadmap.py`) and commit it; same for the page (`python3 site/build.py`). The `generated-pages` gates run both with `--check` and go red when they diverge. Before committing the backlog: `python3 docs/scripts/backlog-lint.py`.
+- **Keep everything aligned**: every factual change has to reach `Dockerfile`, `README.md`, `action.yml`, the workflows, `tests/`, `CHANGELOG.md`, `docs/backlog.md`, and this file + `AGENTS.md` (which are kept in sync with each other).
+- **Nothing is "done" without a verified build.** The only proof that a Dockerfile change works is `docker build` followed by `./tests/smoke.sh`. Report the real output, not the intent.
+- **Read the right exit code**: in `docker build ... > log; echo $?; tail log` the reported exit status belongs to `tail`. Check that `ERROR: failed to solve` is absent from the log, not just the final code.
+- **Every new capability needs an assertion in `tests/smoke.sh`.**
+- **`tests/gpu.sh` before promoting a tag.** No GitHub-hosted runner has a GPU: the smoke test proves NVENC is *compiled in*, not that it *encodes*. It is the only gate covering a driver/`NVCODEC_BRANCH` mismatch, and it is manual (item `gpu-gate-before-tag`).
 
-## Pattern per interventi sulle immagini
+## Pattern for image work
 
-1. **Preflight**: base image ancora supportata (repo APT raggiungibili) e pacchetti esistenti in quella suite — `https://api.ftp-master.debian.org/madison?package=<pkg>&s=<suite>`. Per FFmpeg, il vincolo `ffnvcodec` si legge dal `configure` della release: `curl -s https://raw.githubusercontent.com/FFmpeg/FFmpeg/n<ver>/configure | grep "ffnvcodec >="`.
-2. **Build locale**: `docker build --build-arg FFMPEG_VERSION=… --build-arg NVCODEC_BRANCH=… -t ffmpeg-nvenc:test .` con log su file; run lunghi in background.
-3. **Smoke test**: `./tests/smoke.sh ffmpeg-nvenc:test <versione-attesa>` — deve chiudere 17/17.
-4. **Lint**: `hadolint` (via container), `shellcheck tests/*.sh`, `actionlint` **dalla root del repo** (fuori dal repo esce 3 "no project was found"). Se hai toccato il backlog: `backlog-lint.py` + `generate-roadmap.py --check`.
-5. **Su GPU**: `./tests/gpu.sh` su un host con NVIDIA prima di promuovere un tag.
-6. **Chiusura**: doc `.md` + log in `logs/` + CHANGELOG + README allineato + item di backlog aggiornati (`status: done` sui chiusi) + roadmap rigenerata + tag (solo se va pubblicata).
+1. **Preflight**: is the base image still supported (APT repos reachable) and do the packages exist in that suite — `https://api.ftp-master.debian.org/madison?package=<pkg>&s=<suite>`. For FFmpeg, read the `ffnvcodec` constraint from the release's `configure`: `curl -s https://raw.githubusercontent.com/FFmpeg/FFmpeg/n<ver>/configure | grep "ffnvcodec >="`.
+2. **Local build**: `docker build --build-arg FFMPEG_VERSION=… --build-arg NVCODEC_BRANCH=… -t ffmpeg-nvenc:test .` with the log in a file; long runs in the background.
+3. **Smoke test**: `./tests/smoke.sh ffmpeg-nvenc:test <expected-version>` — it must close 17/17.
+4. **Lint**: `hadolint` (via container), `shellcheck tests/*.sh`, `actionlint` **from the repository root** (outside it you get 3 "no project was found"), `python3 -m unittest discover -s tests -p 'test_*.py'`. If you touched the backlog or the README: `backlog-lint.py`, `generate-roadmap.py --check`, `site/build.py --check`.
+5. **On a GPU**: `./tests/gpu.sh` on an NVIDIA host before promoting a tag.
+6. **Closing**: a `.md` doc + logs in `logs/` + CHANGELOG (`## [Unreleased]`) + README aligned + backlog items updated (`status: done` on the closed ones) + regenerated roadmap and page.
 
-## Trappole note / regole tecniche
+## Known traps / technical rules
 
-- **`ffmpeg … | grep -q` fallisce con exit 141 anche quando il test passa.** `grep -q` esce al primo match, ffmpeg riceve SIGPIPE e con `pipefail` la pipeline ritorna 141. Riguarda i gate nel `Dockerfile` (`SHELL … -o pipefail`) **e gli step `run:` dei workflow** (Actions usa `bash -e -o pipefail` di default). Pattern corretto: redirigere su file, poi `grep` sul file. Già costato una build in questo repo.
-- **Le base Debian marciscono in silenzio.** buster è fuori da `deb.debian.org` (404, contenuto su `archive.debian.org`) — è così che il repo si è rotto senza che nessuno se ne accorgesse. Bookworm è `oldstable` da quando trixie è `stable`. Lo **schedule settimanale in `ci.yml` esiste apposta**: se fallisce di lunedì senza che nessuno abbia toccato il codice, quasi certamente è marcita una base o un repo APT.
-- **Verificare che un pacchetto esista nella suite prima di usarlo.** `python` non esiste da bullseye in poi (solo `python2`/`python3`) e questo bloccava la variante FFmpeg 6.0.
-- **I nomi versionati dei pacchetti runtime sono legati alla suite**: `libx264-164`, `libx265-199`, `libvpx7` sono bookworm. Cambiando `DEBIAN_VERSION` vanno riallineati o lo stage runtime non installa nulla. Su trixie (verificato 17/09/2026): `libvpx7`→`libvpx9`, `libx265-199`→`libx265-215`, `libx264-164` resta.
-- **`NVCODEC_BRANCH` determina il driver NVIDIA minimo dell'host.** Non alzarlo senza motivo: `sdk/13.0` richiede driver molto recenti. Il vincolo minimo è quello del `configure` di FFmpeg (5.1 → ≥ 9.1.23.1, 6.0 → ≥ 12.0.16.0, 7.1 → ≥ 12.1.14.0); scegliere il branch **più basso** che lo soddisfa. ⭐ Verificato il 17/09/2026: il vincolo è **fermo a 12.1.14.0 anche su 7.1.5, 8.1.2 e 9.0.1** → salire di versione FFmpeg **non** alza il driver minimo, `sdk/12.1` copre tutto. Sintomo di mismatch a runtime: `This NVENC API is not compatible with the installed driver`.
-- **NVENC non richiede il CUDA toolkit**, bastano gli header `ffnvcodec`. Non reintrodurre `--extra-cflags=-I/usr/local/cuda/include` / `--extra-ldflags=-L/usr/local/cuda/lib64`: nell'immagine quelle directory non esistono e suggeriscono capacità assenti. Servono solo se si abilita davvero `--enable-cuda-nvcc`/`--enable-libnpp`/`--enable-nvdec`, che richiedono una base `nvidia/cuda:*-devel`.
-- **MAI `--enable-nonfree`** su un'immagine pubblicata: rende il binario **non ridistribuibile**. `tests/smoke.sh` ha un'asserzione dedicata. Lo stesso vale per `libfdk-aac`. L'immagine è GPL-3.0-or-later (per libx264/libx265), il repo è MIT: sono due licenze diverse, non confonderle.
-- **L'immagine ha `ENTRYPOINT ["ffmpeg"]` e gira come utente non root (uid 1000)**, workdir `/data`. Gli esempi in doc vanno scritti senza ripetere `ffmpeg`; per una shell serve `--entrypoint /bin/bash`; su volumi montati serve `--user "$(id -u):$(id -g)"`. ⚠️ Vale per l'immagine di `main`, **non** per quella pubblicata oggi su GHCR (vedi nota sullo stato di consegna).
-- **La GitHub Action non può usare NVENC sui runner GitHub-hosted** (nessuna GPU): solo encoding CPU, oppure self-hosted runner con NVIDIA Container Toolkit. `action.yml` passa il comando via wrapper `bash -c` perché con `ENTRYPOINT ffmpeg` un singolo elemento in `args` arriverebbe come **un solo argomento**. ⚠️ `runs.image` è **statico per specifica**: non accetta `${{ inputs… }}`, quindi `inputs.image` di `action.yml` oggi non fa nulla (item `action-ref-e-input-image`).
-- **Il tagging dei workflow usa `docker/metadata-action`**, con `suffix=-ffmpeg<ver>` per variante più un secondo blocco senza suffisso per la sola variante `default: true`. La versione precedente applicava una regex semver a una stringa che il suffisso rendeva strutturalmente non-matchabile: `:latest` non veniva mai pubblicato. Se si tocca il tagging, verificare i tag effettivi su GHCR dopo il primo tag.
-- **`shellcheck` esce 1 anche su finding `info`**: un `SC20xx` informativo basta a rompere la CI. Usare direttive `# shellcheck disable=` mirate e motivate.
-- **`hadolint`**: `DL3008` (pin versioni apt) è ignorato in `.hadolint.yaml` — pinnare le versioni Debian bloccherebbe le patch di sicurezza ad ogni point release.
-- **Il build context passa dal `.dockerignore`**: `docs/`, `tests/`, `*.md` sono esclusi. Se un file nuovo serve alla build, va tolto dall'ignore.
-- **API GitHub del sync backlog** (`docs/scripts/sync-backlog-to-issues.py`): `PATCH /issues/:n` **sostituisce** l'intero set di label (a differenza di `add_labels` di GitLab) → lo script fa l'unione con quelle presenti, non toccare quella logica o ogni sync cancellerà le label messe a mano. E `GET /issues` **include le pull request**: sono filtrate sulla chiave `pull_request`, altrimenti una PR con la label `backlog-sync` verrebbe chiusa come item fantasma. Il tooling usa **solo stdlib** (nessun `setup-python`, nessun `requirements.txt`): tenerlo così.
-- **Il backlog comanda, non la UI**: un item `status: open` con issue chiusa a mano viene riaperto al sync successivo. Per chiudere davvero si mette `status: done` sull'item.
+- **`ffmpeg … | grep -q` fails with exit 141 even when the test passes.** `grep -q` exits on the first match, ffmpeg takes SIGPIPE, and with `pipefail` the pipeline returns 141. This applies to the gates in the `Dockerfile` (`SHELL … -o pipefail`) **and to `run:` steps in the workflows** (Actions uses `bash -e -o pipefail` by default). The right pattern: redirect to a file, then `grep` the file. It has already cost this repository a build.
+- **Debian bases rot in silence.** buster is gone from `deb.debian.org` (404, content on `archive.debian.org`) — that is how this repository broke without anyone noticing. Bookworm is `oldstable` now that trixie is `stable`. The **weekly schedule in `ci.yml` exists for this**: if it fails on a Monday when nobody touched the code, a base or an APT repo has almost certainly rotted.
+- **Check that a package exists in the suite before using it.** `python` does not exist from bullseye onwards (only `python2`/`python3`) and that is what blocked the FFmpeg 6.0 variant.
+- **Versioned runtime package names are tied to the suite**: `libx264-164`, `libx265-199`, `libvpx7` are bookworm. Changing `DEBIAN_VERSION` means realigning them or the runtime stage installs nothing. On trixie (verified 2026-09-17): `libvpx7`→`libvpx9`, `libx265-199`→`libx265-215`, `libx264-164` stays.
+- **`NVCODEC_BRANCH` sets the host's minimum NVIDIA driver.** Do not raise it without a reason: `sdk/13.0` needs very recent drivers. The floor is whatever FFmpeg's `configure` requires (5.1 → ≥ 9.1.23.1, 6.0 → ≥ 12.0.16.0, 7.1 → ≥ 12.1.14.0); pick the **lowest** branch that satisfies it. ⭐ Verified 2026-09-17: the constraint is **still 12.1.14.0 on 7.1.5, 8.1.2 and 9.0.1** → moving up an FFmpeg version does **not** raise the minimum driver, `sdk/12.1` covers all of it. Runtime symptom of a mismatch: `This NVENC API is not compatible with the installed driver`.
+- **NVENC does not need the CUDA toolkit**, only the `ffnvcodec` headers. Do not reintroduce `--extra-cflags=-I/usr/local/cuda/include` / `--extra-ldflags=-L/usr/local/cuda/lib64`: those directories do not exist in the image and they advertise capabilities that are not there. They are only needed if you really enable `--enable-cuda-nvcc`/`--enable-libnpp`/`--enable-nvdec`, which require an `nvidia/cuda:*-devel` base.
+- **NEVER `--enable-nonfree`** on a published image: it makes the binary **non-redistributable**. `tests/smoke.sh` has a dedicated assertion, and `site/build.py` reads the enabled flags from the Dockerfile with a test pinning the absence of `nonfree`. The same goes for `libfdk-aac`. The image is GPL-3.0-or-later (because of libx264/libx265) and the repository is MIT: two different licences, do not conflate them.
+- **The image has `ENTRYPOINT ["ffmpeg"]` and runs as a non-root user (uid 1000)**, workdir `/data`. Examples in docs must not repeat `ffmpeg`; a shell needs `--entrypoint /bin/bash`; mounted volumes need `--user "$(id -u):$(id -g)"`. ⚠️ That describes the image on `main`, **not** the one currently published on GHCR (see the delivery-status note).
+- **The GitHub Action cannot use NVENC on GitHub-hosted runners** (no GPU): CPU encoding only, or a self-hosted runner with the NVIDIA Container Toolkit. `action.yml` passes the command through a `bash -c` wrapper because with `ENTRYPOINT ffmpeg` a single element in `args` would arrive as **one single argument**. ⚠️ `runs.image` is **static by specification**: it does not accept `${{ inputs… }}`, so `action.yml`'s `inputs.image` currently does nothing (item `action-ref-and-image-input`).
+- **Workflow tagging uses `docker/metadata-action`**, with `suffix=-ffmpeg<ver>` per variant plus a second block without a suffix for the `default: true` variant only. The previous version applied a semver regex to a string the suffix made structurally unmatchable: `:latest` was never published. `type=semver` only yields tags from a tag event, so the `workflow_dispatch` path passes `value=${{ inputs.version }}`. If you touch the tagging, check the actual tags on GHCR after the first tag.
+- **`shellcheck` exits 1 even on `info` findings**: one informational `SC20xx` is enough to break CI. Use targeted, justified `# shellcheck disable=` directives.
+- **`hadolint`**: `DL3008` (pinning apt versions) is ignored in `.hadolint.yaml` — pinning Debian versions would freeze security patches at every point release. `DL3066` on `USER ffmpeg` is informational and below the failure threshold.
+- **The build context goes through `.dockerignore`**: `docs/`, `logs/`, `site/`, `tests/`, `*.md` are excluded. If a new file is needed by the build, take it out of the ignore list.
+- **GitHub API rules in the backlog sync** (`docs/scripts/sync-backlog-to-issues.py`): `PATCH /issues/:n` **replaces** the whole label set (unlike GitLab's `add_labels`) → the script unions it with what is already there; do not touch that logic or every sync will wipe labels added by hand. And `GET /issues` **includes pull requests**: they are filtered on the `pull_request` key, otherwise a PR carrying the `backlog-sync` label would be closed as a phantom item. The tooling is **stdlib only** (no `setup-python`, no `requirements.txt`): keep it that way.
+- **The backlog decides, not the UI**: an item with `status: open` whose issue was closed by hand is reopened on the next sync. To close it for real, set `status: done` on the item.
 
-## Puntatori
+## Pointers
 
-- **Audit**: `docs/audit/2026-09-17-audit-stato-e-automazione.md` (stato attuale + findings + backlog) · `docs/audit/2026-08-09-audit-iniziale.md` (fotografia pre-riparazione, da leggere al passato)
-- **Backlog operativo**: `docs/backlog.md` · **Roadmap per milestone**: `docs/roadmap.md` (generata) · **Runbook del tooling**: `docs/scripts/README.md`
-- Issue gestite dal sync: label `backlog-sync` · Milestone: `https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/milestones`
+- **Audits**: `docs/audit/2026-09-17-state-and-automation-audit.md` (current state + findings + backlog) · `docs/audit/2026-08-09-initial-audit.md` (the pre-repair snapshot, read it in the past tense)
+- **Interventions**: `docs/interventions/` — e.g. `2026-09-17-ffmpeg-patch-bump.md`
+- **Backlog**: `docs/backlog.md` · **Roadmap by milestone**: `docs/roadmap.md` (generated) · **Tooling runbook**: `docs/scripts/README.md`
+- Issues managed by the sync carry the `backlog-sync` label · Milestones: `https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/milestones`
+- **Project page**: `https://allan-nava.github.io/Docker-FFmpeg-Nvenc/` — generated by `site/build.py`, deployed by `pages.yml`
 - Registry: `https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/pkgs/container/docker-ffmpeg-nvenc`
-- Matrice GPU/NVENC NVIDIA: `https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new`
-- `nv-codec-headers`: `https://github.com/FFmpeg/nv-codec-headers` (branch `sdk/<ver>`)
-- Codice rimosso in v2.0.0 (recuperabile): `git checkout v1.0.1 -- scripts/ module.defs Containerfile`
+- NVIDIA GPU/NVENC matrix: `https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new`
+- `nv-codec-headers`: `https://github.com/FFmpeg/nv-codec-headers` (`sdk/<ver>` branches)
+- Code removed in v2.0.0 (recoverable): `git checkout v1.0.1 -- scripts/ module.defs Containerfile`

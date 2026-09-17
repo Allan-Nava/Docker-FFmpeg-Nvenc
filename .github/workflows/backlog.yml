@@ -1,10 +1,10 @@
 name: Backlog
 
-# docs/backlog.md e la sorgente unica dei todo: questo workflow lo valida e lo
-# sincronizza sulle issue GitHub (creando le milestone mancanti).
+# docs/backlog.md is the single source of truth for todos: this workflow validates it and syncs it
+# to GitHub issues (creating the missing milestones).
 #
-# NB: `sync` scrive sulle issue, quindi non gira sulle pull request — su una PR da
-# fork il GITHUB_TOKEN e in sola lettura e il run fallirebbe sul primo POST.
+# Note: `sync` writes issues, so it never runs on pull requests — on a fork PR the GITHUB_TOKEN is
+# read-only and the run would die on the first POST.
 on:
   push:
     branches: [main]
@@ -18,12 +18,12 @@ on:
       - 'docs/scripts/**'
       - '.github/workflows/backlog.yml'
   schedule:
-    # lunedi, dopo lo schedule di ci.yml (04:17): il backlog si allinea a valle
+    # Mondays, after ci.yml's schedule (04:17): the backlog realigns downstream of it.
     - cron: '42 5 * * 1'
   workflow_dispatch:
     inputs:
       apply:
-        description: 'Applica davvero (crea/aggiorna/chiude issue). false = solo piano.'
+        description: 'Actually apply it (create/update/close issues). false = plan only.'
         type: boolean
         default: false
 
@@ -36,21 +36,24 @@ concurrency:
 
 jobs:
   lint:
-    name: Lint backlog + pagine generate
+    name: Lint backlog and generated pages
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Tests
+        run: python3 -m unittest discover -s tests -p 'test_backlog.py'
+
       - name: backlog-lint
         run: python3 docs/scripts/backlog-lint.py
 
-      # La roadmap e committata: se divergesse, la pagina in repo mentirebbe sul backlog.
-      - name: generated-pages (roadmap.md aggiornata)
+      # roadmap.md is committed: if it diverged, the page in the repo would lie about the backlog.
+      - name: generated-pages (roadmap.md up to date)
         run: python3 docs/scripts/generate-roadmap.py --check
 
   sync:
-    name: Sync backlog -> issue
+    name: Sync backlog -> issues
     runs-on: ubuntu-latest
     needs: lint
     if: github.event_name != 'pull_request'
@@ -61,8 +64,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Su push/schedule il run e informativo (piano nel log); si applica dallo
-      # schedule e da workflow_dispatch con apply=true.
+      # On push the run is informational (plan in the log); it applies from the schedule and from
+      # a workflow_dispatch with apply=true.
       - name: Sync (dry-run)
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.apply != true)
         env:
@@ -75,12 +78,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 docs/scripts/sync-backlog-to-issues.py --apply
 
-      - name: Riepilogo
+      - name: Summary
         if: always()
         run: |
           {
             echo "### Backlog"
-            echo "- item: \`docs/backlog.md\` · roadmap: \`docs/roadmap.md\`"
-            echo "- [milestone del repo](${{ github.server_url }}/${{ github.repository }}/milestones)"
-            echo "- [issue \`backlog-sync\`](${{ github.server_url }}/${{ github.repository }}/issues?q=is%3Aissue+label%3Abacklog-sync)"
+            echo "- items: \`docs/backlog.md\` · roadmap: \`docs/roadmap.md\`"
+            echo "- [repository milestones](${{ github.server_url }}/${{ github.repository }}/milestones)"
+            echo "- [\`backlog-sync\` issues](${{ github.server_url }}/${{ github.repository }}/issues?q=is%3Aissue+label%3Abacklog-sync)"
           } >> "$GITHUB_STEP_SUMMARY"

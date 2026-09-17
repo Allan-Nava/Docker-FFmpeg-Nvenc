@@ -1,287 +1,291 @@
-# Backlog operativo — sorgente di verita per le issue GitHub
+# Operational backlog — source of truth for the GitHub issues
 
-Questo file e l'**unica sorgente di verita** dei todo del repo. Uno script idempotente
-([`scripts/sync-backlog-to-issues.py`](scripts/sync-backlog-to-issues.py)) lo legge e
-**apre/aggiorna/chiude automaticamente** una issue GitHub per ogni item, **creando le milestone
-mancanti**, schedulato da [`.github/workflows/backlog.yml`](../.github/workflows/backlog.yml).
+This file is the **single source of truth** for the repository's todos. An idempotent script
+([`scripts/sync-backlog-to-issues.py`](scripts/sync-backlog-to-issues.py)) reads it and
+**opens, updates and closes** one GitHub issue per item, **creating the missing milestones**,
+scheduled by [`.github/workflows/backlog.yml`](../.github/workflows/backlog.yml).
 
-## Come funziona (flusso)
+## How it works
 
 ```
-  docs/backlog.md  ──parse(id)──▶  sync-backlog-to-issues.py  ──API GitHub──▶  Issues + Milestone
-   ### `id` — Titolo                  (idempotente)                            (label backlog-sync
-   - status / labels / milestone      fingerprint                               + fingerprint nel corpo)
-   - priority / ref                   <!-- backlog-id: id | hash: … -->
+  docs/backlog.md  ──parse(id)──▶  sync-backlog-to-issues.py  ──GitHub API──▶  Issues + Milestones
+   ### `id` — Title                  (idempotent)                              (label backlog-sync
+   - status / labels / milestone     fingerprint                                + fingerprint in the body)
+   - priority / ref                  <!-- backlog-id: id | hash: … -->
 
-   item open  + nessuna issue       → CREATE   (milestone creata se manca)
-   item open  + issue aperta  hash= → SKIP     (nessun duplicato: match per `id`)
-   item open  + issue aperta  hash≠ → UPDATE   (titolo/corpo/labels/milestone riallineati)
-   item open  + issue chiusa        → REOPEN   (il backlog comanda, non la UI)
-   item done / rimosso              → CLOSE    (con commento + estratto del motivo)
+   item open  + no issue          → CREATE   (milestone created if missing)
+   item open  + open issue, hash= → SKIP     (no duplicates: matched by `id`)
+   item open  + open issue, hash≠ → UPDATE   (title/body/labels/milestone realigned)
+   item open  + closed issue      → REOPEN   (the backlog decides, not the UI)
+   item done / removed            → CLOSE    (with a comment and the reason)
 
                  │
-                 └─▶ generate-roadmap.py ──▶ docs/roadmap.md   (pagina GENERATA, committata,
-                                                                gate `generated-pages` in CI)
+                 └─▶ generate-roadmap.py ──▶ docs/roadmap.md   (GENERATED page, committed,
+                                                                `generated-pages` gate in CI)
 ```
 
-Re-run sicuro: il match e per `id` stabile (fingerprint nel corpo issue), **non** per testo →
-editare titolo/descrizione non crea doppioni.
+Re-running is safe: the match is by stable `id` (fingerprint in the issue body), **not** by text, so
+editing a title or a description never creates a duplicate.
 
-## Convenzione di scrittura di un item
+## How to write an item
 
-- Un item inizia con `### \`<id-stabile>\` — <Titolo>` (l'`id` e in backtick, kebab-case, **non cambiarlo mai**).
-- Metadati come bullet `- **chiave**: valore`:
-  - **status**: `open` (default) | `done` → `done` chiude la issue.
-  - **labels**: lista separata da virgola (`backlog-sync` e aggiunta in automatico; le label
-    aggiunte a mano sulla issue **non** vengono rimosse: lo script fa l'unione).
-  - **priority**: `low` | `medium` | `high` (opzionale).
-  - **milestone**: titolo di una milestone GitHub (opzionale). Lo script la **cerca per titolo
-    esatto e la crea se manca**, poi assegna la issue. Item della stessa milestone → titolo
-    identico carattere per carattere.
-  - **owner**: username GitHub (opzionale, assegnatario).
-  - **ref**: link/percorso al doc o all'audit (opzionale).
-- Tutto il resto del blocco (prosa) diventa il **corpo** della issue.
+- An item starts with `### \`<stable-id>\` — <Title>` (the `id` is in backticks, kebab-case, **never change it**).
+- Metadata as `- **key**: value` bullets:
+  - **status**: `open` (default) | `done` → `done` closes the issue.
+  - **labels**: comma-separated (`backlog-sync` is added automatically; labels added by hand on the
+    issue are **not** removed — the script unions them).
+  - **priority**: `low` | `medium` | `high` (optional).
+  - **milestone**: the title of a GitHub milestone (optional). The script looks it up by **exact
+    title and creates it if missing**, then assigns the issue. Items in the same milestone must use
+    the same title, character for character.
+  - **owner**: GitHub username (optional, becomes the assignee).
+  - **ref**: link or path to the doc or audit (optional).
+- Everything else in the block (prose) becomes the issue **body**.
 
-> Per "chiudere" un todo: metti `status: done` (storico) **oppure** rimuovi l'item. In entrambi i
-> casi la issue viene chiusa al prossimo sync. Preferire `done` per gli item **gia sincronizzati**
-> (la issue si chiude con la traccia del perche); la rimozione va bene solo per item mai sincronizzati.
+> To "close" a todo: set `status: done` (keeps the history) **or** remove the item. Either way the
+> issue is closed on the next sync. Prefer `done` for items **already synced** (the issue closes with
+> the reason attached); removal is fine only for items that were never synced.
 
-> Prima di aprire un item nuovo **cerca il doppione per artefatto**, non per parole del problema:
-> il path (`grep -i action.yml docs/backlog.md`), il tag GHCR, il nome del workflow, la variante
-> FFmpeg. Due item scritti in momenti diversi sulla stessa azione usano parole diverse.
+> Before opening a new item, **look for the duplicate by artefact**, not by the words of the problem:
+> the path (`grep -i action.yml docs/backlog.md`), the GHCR tag, the workflow name, the FFmpeg
+> variant. Two items written weeks apart about the same action use different words.
 
-Validazione locale (stessi comandi della CI):
+Local validation (the same commands CI runs):
 
 ```shell
 python3 docs/scripts/backlog-lint.py
-python3 docs/scripts/generate-roadmap.py            # rigenera docs/roadmap.md (da committare)
-python3 docs/scripts/sync-backlog-to-issues.py      # dry-run: mostra il piano, non scrive
+python3 docs/scripts/generate-roadmap.py            # regenerate docs/roadmap.md (commit it)
+python3 docs/scripts/sync-backlog-to-issues.py      # dry-run: prints the plan, writes nothing
 ```
 
 ---
 
-## Item attivi
+## Active items
 
-### `tag-v2-0-0` — Tutta la riparazione v2.0.0 e su main ma NON pubblicata: su GHCR `:latest` e l'immagine del 2023
+### `publish-v2-0-0` — The whole v2.0.0 repair is on main but unpublished: `:latest` on GHCR is the 2023 image
 
 - **status**: open
 - **priority**: high
 - **labels**: release, docker, bug
-- **milestone**: Pubblicazione v2.0.0
-- **ref**: [audit/2026-09-17-audit-stato-e-automazione.md](audit/2026-09-17-audit-stato-e-automazione.md)
+- **milestone**: Ship v2.0.0
+- **ref**: [audit/2026-09-17-state-and-automation-audit.md](audit/2026-09-17-state-and-automation-audit.md)
 
-`CHANGELOG.md` ha la sezione `[2.0.0] - 2026-08-09` ma **il tag `v2.0.0` non esiste** (ultimo tag:
-`v1.0.1`, maggio 2023). Il workflow di publish gira solo su push di tag `v*` → **niente e stato
-pubblicato**. Verificato sul registry il 17/09/2026: `ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest`
-e un manifest **creato il 2023-01-16**, label `org.opencontainers.image.version=v0.1.2`, `User`
-vuoto (**gira come root**), `ENTRYPOINT ["/bin/bash"]`, 10 layer (nessun multi-stage) e
-`NVIDIA_REQUIRE_CUDA=… driver>=470,driver<471`: su un host con driver moderno (535/550/570) il
-container **non parte affatto** (`requirement error: unsatisfied condition`).
+`CHANGELOG.md` has a `[2.0.0] - 2026-08-09` section but **the `v2.0.0` tag does not exist** (latest tag:
+`v1.0.1`, May 2023). The publish workflow only fires on `v*` tag pushes, so **nothing was ever published**.
+Verified against the registry on 2026-09-17: `ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest` is a manifest
+**created on 2023-01-16**, labelled `org.opencontainers.image.version=v0.1.2`, with an empty `User`
+(**runs as root**), `ENTRYPOINT ["/bin/bash"]`, 10 layers (no multi-stage) and
+`NVIDIA_REQUIRE_CUDA=… driver>=470,driver<471`: on a host with a modern driver (535/550/570) the container
+**does not start at all** (`requirement error: unsatisfied condition`).
 
-Quindi oggi: chi segue il README scarica l'immagine rotta del 2023, e la CI verde ogni lunedi
-certifica un artefatto che nessuno puo usare.
+So today: anyone following the README pulls the broken 2023 image, and the CI that is green every Monday
+certifies an artefact nobody can use.
 
-Chiusura (il push del tag lo fa l'utente):
-- [ ] `./tests/gpu.sh` su un host con GPU NVIDIA sulle tre varianti (mai eseguito in CI)
-- [ ] `git tag -a v2.0.0 -m "Release 2.0.0"` + push del tag
-- [ ] verificare i tag effettivi su GHCR dopo il run: `latest`, `v2.0.0`, `v2.0`, `v2` **senza**
-      suffisso (variante default) + `latest-ffmpeg{7.1.1,6.0,5.1.2}`
-- [ ] verificare che `:latest` abbia `User=ffmpeg` e `Entrypoint=["ffmpeg"]`
+Closing it (the tag push is the user's):
+- [ ] `./tests/gpu.sh` on an NVIDIA host for all three variants (never run in CI)
+- [ ] release `v2.0.0` — `release.yml` tags it automatically on the next commit to main
+- [ ] run `Publish` (workflow_dispatch, `version: v2.0.0`) to put the images on GHCR
+- [ ] check the actual tags on GHCR afterwards: `latest`, `v2.0.0`, `v2.0`, `v2` **without** suffix
+      (default variant) plus `latest-ffmpeg{7.1.5,6.0.1,5.1.10}`
+- [ ] check that `:latest` now has `User=ffmpeg` and `Entrypoint=["ffmpeg"]`
 
-### `action-ref-e-input-image` — La Action pubblica punta a `:latest` mobile, `@v2` non esiste e `inputs.image` e codice morto
+### `action-ref-and-image-input` — The published Action pins `:latest`, `@v2` does not exist, and `inputs.image` is dead code
 
 - **status**: open
 - **priority**: high
 - **labels**: github_actions, documentation, bug
-- **milestone**: Pubblicazione v2.0.0
-- **ref**: [audit/2026-09-17-audit-stato-e-automazione.md](audit/2026-09-17-audit-stato-e-automazione.md)
+- **milestone**: Ship v2.0.0
+- **ref**: [audit/2026-09-17-state-and-automation-audit.md](audit/2026-09-17-state-and-automation-audit.md)
 
-Tre problemi sullo stesso file, `action.yml`:
+Three problems in one file, `action.yml`:
 
-1. `runs.image: docker://…:latest` — tag **mobile**: la Action cambia comportamento sotto i piedi
-   dei consumatori ad ogni publish, e oggi esegue l'immagine del 2023 (vedi `tag-v2-0-0`).
-2. `README.md` documenta `uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2`, ma **nessun tag/branch `v2`
-   esiste**: quell'esempio non risolve.
-3. `inputs.image` esiste, e documentato come "override per pinnare una versione specifica", ma
-   **non e referenziato da nessuna parte**: `runs.image` e statico per specifica GitHub (non
-   accetta espressioni `${{ }}`). E un input che promette una cosa che non fa.
+1. `runs.image: docker://…:latest` — a **moving** tag: the Action changes under its consumers on every
+   publish, and today it runs the 2023 image (see `publish-v2-0-0`).
+2. `README.md` documents `uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2`, but **no `v2` tag or branch exists**:
+   that example does not resolve.
+3. `inputs.image` exists and is documented as "override to pin a specific version", but it is
+   **referenced nowhere**: `runs.image` is static by GitHub's specification (it does not accept `${{ }}`
+   expressions). It is an input that promises something it cannot do.
 
-Decisione da prendere: pinnare `runs.image` a `vX.Y.Z` (o al digest) aggiornandolo ad ogni release,
-e **rimuovere** `inputs.image` documentando che per pinnare si usa `uses: …@vX.Y.Z`.
+Decision to take: pin `runs.image` to `vX.Y.Z` (or to the digest) and update it on every release.
 
-### `ghcr-tag-igiene` — Sul registry restano `main`, `pr-2`…`pr-5` e le immagini v0.1.x del 2023
+> **Partially done on 2026-09-17**: point 3 is closed — `inputs.image` was removed and `action.yml` now
+> documents why it cannot exist (`runs.image` is static by specification) and that pinning is done with
+> `uses: …@vX.Y.Z`. Points 1 and 2 stay open: they need the `v2.0.0` tag to exist first
+> (`publish-v2-0-0`), otherwise pinning `runs.image` would point at nothing.
+
+### `ghcr-tag-hygiene` — `main`, `pr-2`…`pr-5` and the 2023 v0.1.x images are still on the registry
 
 - **status**: open
 - **priority**: medium
 - **labels**: docker, cleanup
-- **milestone**: Pubblicazione v2.0.0
+- **milestone**: Ship v2.0.0
 
-Tag presenti su GHCR (17/09/2026): `main`, `pr-2`, `pr-3`, `pr-4`, `pr-5`, `v0.1.1`, `v0.1.2`,
-`latest`, `v1.0.1-ffmpeg5.1.2`, `v1.0.1-ffmpeg6.0`. I tag `pr-*` e `main` sono residui di workflow
-che **non esistono piu** (nessun workflow attuale pubblica su push di branch o PR): sono immagini
-del 2023, root, con `--enable-nonfree`, scaricabili da chiunque.
+Tags on GHCR (2026-09-17): `main`, `pr-2`, `pr-3`, `pr-4`, `pr-5`, `v0.1.1`, `v0.1.2`, `latest`,
+`v1.0.1-ffmpeg5.1.2`, `v1.0.1-ffmpeg6.0`. The `pr-*` and `main` tags are leftovers from workflows that
+**no longer exist** (nothing publishes on branch or PR events today): 2023 images, running as root, built
+with `--enable-nonfree`, pullable by anyone.
 
-Da fare dopo `tag-v2-0-0` (non prima: cancellare `latest` ora lascerebbe il README senza immagine):
-eliminare i tag `pr-*` e `main`, valutare la retention del package (`Package settings ▸ Manage
-Actions access / retention`) e lasciare le `v0.1.x`/`v1.0.1-*` come storia ma **marcate** nel README
-come non supportate.
+To do after `publish-v2-0-0` (not before: deleting `latest` now would leave the README with no image):
+delete the `pr-*` and `main` tags, consider package retention, and keep the `v0.1.x`/`v1.0.1-*` tags as
+history but **marked** in the README as unsupported.
 
-### `ffmpeg-bump-7-1-5` — La variante default e ferma a FFmpeg 7.1.1, upstream e a 7.1.5
-
-- **status**: open
-- **priority**: high
-- **labels**: docker, upgrade, sicurezza
-- **milestone**: Manutenzione immagine & upstream
-
-Verificato su `ffmpeg.org/releases` il 17/09/2026: nel ramo 7.1 esistono **7.1.2, 7.1.3, 7.1.4,
-7.1.5**. Il repo pinna `7.1.1` → **cinque release di manutenzione indietro**, cioe i fix (inclusi
-quelli di sicurezza) di quel ramo non sono nell'immagine.
-
-Il bump e a costo quasi nullo: il vincolo del `configure` resta `ffnvcodec >= 12.1.14.0`
-(verificato su `n7.1.2` e `n7.1.5`), quindi `NVCODEC_BRANCH=sdk/12.1` non cambia e **il driver
-NVIDIA minimo dell'host non si alza**. Da propagare: matrice in `ci.yml` e `docker-publish.yml`,
-tabella nel `README.md`, `CLAUDE.md`/`AGENTS.md`.
-
-### `dependabot-pr-arretrate` — 4 PR dependabot major aperte da 5 settimane + 2 PR fossili del 2023
+### `dependabot-backlog-prs` — 4 major Dependabot PRs open for 5 weeks, plus 2 fossils from 2023
 
 - **status**: open
 - **priority**: high
 - **labels**: dependencies, github_actions
-- **milestone**: Manutenzione immagine & upstream
+- **milestone**: Image & upstream maintenance
 
-Aperte il 09/08/2026 e mai toccate: `#23` login-action 3→4, `#22` setup-buildx-action 3→4,
-`#21` build-push-action 6→7, `#20` metadata-action 5→6. Sono **quattro major** sulle action che
-fanno la build e il push: vanno lette insieme (una CI verde su tutte e quattro, non quattro merge
-ciechi), e `metadata-action` 6 tocca proprio il tagging che in questo repo si e gia rotto una volta.
+Opened on 2026-08-09 and never touched: `#23` login-action 3→4, `#22` setup-buildx-action 3→4,
+`#21` build-push-action 6→7, `#20` metadata-action 5→6. Four **majors** on the actions that build and push:
+they want reading together (one green CI across all four, not four blind merges), and `metadata-action` 6
+touches exactly the tagging that has already broken once in this repository.
 
-Fossili da chiudere, riferiti a file che non esistono piu: `#18` "Bump nvidia/cuda …"
-(`Containerfile`, rimosso in v2.0.0) e `#5` "Bump sigstore/cosign-installer" (workflow rimosso).
+Fossils to close, referring to files that no longer exist: `#18` "Bump nvidia/cuda …" (`Containerfile`,
+removed in v2.0.0) and `#5` "Bump sigstore/cosign-installer" (workflow removed).
 
-Da fare anche: `groups` in `.github/dependabot.yml` (una PR sola per le action docker/*) per non
-riaprire cinque PR ogni settimana. `actions/checkout` e ancora a `v4` ovunque.
+Also worth doing: `groups` in `.github/dependabot.yml` (one PR for all the docker/* actions) so five PRs
+do not reappear every week. `actions/checkout` is still on `v4` everywhere.
 
-### `ffmpeg-8-e-9-varianti` — Valutare FFmpeg 8.1.x / 9.0.x nella matrice (e quale diventa default)
-
-- **status**: open
-- **priority**: medium
-- **labels**: docker, upgrade
-- **milestone**: Manutenzione immagine & upstream
-
-Upstream (17/09/2026) e a **9.0.1**, con il ramo **8.1.2** ancora manutenuto; la matrice del repo
-si ferma a 7.1.x. Fatto che rende la valutazione economica: il vincolo `ffnvcodec` di `n8.1.2` e
-`n9.0.1` e **identico** a quello di 7.1 (`>= 12.1.14.0`), quindi `sdk/12.1` basta anche per 9.0 e
-**il driver minimo dell'host resta ≥ 530** — non c'e il solito tradeoff "versione nuova = driver
-nuovo".
-
-Da verificare prima di aggiungerle: i nomi dei pacchetti runtime bookworm reggono, il set di
-`--enable-*` e ancora valido (8.x ha rimosso qualche opzione), e **quante varianti si vogliono
-mantenere**: ogni riga della matrice e ~una build da 90 minuti su ogni tag. Probabile forma finale:
-9.0.x default, 7.1.x come LTS, 5.1.2 per i driver ≥ 470, drop di 6.0.
-
-### `debian-13-trixie` — La base `debian:12-slim` e oldstable
+### `ffmpeg-8-and-9-variants` — Evaluate FFmpeg 8.1.x / 9.0.x in the matrix (and which one becomes default)
 
 - **status**: open
 - **priority**: medium
 - **labels**: docker, upgrade
-- **milestone**: Manutenzione immagine & upstream
+- **milestone**: Image & upstream maintenance
 
-Debian 13 (trixie) e `stable`; bookworm e **oldstable** (verificato via `api.ftp-master.debian.org`,
-17/09/2026). Non e un'emergenza (bookworm ha supporto LTS per anni), ma e esattamente la strada per
-cui questo repo si e rotto in silenzio una volta: la base marcisce, e lo schedule del lunedi lo
-scopre solo quando i repo APT smettono di rispondere.
+Upstream (2026-09-17) is at **9.0.1**, with **8.1.2** still maintained; the repository's matrix stops at
+7.1.x. The fact that makes this cheap to evaluate: the `ffnvcodec` constraint of `n8.1.2` and `n9.0.1` is
+**identical** to 7.1's (`>= 12.1.14.0`), so `sdk/12.1` covers 9.0 too and **the host's minimum driver stays
+≥ 530** — none of the usual "newer version means newer driver" trade-off.
 
-`DEBIAN_VERSION` e gia un `ARG`, ma **le liste di pacchetti non sono parametriche**: passare a 13
-richiede di riallineare i nomi versionati dello stage runtime. Verificato in trixie:
-`libvpx7` → **`libvpx9`** (1.15.0), `libx265-199` → **`libx265-215`** (4.1), `libx264-164` **resta**
-(0.164.3108). Tutto il resto (`libass9`, `libmp3lame0`, `libopus0`, `libspeex1`, `libtheora0`,
-`libvorbis0a`, `libvorbisenc2`, `libnuma1`, `libxml2`, `libfreetype6`, `libfribidi0`,
-`libharfbuzz0b`, `libfontconfig1`) esiste con lo stesso nome.
+To check before adding them: that the bookworm runtime package names still hold, that the `--enable-*` set
+is still valid (8.x dropped a few options), and **how many variants are worth maintaining**: each matrix row
+is a ~90-minute build on every tag. Likely end state: 9.0.x default, 7.1.x as LTS, 5.1.x for drivers ≥ 470,
+drop 6.0.
 
-### `gpu-gate-prima-del-tag` — `tests/gpu.sh` non e invocato da nessun workflow: il publish e cieco su NVENC
+### `debian-13-trixie` — The `debian:12-slim` base is oldstable
+
+- **status**: open
+- **priority**: medium
+- **labels**: docker, upgrade
+- **milestone**: Image & upstream maintenance
+
+Debian 13 (trixie) is `stable`; bookworm is **oldstable** (verified via `api.ftp-master.debian.org`,
+2026-09-17). Not an emergency — bookworm has years of LTS left — but it is exactly the road along which this
+repository broke in silence once: the base rots, and the Monday schedule only finds out when the APT repos
+stop answering.
+
+`DEBIAN_VERSION` is already an `ARG`, but **the package lists are not parameterised**: moving to 13 means
+realigning the versioned names in the runtime stage. Verified in trixie: `libvpx7` → **`libvpx9`** (1.15.0),
+`libx265-199` → **`libx265-215`** (4.1), `libx264-164` **stays** (0.164.3108). Everything else (`libass9`,
+`libmp3lame0`, `libopus0`, `libspeex1`, `libtheora0`, `libvorbis0a`, `libvorbisenc2`, `libnuma1`, `libxml2`,
+`libfreetype6`, `libfribidi0`, `libharfbuzz0b`, `libfontconfig1`) exists under the same name.
+
+### `gpu-gate-before-tag` — No workflow runs `tests/gpu.sh`: publishing is blind to NVENC
 
 - **status**: open
 - **priority**: medium
 - **labels**: ci, test
-- **milestone**: Automazione repo
+- **milestone**: Repository automation
 
-`tests/smoke.sh` verifica che gli encoder NVENC siano **compilati**; che *encodino* lo verifica solo
-`tests/gpu.sh`, che nessun workflow chiama (i runner GitHub-hosted non hanno GPU). Oggi la promozione
-di un tag e un atto di fede sul funzionamento reale, e il tipo di rottura che non vedremmo e proprio
-la piu probabile: mismatch fra `NVCODEC_BRANCH` e driver dell'host (`This NVENC API is not compatible
-with the installed driver`).
+`tests/smoke.sh` proves the NVENC encoders are **compiled in**; that they actually *encode* is only proven by
+`tests/gpu.sh`, which no workflow calls (GitHub-hosted runners have no GPU). Promoting a tag is therefore an
+act of faith about real behaviour, and the failure we would not see is the most likely one: a mismatch
+between `NVCODEC_BRANCH` and the host driver (`This NVENC API is not compatible with the installed driver`).
 
-Due strade: (a) self-hosted runner con GPU + NVIDIA Container Toolkit, job `workflow_dispatch` da
-lanciare prima del tag; (b) restare manuali ma renderlo **obbligatorio** in una checklist di release
-(vedi `tag-v2-0-0`). Finche non c'e (a), (b) va scritto nel `CLAUDE.md` come gate.
+Two routes: (a) a self-hosted runner with a GPU and the NVIDIA Container Toolkit, plus a `workflow_dispatch`
+job to run before tagging; (b) stay manual but make it **mandatory** in the release checklist (see
+`publish-v2-0-0`). Until (a) exists, (b) belongs in `CLAUDE.md` as a gate — it is written there now.
 
-### `trivy-non-e-un-gate` — Lo scan gira su una sola variante e non blocca nulla
+### `trivy-not-a-gate` — The scan runs on one variant and blocks nothing
 
 - **status**: open
 - **priority**: medium
-- **labels**: ci, sicurezza
-- **milestone**: Supply chain & sicurezza
+- **labels**: ci, security
+- **milestone**: Supply chain & security
 
-Il job `scan` di `ci.yml` builda la sola variante di default, gira Trivy con `severity: CRITICAL,HIGH`
-e `ignore-unfixed: true`, e carica il SARIF su code scanning: **nessun `exit-code`**, quindi lo step
-e verde qualunque cosa trovi. Va bene come inventario, non come gate — e in pratica nessuno apre la
-tab Code scanning.
+The `scan` job in `ci.yml` builds only the default variant, runs Trivy with `severity: CRITICAL,HIGH` and
+`ignore-unfixed: true`, and uploads SARIF to code scanning: **no `exit-code`**, so the step is green whatever
+it finds. Fine as an inventory, not as a gate — and in practice nobody opens the Code scanning tab.
 
-Da decidere: `exit-code: 1` sulle sole CRITICAL (con `ignore-unfixed` mantenuto, altrimenti le CVE
-Debian senza patch bloccano tutto per sempre) e scan anche sulle varianti 6.0/5.1.2, che sono le piu
-vecchie e quindi le piu esposte.
+To decide: `exit-code: 1` on CRITICAL only (keeping `ignore-unfixed`, otherwise unpatched Debian CVEs block
+everything forever) and scanning the 6.0.1/5.1.10 variants too, which are the oldest and therefore the most
+exposed.
 
-### `cosign-firma-immagini` — Le immagini pubblicate non sono firmate
+### `cosign-image-signing` — Published images are not signed
 
 - **status**: open
 - **priority**: low
-- **labels**: sicurezza, supply-chain
-- **milestone**: Supply chain & sicurezza
+- **labels**: security, supply-chain
+- **milestone**: Supply chain & security
 
-Il publish produce gia `provenance: true` e `sbom: true`, ma niente firma: un consumatore non ha modo
-di verificare che l'immagine venga da questa CI. Con `id-token: write` (gia concesso nel job) la firma
-keyless cosign e ~10 righe. Nota storica: una PR dependabot su `sigstore/cosign-installer` (`#5`,
-2023) e ancora aperta pur riferendosi a un workflow rimosso — il repo aveva la firma e l'ha persa.
+Publishing already produces `provenance: true` and `sbom: true`, but no signature: a consumer has no way to
+verify an image came from this CI. With `id-token: write` (already granted in the job) keyless cosign signing
+is about ten lines. Historical note: a Dependabot PR for `sigstore/cosign-installer` (`#5`, 2023) is still
+open although the workflow it refers to was removed — the repository used to sign and lost it.
 
-### `multiarch-arm64` — Solo `linux/amd64`
+### `multiarch-arm64` — `linux/amd64` only
 
 - **status**: open
 - **priority**: low
 - **labels**: docker
-- **milestone**: Manutenzione immagine & upstream
+- **milestone**: Image & upstream maintenance
 
-Build e publish sono fissi su `platforms: linux/amd64`. NVENC esiste anche su arm64 (Jetson, Grace
-Hopper), quindi non e una scelta ovvia: va **o** implementata (build arm64 nativa/emulata, +tempo di
-CI) **o** dichiarata nel README come non supportata, con il perche. Oggi non e ne l'una ne l'altra.
+Build and publish are fixed on `platforms: linux/amd64`. NVENC also exists on arm64 (Jetson, Grace Hopper),
+so this is not an obvious choice: it should either be **implemented** (native or emulated arm64 build, more
+CI time) **or declared** unsupported in the README, with the reason. Today it is neither.
 
-### `backlog-sync-primo-run` — Verificare il primo run reale del sync backlog → issue
+### `automation-first-run` — Verify the first real run of the backlog sync, Pages and the release workflow
 
 - **status**: open
 - **priority**: medium
 - **labels**: ci, documentation
-- **milestone**: Automazione repo
+- **milestone**: Repository automation
 - **ref**: [runbook: docs/scripts/README.md](scripts/README.md)
 
-L'automazione (questo file + `docs/scripts/` + `.github/workflows/backlog.yml`) e stata aggiunta il
-17/09/2026 ma **non ha ancora girato su GitHub**: il workflow parte solo dopo il push. Il dry-run
-locale e verde.
+The automation (this file, `docs/scripts/`, `site/`, and the `backlog.yml` / `pages.yml` / `release.yml`
+workflows) was added on 2026-09-17 but **has never run on GitHub**: the workflows only start after the push.
+Everything is green locally (tests, lint, dry-run).
 
-- [ ] push del branch → far girare `Backlog` a mano (`workflow_dispatch`, `apply=false`) e leggere il piano
-- [ ] run con `apply=true`: devono nascere le milestone («Pubblicazione v2.0.0», «Manutenzione
-      immagine & upstream», «Supply chain & sicurezza», «Automazione repo») e una issue per item
-- [ ] secondo run consecutivo: deve essere **tutto SKIP** (prova dell'idempotenza)
-- [ ] mettere `status: done` su questo item quando i tre punti sopra sono verdi
+- [ ] push the branch, run `Backlog` by hand (`workflow_dispatch`, `apply=false`) and read the plan
+- [ ] run it with `apply=true`: the four milestones and one issue per item must appear
+- [ ] run it again: everything must be SKIP (proof of idempotence)
+- [ ] enable GitHub Pages (Settings ▸ Pages ▸ Source: GitHub Actions) and check the deployed page
+- [ ] check that `Release` tags `v2.0.0` on the first commit to main, creates the GitHub Release, and does
+      **not** publish images
+- [ ] set `status: done` on this item once all of the above is green
 
-## Item chiusi (storico)
+## Closed items (history)
 
-### `doc-drift-asserzioni-smoke` — `CHANGELOG` diceva 18 asserzioni di smoke test, sono 17
+### `ffmpeg-patch-bump` — Variants were pinned to old patch releases of their branch
+
+- **status**: done
+- **priority**: high
+- **labels**: docker, upgrade, security
+- **milestone**: Image & upstream maintenance
+- **ref**: [interventions/2026-09-17-ffmpeg-patch-bump.md](interventions/2026-09-17-ffmpeg-patch-bump.md)
+
+The default variant was pinned to FFmpeg 7.1.1 while upstream was at 7.1.5 — five maintenance releases
+behind, which means the fixes (security ones included) of that branch were not in the image.
+
+> **Done on 2026-09-17** ([intervention](interventions/2026-09-17-ffmpeg-patch-bump.md)): all three variants
+> moved to the latest patch of their branch — 7.1.1 → **7.1.5**, 6.0 → **6.0.1**, 5.1.2 → **5.1.10**. The
+> `sdk/*` branches stay as they were, because the `ffnvcodec` constraint does not move inside a branch
+> (verified on the `configure` of n5.1.10/n6.0.1/n7.1.5), so **no consumer has to touch their drivers**.
+> Native arm64 builds plus smoke tests: **17/17 on all three** (200-203 MB). Still to do on real hardware:
+> `tests/gpu.sh` and the amd64 build in CI.
+
+### `doc-drift-smoke-assertions` — The CHANGELOG said 18 smoke-test assertions; there are 17
 
 - **status**: done
 - **priority**: low
 - **labels**: documentation
-- **milestone**: Automazione repo
+- **milestone**: Repository automation
 
-> Corretto il 17/09/2026 nella sezione `[2.0.0]` del `CHANGELOG.md`. Conteggio reale delle asserzioni
-> di `tests/smoke.sh`: 2 (binari) + 1 (versione attesa) + 2 (NVENC) + 5 (codec di contorno) +
-> 2 (licenza) + 1 (transcodifica) + 4 (igiene container) = **17** — coerente con `CLAUDE.md`,
-> `AGENTS.md` e `README.md`, che dicevano 17. Item tenuto come storico: e il tipo di drift che la
-> regola "allineare tutto" deve intercettare.
+> Fixed on 2026-09-17 in the `[2.0.0]` section of `CHANGELOG.md`. Real count of the assertions in
+> `tests/smoke.sh`: 2 (binaries) + 1 (expected version) + 2 (NVENC) + 5 (surrounding codecs) + 2 (licence) +
+> 1 (transcode) + 4 (container hygiene) = **17** — consistent with `CLAUDE.md`, `AGENTS.md` and `README.md`,
+> which said 17. Kept as history: it is the kind of drift the "keep everything aligned" rule exists to catch.
+> The count is now derived, not written: `site/build.py` computes it from the script and a test pins it.
