@@ -20,6 +20,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
   `docs/scripts/backlog-lint.py`, `docs/scripts/generate-roadmap.py`, shared library
   `docs/scripts/lib/backlog.py`, runbook `docs/scripts/README.md`. Python stdlib only.
 - **`docs/roadmap.md`**: per-milestone view, **generated** from the backlog and committed (`--check` gate in CI).
+- The backlog was synced for real on 2026-09-17: milestones *Ship v2.0.0*, *Image & upstream maintenance*,
+  *Repository automation*, *Supply chain & security*, and issues `#24`-`#34`. Re-running produced
+  `SKIP 11` (idempotence) and, after an item edit, `UPDATE 1 · SKIP 10`.
 - **Release automation**: `docs/scripts/next-version.py` plus `.github/workflows/release.yml` — every commit on
   main gets a version (a CHANGELOG section above the latest tag is a *pending release* and is tagged as-is;
   otherwise the latest tag is bumped by the strongest conventional-commit marker), the `[Unreleased]` section is

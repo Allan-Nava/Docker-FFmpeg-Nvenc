@@ -249,9 +249,12 @@ The automation (this file, `docs/scripts/`, `site/`, and the `backlog.yml` / `pa
 workflows) was added on 2026-09-17 but **has never run on GitHub**: the workflows only start after the push.
 Everything is green locally (tests, lint, dry-run).
 
-- [ ] push the branch, run `Backlog` by hand (`workflow_dispatch`, `apply=false`) and read the plan
-- [ ] run it with `apply=true`: the four milestones and one issue per item must appear
-- [ ] run it again: everything must be SKIP (proof of idempotence)
+- [x] first `--apply` run (from a workstation, 2026-09-17): four milestones created and one issue per
+      active item, `#24`-`#34`
+- [x] second consecutive run: `CREATE 0 · UPDATE 0 · CLOSE 0 · SKIP 11` — idempotence proven on the real
+      repository, and no open PR was mistaken for an item
+- [ ] after the push, run `Backlog` from Actions (`workflow_dispatch`, `apply=false` then `apply=true`) to
+      check the same thing happens with the workflow's `GITHUB_TOKEN`
 - [ ] enable GitHub Pages (Settings ▸ Pages ▸ Source: GitHub Actions) and check the deployed page
 - [ ] check that `Release` tags `v2.0.0` on the first commit to main, creates the GitHub Release, and does
       **not** publish images

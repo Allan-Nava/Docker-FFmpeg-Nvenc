@@ -238,6 +238,13 @@ generated pages, an **authenticated** dry-run of the sync against the real repos
 the label query picked up none of the six open PRs), `actionlint` from the root, `shellcheck` on
 `tests/*.sh`.
 
+Then the sync was actually applied against the repository: **4 milestones and 11 issues created**
+(`#24`-`#34`, one per active item), a second run reporting `CREATE 0 · UPDATE 0 · CLOSE 0 · SKIP 11`, and a
+third — after editing one item — reporting `UPDATE 1 · SKIP 10`. Create, skip and update paths are
+therefore proven on the real API, not only in a dry-run. What is still unproven is the same thing running
+under the workflow's own `GITHUB_TOKEN`, plus Pages and the release workflow, all of which need the push
+(item `automation-first-run`).
+
 ### 4.5 FFmpeg patch bump (F3)
 
 All three variants moved to the latest maintenance release of their branch — 7.1.1 → 7.1.5, 6.0 → 6.0.1,
