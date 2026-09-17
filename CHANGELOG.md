@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- `test_the_real_changelog_has_unreleased_entries` asserted that `## [Unreleased]` had entries — true while writing them, false the moment `release.yml` folded them into `[2.0.0]`. It turned CI, Pages and the next Release red on the push right after v2.0.0 shipped. Replaced with structural checks (the file parses, a released version exists, `[Unreleased]` sits above it when present, an entry can always be filed), and the page test that looked for one README sentence now checks that no README notice is dropped.
+
 ## [2.0.0] - 2026-09-17
 
 ### Added

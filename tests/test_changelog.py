@@ -219,9 +219,43 @@ class TestCli(unittest.TestCase):
 
 
 class TestRepositoryChangelog(unittest.TestCase):
-    def test_the_real_changelog_has_unreleased_entries(self):
+    """Structural checks only.
+
+    An earlier version of this class asserted that the real CHANGELOG *has* unreleased entries. That
+    is a transient state, not an invariant: `release.yml` folds `[Unreleased]` into the version
+    section on every release, so the assertion was false from the moment v2.0.0 shipped and it took
+    CI, Pages and the next Release down with it. A test must pin what is always true.
+    """
+
+    def setUp(self):
         with open(os.path.join(ROOT, "CHANGELOG.md"), encoding="utf-8") as f:
-            self.assertTrue(C.has_unreleased_entries(f.read()))
+            self.text = f.read()
+
+    def test_it_has_at_least_one_released_version(self):
+        self.assertTrue(C.VERSION_RE.search(self.text), "no `## [x.y.z]` section in CHANGELOG.md")
+
+    def test_has_unreleased_entries_agrees_with_the_file(self):
+        bounds = C._unreleased_bounds(self.text)
+        if bounds is None:
+            # right after a release: the section is gone, and that is correct
+            self.assertFalse(C.has_unreleased_entries(self.text))
+        else:
+            block = self.text[bounds[0]:bounds[1]]
+            self.assertEqual(C.has_unreleased_entries(self.text),
+                             any(l.startswith("- ") for l in block.split("\n")))
+
+    def test_unreleased_when_present_sits_above_the_newest_release(self):
+        bounds = C._unreleased_bounds(self.text)
+        if bounds is None:
+            self.skipTest("no [Unreleased] section (the repository is just after a release)")
+        self.assertLess(bounds[0], C.VERSION_RE.search(self.text).start())
+
+    def test_an_entry_can_always_be_filed_on_the_real_file(self):
+        # The post-release state is the one that broke: adding an entry must recreate the section
+        # above the newest release rather than append it at the bottom.
+        out = C.add_entry(self.text, "Added", "a probe entry, not written to disk")
+        self.assertTrue(C.has_unreleased_entries(out))
+        self.assertLess(out.index("## [Unreleased]"), C.VERSION_RE.search(out).start())
 
 
 if __name__ == "__main__":

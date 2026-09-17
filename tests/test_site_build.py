@@ -186,9 +186,15 @@ class TestPage(unittest.TestCase):
         self.assertIn("prefers-color-scheme: dark", self.html)
         self.assertIn('name="viewport"', self.html)
 
-    def test_publication_notice_from_the_readme(self):
-        # The README warns that the tags are not published yet: the page must not lose that.
-        self.assertIn("have not been published yet", self.html)
+    def test_no_readme_notice_is_dropped_by_the_page(self):
+        # Structural, not textual: the README's blockquotes are its warnings (what is published, what
+        # is not, what breaks). The page must carry all of them. Asserting one *sentence* would be a
+        # test of today's wording — the same mistake that took CI down when [Unreleased] was folded
+        # into a release and `test_the_real_changelog_has_unreleased_entries` started failing.
+        quotes = [b for b in re.split(r"\n\s*\n", self.readme) if b.strip().startswith(">")]
+        self.assertGreaterEqual(len(quotes), 1, "the README has no notices to carry")
+        self.assertGreaterEqual(self.html.count("<blockquote>"), len(quotes),
+                                "the page drops at least one README notice")
 
 
 class TestBuildOnDisk(unittest.TestCase):
