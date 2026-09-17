@@ -243,9 +243,11 @@ footer a{color:var(--muted)}
   <section id="github-action">
     <h2><a href="#github-action">GitHub Action</a></h2>
 <p>The repository also ships an Action that runs ffmpeg inside the prebuilt image:</p>
-<pre><code class="lang-yaml">- uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2      # available from the v2.0.0 tag (see the notice above)
+<pre><code class="lang-yaml">- uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2.1.0
   with:
     command: &#x27;-i input.mp4 -c:v libx264 -preset fast output.mp4&#x27;</code></pre>
+<p>Pin the action to an exact tag as above: there is no moving <code>v2</code> tag, and <code>runs.image</code> inside the action is static by GitHub&#x27;s specification, so the image it runs cannot be chosen by an input.</p>
+<p>⚠️ Until the images are published (see the notice at the top), the action pulls <code>:latest</code> from GHCR, which is still the January 2023 build — it will not do what this page describes.</p>
 <p>⚠️ GitHub-hosted runners have <strong>no GPU</strong>: the <code>*_nvenc</code> encoders are unusable inside the Action. You need a self-hosted runner with a GPU and the NVIDIA Container Toolkit.</p>
   </section>
   <section id="development">

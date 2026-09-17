@@ -114,10 +114,16 @@ needs the `ffnvcodec` headers, which is what the image installs. If you need acc
 The repository also ships an Action that runs ffmpeg inside the prebuilt image:
 
 ```yaml
-- uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2      # available from the v2.0.0 tag (see the notice above)
+- uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2.1.0
   with:
     command: '-i input.mp4 -c:v libx264 -preset fast output.mp4'
 ```
+
+Pin the action to an exact tag as above: there is no moving `v2` tag, and `runs.image` inside the action is
+static by GitHub's specification, so the image it runs cannot be chosen by an input.
+
+⚠️ Until the images are published (see the notice at the top), the action pulls `:latest` from GHCR, which is
+still the January 2023 build — it will not do what this page describes.
 
 ⚠️ GitHub-hosted runners have **no GPU**: the `*_nvenc` encoders are unusable inside the Action. You need a
 self-hosted runner with a GPU and the NVIDIA Container Toolkit.

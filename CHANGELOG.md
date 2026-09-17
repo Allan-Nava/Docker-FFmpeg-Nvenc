@@ -8,11 +8,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 ### Added
 
 - every variant now gets `latest-ffmpeg<major>`, `latest-ffmpeg<major>.<minor>` and `latest-ffmpeg<full>` plus one exact `<release>-ffmpeg<full>`; only the default row keeps the unsuffixed `latest`/`X.Y.Z`/`X.Y`/`X`. Before this, the only stable pointer was `:latest` (default variant only): `latest-ffmpeg7.1.5` vanished the moment 7.1.6 shipped, and there was no way to say "the newest 7.x". Combinations such as `2-ffmpeg9.0.1` are deliberately absent — they look immutable and are not.
+- `tests/verify-registry.sh` compares GHCR with the tags `docs/scripts/image-tags.py` generates for a release — and compares **digests**, not just names: `:latest` has existed on this registry since 2023 while pointing at an image that cannot start on a modern driver, so a name-only check would have called that a pass for two years. Run today against v2.1.0 it reports 19 of 20 expected tags missing and `:latest` on the 2023 digest, which is exactly the state the `publish-v2-0-0` item describes.
 
 ### Changed
 
 - full documentation audit against the live systems (`docs/audit/2026-09-17-documentation-audit.md`): seven drifts found and fixed, the sharpest being two entries that a rebase had merged **inside the already-released `## [2.1.0]` section**, making the changelog claim a shipped version contained work that came after its tag. Also corrected: the delivery status in `CLAUDE.md`/`AGENTS.md` and the notice in `README.md` (released is not published — `v2.0.0` and `v2.1.0` exist, GHCR still serves the 2023 image), the scripts runbook (four files listed out of ten), and the tagging trap that still described `docker/metadata-action`.
 - `tests/test_docs.py` pins what rots: every relative link resolves, `CLAUDE.md` and `AGENTS.md` keep the same sections (and `AGENTS.md` stays ASCII), the scripts runbook lists every script and no phantom, the README variant table matches the publish matrix, and no document claims the release is untagged once a `v2.*` tag exists.
+- [`docs/runbooks/publish-release.md`](docs/runbooks/publish-release.md) — the sequence from a tag to verified images on GHCR: the GPU gate first (the only proof NVENC *encodes*), the `Publish` dispatch, registry verification, what to do when a variant fails, and the doc updates that follow a successful publish.
 
 ### Fixed
 

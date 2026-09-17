@@ -15,6 +15,7 @@ import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPTS = ["tests/build-matrix.sh", "tests/run-all.sh", "tests/smoke.sh", "tests/gpu.sh",
+           "tests/verify-registry.sh",
            "docs/scripts/commit.sh", "docs/scripts/install-hooks.sh", ".githooks/commit-msg"]
 
 
@@ -127,6 +128,34 @@ class TestCommitAutomation(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             msg = "# please enter the commit message\nfeat: real subject\n"
             self.assertEqual(self._hook(msg, tmp).returncode, 0)
+
+
+class TestRegistryVerification(unittest.TestCase):
+    """After a publish, the registry must carry exactly what image-tags.py generated."""
+
+    def test_it_compares_against_the_generator_not_a_hardcoded_list(self):
+        body = read("tests/verify-registry.sh")
+        self.assertIn("image-tags.py", body)
+        self.assertIn("--print-variants", body)
+        for hardcoded in ("latest-ffmpeg9", "latest-ffmpeg7"):
+            self.assertNotIn(hardcoded, body, "expected tags are hardcoded instead of generated")
+
+    def test_it_reads_the_registry_without_credentials(self):
+        # GHCR hands out an anonymous pull token for a public package: verification must not need
+        # the user to be logged in, or it will simply not get run.
+        self.assertIn("ghcr.io/token", read("tests/verify-registry.sh"))
+
+    def test_it_compares_digests_not_just_tag_names(self):
+        # The failure mode this repository is actually in: `:latest` exists on GHCR and points at a
+        # 2023 image. A check that only asks "does the tag exist?" would call that a pass.
+        body = read("tests/verify-registry.sh")
+        self.assertIn("digest", body.lower())
+
+    def test_help_exits_zero_and_hits_no_network(self):
+        res = subprocess.run(["tests/verify-registry.sh", "--help"], cwd=ROOT, text=True,
+                             capture_output=True, timeout=20)
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("usage", (res.stdout + res.stderr).lower())
 
 
 class TestVariantsCli(unittest.TestCase):
