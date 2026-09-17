@@ -181,12 +181,23 @@ footer a{color:var(--muted)}
 <table>
 <thead><tr><th>Variant</th><th>FFmpeg</th><th>nv-codec-headers</th><th>Minimum NVIDIA driver</th><th>Tags</th></tr></thead>
 <tbody>
-<tr><td>default</td><td>9.0.1</td><td><code>sdk/12.1</code></td><td>≥ 530</td><td><code>latest</code>, <code>vX.Y.Z</code>, <code>latest-ffmpeg9.0.1</code>, <code>vX.Y.Z-ffmpeg9.0.1</code></td></tr>
-<tr><td></td><td>7.1.5</td><td><code>sdk/12.1</code></td><td>≥ 530</td><td><code>latest-ffmpeg7.1.5</code>, <code>vX.Y.Z-ffmpeg7.1.5</code></td></tr>
-<tr><td></td><td>6.1.6</td><td><code>sdk/12.1</code></td><td>≥ 530</td><td><code>latest-ffmpeg6.1.6</code>, <code>vX.Y.Z-ffmpeg6.1.6</code></td></tr>
-<tr><td></td><td>5.1.10</td><td><code>sdk/11.0</code></td><td>≥ 470</td><td><code>latest-ffmpeg5.1.10</code>, <code>vX.Y.Z-ffmpeg5.1.10</code></td></tr>
+<tr><td>default</td><td>9.0.1</td><td><code>sdk/12.1</code></td><td>≥ 530</td><td><code>latest</code>, <code>X.Y.Z</code>, <code>X.Y</code>, <code>X</code> + <code>latest-ffmpeg9</code>, <code>latest-ffmpeg9.0</code>, <code>latest-ffmpeg9.0.1</code>, <code>X.Y.Z-ffmpeg9.0.1</code></td></tr>
+<tr><td></td><td>7.1.5</td><td><code>sdk/12.1</code></td><td>≥ 530</td><td><code>latest-ffmpeg7</code>, <code>latest-ffmpeg7.1</code>, <code>latest-ffmpeg7.1.5</code>, <code>X.Y.Z-ffmpeg7.1.5</code></td></tr>
+<tr><td></td><td>6.1.6</td><td><code>sdk/12.1</code></td><td>≥ 530</td><td><code>latest-ffmpeg6</code>, <code>latest-ffmpeg6.1</code>, <code>latest-ffmpeg6.1.6</code>, <code>X.Y.Z-ffmpeg6.1.6</code></td></tr>
+<tr><td></td><td>5.1.10</td><td><code>sdk/11.0</code></td><td>≥ 470</td><td><code>latest-ffmpeg5</code>, <code>latest-ffmpeg5.1</code>, <code>latest-ffmpeg5.1.10</code>, <code>X.Y.Z-ffmpeg5.1.10</code></td></tr>
 </tbody>
 </table>
+<p><code>X.Y.Z</code> is the <strong>repository</strong> release, not the FFmpeg version. Pick a tag by how much movement you want:</p>
+<table>
+<thead><tr><th>You want</th><th>Pull</th></tr></thead>
+<tbody>
+<tr><td>whatever is current</td><td><code>:latest</code> (today FFmpeg 9.0.1 — it follows the default variant)</td></tr>
+<tr><td>the newest 7.x, forever</td><td><code>:latest-ffmpeg7</code></td></tr>
+<tr><td>the newest 7.1.x</td><td><code>:latest-ffmpeg7.1</code></td></tr>
+<tr><td>nothing to ever move</td><td><code>:2.1.0-ffmpeg7.1.5</code>, or better, the digest</td></tr>
+</tbody>
+</table>
+<p>⚠️ <code>:latest</code> follows the <strong>default variant</strong>, which is now FFmpeg 9.0.1 (it was 7.1.x). If you pinned <code>:latest</code> and want to stay on 7.x, move to <code>:latest-ffmpeg7</code>.</p>
 <p>Every variant pins the <strong>latest maintenance release</strong> of its branch, on the <strong>lowest</strong> <code>sdk/*</code> branch its <code>configure</code> accepts. Measured across every maintained FFmpeg branch: the <code>ffnvcodec</code> requirement is frozen at 12.1.14.0 from 6.1 all the way to 9.0, so <strong>a newer FFmpeg does not ask more of your driver</strong> — 9.0.1 and 7.1.5 have exactly the same floor. Only 5.1 sits lower (≥ 470), which is why it is still here.</p>
 <p><code>sdk/12.2</code> and <code>sdk/13.0</code> exist upstream and are deliberately unused: they would only raise the minimum driver without any variant needing them.</p>
 <p>The <code>nv-codec-headers</code> branch is what sets the <strong>minimum NVIDIA driver</strong> on the host: if you get <code>This NVENC API is not compatible with the installed driver</code>, either use a lower variant or update the driver.</p>

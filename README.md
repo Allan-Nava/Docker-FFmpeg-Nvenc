@@ -24,10 +24,22 @@ ghcr.io/allan-nava/docker-ffmpeg-nvenc
 
 | Variant | FFmpeg | nv-codec-headers | Minimum NVIDIA driver | Tags |
 |---|---|---|---|---|
-| default | 9.0.1 | `sdk/12.1` | ≥ 530 | `latest`, `vX.Y.Z`, `latest-ffmpeg9.0.1`, `vX.Y.Z-ffmpeg9.0.1` |
-| | 7.1.5 | `sdk/12.1` | ≥ 530 | `latest-ffmpeg7.1.5`, `vX.Y.Z-ffmpeg7.1.5` |
-| | 6.1.6 | `sdk/12.1` | ≥ 530 | `latest-ffmpeg6.1.6`, `vX.Y.Z-ffmpeg6.1.6` |
-| | 5.1.10 | `sdk/11.0` | ≥ 470 | `latest-ffmpeg5.1.10`, `vX.Y.Z-ffmpeg5.1.10` |
+| default | 9.0.1 | `sdk/12.1` | ≥ 530 | `latest`, `X.Y.Z`, `X.Y`, `X` + `latest-ffmpeg9`, `latest-ffmpeg9.0`, `latest-ffmpeg9.0.1`, `X.Y.Z-ffmpeg9.0.1` |
+| | 7.1.5 | `sdk/12.1` | ≥ 530 | `latest-ffmpeg7`, `latest-ffmpeg7.1`, `latest-ffmpeg7.1.5`, `X.Y.Z-ffmpeg7.1.5` |
+| | 6.1.6 | `sdk/12.1` | ≥ 530 | `latest-ffmpeg6`, `latest-ffmpeg6.1`, `latest-ffmpeg6.1.6`, `X.Y.Z-ffmpeg6.1.6` |
+| | 5.1.10 | `sdk/11.0` | ≥ 470 | `latest-ffmpeg5`, `latest-ffmpeg5.1`, `latest-ffmpeg5.1.10`, `X.Y.Z-ffmpeg5.1.10` |
+
+`X.Y.Z` is the **repository** release, not the FFmpeg version. Pick a tag by how much movement you want:
+
+| You want | Pull |
+|---|---|
+| whatever is current | `:latest` (today FFmpeg 9.0.1 — it follows the default variant) |
+| the newest 7.x, forever | `:latest-ffmpeg7` |
+| the newest 7.1.x | `:latest-ffmpeg7.1` |
+| nothing to ever move | `:2.1.0-ffmpeg7.1.5`, or better, the digest |
+
+⚠️ `:latest` follows the **default variant**, which is now FFmpeg 9.0.1 (it was 7.1.x). If you pinned
+`:latest` and want to stay on 7.x, move to `:latest-ffmpeg7`.
 
 Every variant pins the **latest maintenance release** of its branch, on the **lowest** `sdk/*` branch its
 `configure` accepts. Measured across every maintained FFmpeg branch: the `ffnvcodec` requirement is frozen at

@@ -5,9 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 
 ## [2.1.0] - 2026-09-17
 
+### Added
+
+- every variant now gets `latest-ffmpeg<major>`, `latest-ffmpeg<major>.<minor>` and `latest-ffmpeg<full>` plus one exact `<release>-ffmpeg<full>`; only the default row keeps the unsuffixed `latest`/`X.Y.Z`/`X.Y`/`X`. Before this, the only stable pointer was `:latest` (default variant only): `latest-ffmpeg7.1.5` vanished the moment 7.1.6 shipped, and there was no way to say "the newest 7.x". Combinations such as `2-ffmpeg9.0.1` are deliberately absent — they look immutable and are not.
+
 ### Fixed
 
 - `test_the_real_changelog_has_unreleased_entries` asserted that `## [Unreleased]` had entries — true while writing them, false the moment `release.yml` folded them into `[2.0.0]`. It turned CI, Pages and the next Release red on the push right after v2.0.0 shipped. Replaced with structural checks (the file parses, a released version exists, `[Unreleased]` sits above it when present, an entry can always be filed), and the page test that looked for one README sentence now checks that no README notice is dropped.
+- the publish workflow no longer builds its tag list with two `docker/metadata-action` steps; it calls [`docs/scripts/image-tags.py`](docs/scripts/image-tags.py), covered by 19 unit tests — among them that no two variants can claim the same tag and that a non-default variant can never take an unsuffixed one. This is the part of the repository that has already failed silently once (`:latest` unpublished for two years), so it belongs in tested code rather than in YAML.
 
 ## [2.0.0] - 2026-09-17
 
