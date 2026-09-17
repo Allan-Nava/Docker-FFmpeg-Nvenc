@@ -143,6 +143,20 @@ The Python tooling and the page generator are covered by tests — stdlib `unitt
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
+### Committing
+
+Commit subjects are conventional commits, because the release version is derived from them. One command
+validates the subject, files the CHANGELOG entry and runs the gates:
+
+```shell
+./docs/scripts/install-hooks.sh                      # once: enables the commit-msg hook
+./docs/scripts/commit.sh "fix: the tagging regex never matched"   --entry "the semver regex ran against a string the suffix made unmatchable, so :latest was never published"
+```
+
+`--entry` is the sentence that ends up in the release notes; without it the commit description is used.
+`python3 docs/scripts/changelog-add.py --message "<subject>"` does the CHANGELOG part on its own. On a pull
+request, CI checks both the subjects and that `## [Unreleased]` is not empty when code changed.
+
 See [CLAUDE.md](CLAUDE.md) / [AGENTS.md](AGENTS.md) for working conventions and known traps, and
 [docs/audit/](docs/audit/) for the project audits.
 

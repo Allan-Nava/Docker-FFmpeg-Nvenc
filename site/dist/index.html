@@ -255,6 +255,11 @@ footer a{color:var(--muted)}
 <p>CI (<code>.github/workflows/ci.yml</code>) runs the linters (hadolint, shellcheck, actionlint), builds and tests all three variants on every push/PR, and runs <strong>weekly</strong> to catch base images rotting away. Publishing (<code>docker-publish.yml</code>) only fires on <code>v*</code> tag pushes and goes through the same smoke tests before pushing.</p>
 <p>The Python tooling and the page generator are covered by tests — stdlib <code>unittest</code>, no dependencies:</p>
 <pre><code class="lang-shell">python3 -m unittest discover -s tests -p &#x27;test_*.py&#x27;</code></pre>
+<h3>Committing</h3>
+<p>Commit subjects are conventional commits, because the release version is derived from them. One command validates the subject, files the CHANGELOG entry and runs the gates:</p>
+<pre><code class="lang-shell">./docs/scripts/install-hooks.sh                      # once: enables the commit-msg hook
+./docs/scripts/commit.sh &quot;fix: the tagging regex never matched&quot;   --entry &quot;the semver regex ran against a string the suffix made unmatchable, so :latest was never published&quot;</code></pre>
+<p><code>--entry</code> is the sentence that ends up in the release notes; without it the commit description is used. <code>python3 docs/scripts/changelog-add.py --message &quot;&lt;subject&gt;&quot;</code> does the CHANGELOG part on its own. On a pull request, CI checks both the subjects and that <code>## [Unreleased]</code> is not empty when code changed.</p>
 <p>See <a href="CLAUDE.md">CLAUDE.md</a> / <a href="AGENTS.md">AGENTS.md</a> for working conventions and known traps, and <a href="docs/audit/">docs/audit/</a> for the project audits.</p>
 <h3>Backlog and roadmap</h3>
 <p>The repository&#x27;s todos live in <a href="docs/backlog.md"><code>docs/backlog.md</code></a>, which is the <strong>single source of truth</strong>: an idempotent script opens, updates and closes one GitHub issue per item (label <code>backlog-sync</code>) and creates the missing milestones, scheduled by <a href=".github/workflows/backlog.yml"><code>.github/workflows/backlog.yml</code></a>. <a href="docs/roadmap.md"><code>docs/roadmap.md</code></a> is the per-milestone view, <strong>generated</strong> from the backlog.</p>

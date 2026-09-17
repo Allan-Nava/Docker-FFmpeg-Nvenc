@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+#
+# commit-msg hook: the subject must be parseable, because `docs/scripts/next-version.py` reads the
+# release bump out of it. A subject nobody can parse is a release nobody can number.
+#
+# Install: ./docs/scripts/install-hooks.sh   (sets core.hooksPath to .githooks)
+# Bypass:  git commit --no-verify            (for a genuine one-off)
+#
+# The rule itself is NOT written here: it lives in docs/scripts/lib/changelog.py, which the release
+# tooling and the CI gate use too. A bash copy of the regex would drift from it within a week.
+
+set -euo pipefail
+
+MSG_FILE="$1"
+
+if python3 - "$MSG_FILE" <<'PY'
+import sys, os
+root = os.popen("git rev-parse --show-toplevel").read().strip()
+sys.path.insert(0, os.path.join(root, "docs", "scripts", "lib"))
+import changelog as C
+
+with open(sys.argv[1], encoding="utf-8") as f:
+    message = "\n".join(l for l in f.read().split("\n") if not l.startswith("#")).strip()
+
+sys.exit(0 if C.is_acceptable(message) else 1)
+PY
+then
+  exit 0
+fi
+
+SUBJECT=$(grep -v '^#' "$MSG_FILE" | sed '/^[[:space:]]*$/d' | head -n 1)
+cat >&2 <<EOF
+
+  Rejected commit subject:
+
+    $SUBJECT
+
+  It must be a conventional commit: <type>[(scope)][!]: description
+  (types: build, chore, ci, deprecate, docs, feat, fix, perf, refactor, remove,
+   revert, security, style, test — description non-empty, under 100 characters)
+
+  Examples:
+    feat: add the FFmpeg 9.0 variant
+    fix(ci): redirect ffmpeg to a file instead of piping into grep
+    feat!: drop the 6.0 variant
+
+  Why: docs/scripts/next-version.py derives the release bump from these subjects,
+  and docs/scripts/changelog-add.py derives the CHANGELOG section from the type.
+  One-off bypass: git commit --no-verify
+
+EOF
+exit 1

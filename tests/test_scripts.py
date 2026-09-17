@@ -9,11 +9,13 @@ actually rots — they do not hardcode the variant matrix, which lives in the pu
 import os
 import shutil
 import stat
+import tempfile
 import subprocess
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SCRIPTS = ["tests/build-matrix.sh", "tests/run-all.sh", "tests/smoke.sh", "tests/gpu.sh"]
+SCRIPTS = ["tests/build-matrix.sh", "tests/run-all.sh", "tests/smoke.sh", "tests/gpu.sh",
+           "docs/scripts/commit.sh", "docs/scripts/install-hooks.sh", ".githooks/commit-msg"]
 
 
 def read(path):
@@ -70,6 +72,61 @@ class TestRunAllScript(unittest.TestCase):
     def test_it_does_not_build_images(self):
         # run-all.sh is the fast gate: no docker, that is build-matrix.sh's job.
         self.assertNotIn("docker build", read("tests/run-all.sh"))
+
+
+class TestCommitAutomation(unittest.TestCase):
+    """One command for "commit + changelog", and a hook that keeps the subject parseable."""
+
+    def test_commit_script_runs_the_gates_and_files_the_changelog(self):
+        body = read("docs/scripts/commit.sh")
+        self.assertIn("run-all.sh", body)
+        self.assertIn("changelog-add.py", body)
+        self.assertIn("git commit", body)
+
+    def test_commit_script_can_skip_the_slow_gates_explicitly(self):
+        self.assertIn("--no-gates", read("docs/scripts/commit.sh"))
+
+    def test_commit_script_help_exits_zero(self):
+        res = subprocess.run(["docs/scripts/commit.sh", "--help"], cwd=ROOT, text=True, capture_output=True)
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("usage", (res.stdout + res.stderr).lower())
+
+    def test_install_hooks_points_git_at_the_tracked_hooks(self):
+        body = read("docs/scripts/install-hooks.sh")
+        self.assertIn("core.hooksPath", body)
+        self.assertIn(".githooks", body)
+
+    def test_hook_validates_through_the_shared_library(self):
+        # The rule lives in docs/scripts/lib/changelog.py; a second copy in bash would drift.
+        body = read(".githooks/commit-msg")
+        self.assertIn("changelog", body)
+        self.assertNotIn("^feat|^fix", body, "the conventional-commit regex is duplicated in the hook")
+
+    def _hook(self, message, tmp):
+        path = os.path.join(tmp, "MSG")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(message)
+        return subprocess.run([os.path.join(ROOT, ".githooks/commit-msg"), path],
+                              cwd=ROOT, text=True, capture_output=True)
+
+    def test_hook_accepts_a_conventional_subject(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(self._hook("feat: add a variant\n", tmp).returncode, 0)
+
+    def test_hook_accepts_the_release_commit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(self._hook("release: v2.0.0\n", tmp).returncode, 0)
+
+    def test_hook_rejects_a_free_form_subject(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            res = self._hook("fixed some stuff\n", tmp)
+            self.assertEqual(res.returncode, 1)
+            self.assertIn("conventional", (res.stdout + res.stderr).lower())
+
+    def test_hook_ignores_comment_lines(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            msg = "# please enter the commit message\nfeat: real subject\n"
+            self.assertEqual(self._hook(msg, tmp).returncode, 0)
 
 
 class TestVariantsCli(unittest.TestCase):

@@ -17,8 +17,15 @@ Four scripts and one shared library. No external dependencies: **Python 3 stdlib
       └──────────── `lint` gate ──────────▶ docs/roadmap.md         Issues + Milestones
                     (.github/workflows/backlog.yml)                  (label backlog-sync)
 
+  commit subject ──▶ lib/changelog.py ──▶ changelog-add.py ──▶ `## [Unreleased]` ▸ `### <section>`
+       │                    ▲                  (commit.sh does subject + entry + gates + commit)
+       │                    │
+       └──▶ .githooks/commit-msg  and  the commit-lint job in ci.yml (same rule, one source)
+
   CHANGELOG.md + git tags ──▶ next-version.py ──▶ version, CHANGELOG section, release notes
-                                                  (.github/workflows/release.yml)
+                                                  (.github/workflows/release.yml; falls back to
+                                                   changelog-add.py --from-commits if nobody wrote
+                                                   any entry)
 ```
 
 ## Local usage
@@ -32,6 +39,11 @@ python3 docs/scripts/sync-backlog-to-issues.py     # dry-run (default). No token
 GITHUB_TOKEN=... python3 docs/scripts/sync-backlog-to-issues.py          # dry-run COMPARED with the repo
 GITHUB_TOKEN=... python3 docs/scripts/sync-backlog-to-issues.py --apply  # actually writes
 python3 docs/scripts/next-version.py --explain     # the version the next release would get, and why
+python3 docs/scripts/changelog-add.py --message "fix: x"          # file an entry under [Unreleased]
+python3 docs/scripts/changelog-add.py --message "fix: x" --entry "the sentence you want there"
+python3 docs/scripts/changelog-add.py --from-commits              # draft from commits (release fallback)
+./docs/scripts/install-hooks.sh                                   # enable .githooks/commit-msg
+./docs/scripts/commit.sh "feat: thing" --entry "what it means"     # subject + entry + gates + commit
 ```
 
 Local token: a PAT with `issues: write` on the repository, or `--token-file <path>`. `gh auth token`
@@ -56,6 +68,13 @@ Tests: `python3 -m unittest discover -s tests -p 'test_*.py'` (`tests/test_backl
   variants.
 - **`docs/roadmap.md` is generated and committed**: change `backlog.md` without regenerating it and the
   `generated-pages` gate goes red.
+- **The conventional-commit rule has one home**: `lib/changelog.py`. The hook, the CI job,
+  `changelog-add.py` and `next-version.py` import it. Unknown types are rejected rather than treated as a
+  `patch` bump, so a typo fails loudly instead of quietly shipping the wrong version.
+- **The automation chooses the section, not the words.** `feat:` goes to *Added*, `fix:` to *Fixed*,
+  `security:` to *Security*, `remove:`/`revert:` to *Removed*, everything else to *Changed*. What the
+  bullet says is still yours to write (`--entry`), and the `--from-commits` draft exists only so a release
+  nobody documented still ships a readable list.
 - **Releasing does not publish images.** `next-version.py` decides the version, `release.yml` tags it
   with the `GITHUB_TOKEN` — which by design does not trigger other workflows — so `docker-publish.yml`
   stays an explicit act. A CHANGELOG section numbered above the latest tag is treated as a *pending

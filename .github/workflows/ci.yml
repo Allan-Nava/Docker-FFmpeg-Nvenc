@@ -62,6 +62,61 @@ jobs:
           python3 docs/scripts/generate-roadmap.py --check
           python3 site/build.py --check
 
+  commit-lint:
+    name: Commit subjects and CHANGELOG
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # The release bump is derived from these subjects, so an unparseable one is a release that
+      # cannot be numbered. Same rule as the local commit-msg hook: docs/scripts/lib/changelog.py.
+      - name: Conventional commits
+        run: |
+          python3 - <<'PY'
+          import subprocess, sys, os
+          sys.path.insert(0, "docs/scripts/lib")
+          import changelog as C
+          base = os.environ["BASE_SHA"]
+          log = subprocess.run(["git", "log", "--format=%B%x00", f"{base}..HEAD"],
+                               check=True, text=True, capture_output=True).stdout
+          bad = [m.strip().split("\n")[0] for m in log.split("\0")
+                 if m.strip() and not C.is_acceptable(m.strip())]
+          for subject in bad:
+              print(f"::error::not a conventional commit: {subject}")
+          sys.exit(1 if bad else 0)
+          PY
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
+      # A change to the image or the tooling that nobody can find in the CHANGELOG is a change that
+      # is discovered by whoever it breaks. Docs-only and log-only PRs are exempt.
+      - name: CHANGELOG entry present
+        run: |
+          python3 - <<'PY'
+          import subprocess, sys, os
+          sys.path.insert(0, "docs/scripts/lib")
+          import changelog as C
+          base = os.environ["BASE_SHA"]
+          files = subprocess.run(["git", "diff", "--name-only", f"{base}..HEAD"],
+                                 check=True, text=True, capture_output=True).stdout.split()
+          exempt = lambda f: f.startswith(("docs/", "logs/", "site/dist/")) or f.endswith(".md")
+          code = [f for f in files if not exempt(f)]
+          with open("CHANGELOG.md", encoding="utf-8") as fh:
+              has = C.has_unreleased_entries(fh.read())
+          if code and not has:
+              print("::error::this PR touches " + ", ".join(code[:5]) +
+                    " but [Unreleased] in CHANGELOG.md is empty "
+                    "(use: python3 docs/scripts/changelog-add.py --message '<commit subject>')")
+              sys.exit(1)
+          print("ok: " + ("entries present" if has else "docs-only change"))
+          PY
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
   build-test:
     name: Build & test (ffmpeg ${{ matrix.ffmpeg }})
     runs-on: ubuntu-latest

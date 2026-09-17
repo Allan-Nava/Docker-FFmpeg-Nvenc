@@ -46,6 +46,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 - `.github/workflows/backlog.yml`: `lint` (tests + backlog-lint + roadmap `--check`) on pushes/PRs touching the
   backlog paths; `sync` on the Monday schedule and on `workflow_dispatch` (`apply` input), never on pull
   requests — on a fork PR the `GITHUB_TOKEN` is read-only.
+- `docs/scripts/commit.sh` does subject validation, the `[Unreleased]` entry, the local gates and the commit in one command; `docs/scripts/changelog-add.py` files a bullet in the Keep a Changelog section the commit type implies (`feat:` → Added, `fix:` → Fixed, `security:` → Security, `remove:`/`revert:` → Removed, the rest → Changed); `.githooks/commit-msg` (installed by `docs/scripts/install-hooks.sh`) rejects a subject `next-version.py` could not turn into a version bump. The prose stays hand-written — the automation picks the section, not the words.
 
 ### Changed
 
@@ -77,6 +78,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
   file now says so, and says that pinning is done with `uses: …@vX.Y.Z`. Pinning `runs.image` itself waits
   for the `v2.0.0` tag to exist (item `action-ref-and-image-input`).
 - `.dockerignore`: also excludes `logs/` and `site/`.
+- `ci.yml` gained a **commit-lint** job on pull requests: it rejects subjects the release tooling could not parse and fails when a PR touches code while `[Unreleased]` is empty (docs-only and log-only PRs are exempt). It imports the same `docs/scripts/lib/changelog.py` as the local hook, so there is one rule rather than three copies.
+- `release.yml` now drafts CHANGELOG entries from the conventional commits when `[Unreleased]` is empty, so a release never ships with empty notes. Hand-written entries always win; the draft only fires when there are none.
 
 ### Fixed
 

@@ -33,13 +33,20 @@ step "Generated pages"
 if python3 docs/scripts/generate-roadmap.py --check; then ok "roadmap"; else ko "roadmap (run: python3 docs/scripts/generate-roadmap.py)"; fi
 if python3 site/build.py --check; then ok "site/dist"; else ko "site/dist (run: python3 site/build.py)"; fi
 
+step "Commit hooks"
+if [[ "$(git config --get core.hooksPath || true)" == ".githooks" ]]; then
+  ok "core.hooksPath = .githooks"
+else
+  printf '\033[33mSKIP\033[0m hooks not installed (run: ./docs/scripts/install-hooks.sh)\n'
+fi
+
 step "Release"
 printf 'next version: '
 if python3 docs/scripts/next-version.py --explain; then ok "next-version.py"; else ko "next-version.py"; fi
 
 step "Linters"
 if command -v shellcheck >/dev/null 2>&1; then
-  if shellcheck tests/*.sh; then ok "shellcheck"; else ko "shellcheck"; fi
+  if shellcheck tests/*.sh docs/scripts/*.sh .githooks/*; then ok "shellcheck"; else ko "shellcheck"; fi
 else
   skip "shellcheck"
 fi

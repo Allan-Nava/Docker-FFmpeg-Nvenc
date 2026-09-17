@@ -64,6 +64,27 @@ jobs:
             echo "tagged=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # If nobody wrote the prose, draft it from the conventional commits rather than shipping a
+      # release with empty notes. Hand-written entries always win: this only fires when there are none.
+      - name: Draft CHANGELOG entries if [Unreleased] is empty
+        if: steps.exists.outputs.tagged == 'false'
+        run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, "docs/scripts/lib")
+          import changelog as C
+          with open("CHANGELOG.md", encoding="utf-8") as f:
+              has = C.has_unreleased_entries(f.read())
+          print("hand-written entries found" if has else "empty [Unreleased]: drafting from commits")
+          sys.exit(0 if has else 7)
+          PY
+        continue-on-error: true
+        id: unreleased
+
+      - name: Fallback draft
+        if: steps.exists.outputs.tagged == 'false' && steps.unreleased.outcome == 'failure'
+        run: python3 docs/scripts/changelog-add.py --from-commits
+
       - name: Prepare CHANGELOG and notes
         if: steps.exists.outputs.tagged == 'false'
         run: |

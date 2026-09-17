@@ -1,6 +1,7 @@
 # The build context only serves the Dockerfile: everything else is dead weight.
 .git
 .github
+.githooks
 .gitignore
 .dockerignore
 .hadolint.yaml
