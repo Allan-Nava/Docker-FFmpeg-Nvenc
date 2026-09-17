@@ -24,13 +24,18 @@ ghcr.io/allan-nava/docker-ffmpeg-nvenc
 
 | Variant | FFmpeg | nv-codec-headers | Minimum NVIDIA driver | Tags |
 |---|---|---|---|---|
-| default | 7.1.5 | `sdk/12.1` | ≥ 530 | `latest`, `vX.Y.Z`, `latest-ffmpeg7.1.5`, `vX.Y.Z-ffmpeg7.1.5` |
-| | 6.0.1 | `sdk/12.0` | ≥ 530 | `latest-ffmpeg6.0.1`, `vX.Y.Z-ffmpeg6.0.1` |
+| default | 9.0.1 | `sdk/12.1` | ≥ 530 | `latest`, `vX.Y.Z`, `latest-ffmpeg9.0.1`, `vX.Y.Z-ffmpeg9.0.1` |
+| | 7.1.5 | `sdk/12.1` | ≥ 530 | `latest-ffmpeg7.1.5`, `vX.Y.Z-ffmpeg7.1.5` |
+| | 6.1.6 | `sdk/12.1` | ≥ 530 | `latest-ffmpeg6.1.6`, `vX.Y.Z-ffmpeg6.1.6` |
 | | 5.1.10 | `sdk/11.0` | ≥ 470 | `latest-ffmpeg5.1.10`, `vX.Y.Z-ffmpeg5.1.10` |
 
-Every variant pins the **latest maintenance release** of its branch. The `sdk/*` branch does not move with
-those patches: the `ffnvcodec` constraint in `configure` is identical across a branch, so the host's minimum
-driver stays the one in the table.
+Every variant pins the **latest maintenance release** of its branch, on the **lowest** `sdk/*` branch its
+`configure` accepts. Measured across every maintained FFmpeg branch: the `ffnvcodec` requirement is frozen at
+12.1.14.0 from 6.1 all the way to 9.0, so **a newer FFmpeg does not ask more of your driver** — 9.0.1 and
+7.1.5 have exactly the same floor. Only 5.1 sits lower (≥ 470), which is why it is still here.
+
+`sdk/12.2` and `sdk/13.0` exist upstream and are deliberately unused: they would only raise the minimum
+driver without any variant needing them.
 
 The `nv-codec-headers` branch is what sets the **minimum NVIDIA driver** on the host: if you get
 `This NVENC API is not compatible with the installed driver`, either use a lower variant or update the driver.
@@ -109,13 +114,24 @@ A single parameterised `Dockerfile` produces every variant:
 
 ```shell
 docker build \
-  --build-arg FFMPEG_VERSION=6.0.1 \
-  --build-arg NVCODEC_BRANCH=sdk/12.0 \
-  -t ffmpeg-nvenc:6.0.1 .
+  --build-arg FFMPEG_VERSION=6.1.6 \
+  --build-arg NVCODEC_BRANCH=sdk/12.1 \
+  -t ffmpeg-nvenc:6.1.6 .
 
-./tests/smoke.sh ffmpeg-nvenc:6.0.1 6.0.1   # no GPU required
-./tests/gpu.sh   ffmpeg-nvenc:6.0.1         # requires an NVIDIA GPU
+./tests/smoke.sh ffmpeg-nvenc:6.1.6 6.1.6   # no GPU required
+./tests/gpu.sh   ffmpeg-nvenc:6.1.6         # requires an NVIDIA GPU
 ```
+
+Two helper scripts do the whole round instead:
+
+```shell
+./tests/run-all.sh        # every gate that needs no docker: tests, backlog, generated pages, linters
+./tests/build-matrix.sh   # builds and smoke-tests every variant of the publish matrix
+./tests/build-matrix.sh 9.0.1   # ...or just one
+```
+
+`build-matrix.sh` reads the matrix from the publish workflow (`site/build.py --print-variants`), so it can
+never test a different set of variants from the one CI publishes.
 
 CI (`.github/workflows/ci.yml`) runs the linters (hadolint, shellcheck, actionlint), builds and tests all three
 variants on every push/PR, and runs **weekly** to catch base images rotting away. Publishing

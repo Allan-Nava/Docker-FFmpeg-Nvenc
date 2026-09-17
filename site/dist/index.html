@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Docker-FFmpeg-Nvenc — FFmpeg 7.1.5 with NVENC, on GHCR</title>
+<title>Docker-FFmpeg-Nvenc — FFmpeg 9.0.1 with NVENC, on GHCR</title>
 <meta name="description" content="Container image with FFmpeg built with NVIDIA NVENC support (h264_nvenc, hevc_nvenc) for GPU-accelerated transcoding.">
 <link rel="canonical" href="https://allan-nava.github.io/Docker-FFmpeg-Nvenc/">
 <meta name="theme-color" content="#1f7a5a" media="(prefers-color-scheme: light)">
@@ -12,12 +12,12 @@
 <meta property="og:site_name" content="Docker-FFmpeg-Nvenc">
 <meta property="og:locale" content="en_GB">
 <meta property="og:url" content="https://allan-nava.github.io/Docker-FFmpeg-Nvenc/">
-<meta property="og:title" content="Docker-FFmpeg-Nvenc — FFmpeg 7.1.5 with NVENC, on GHCR">
+<meta property="og:title" content="Docker-FFmpeg-Nvenc — FFmpeg 9.0.1 with NVENC, on GHCR">
 <meta property="og:description" content="Container image with FFmpeg built with NVIDIA NVENC support (h264_nvenc, hevc_nvenc) for GPU-accelerated transcoding.">
 <meta property="og:image" content="https://allan-nava.github.io/Docker-FFmpeg-Nvenc/assets/social-preview.svg">
-<meta property="og:image:alt" content="Docker-FFmpeg-Nvenc — FFmpeg 7.1.5 with NVENC, on GHCR">
+<meta property="og:image:alt" content="Docker-FFmpeg-Nvenc — FFmpeg 9.0.1 with NVENC, on GHCR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Docker-FFmpeg-Nvenc — FFmpeg 7.1.5 with NVENC, on GHCR">
+<meta name="twitter:title" content="Docker-FFmpeg-Nvenc — FFmpeg 9.0.1 with NVENC, on GHCR">
 <meta name="twitter:description" content="Container image with FFmpeg built with NVIDIA NVENC support (h264_nvenc, hevc_nvenc) for GPU-accelerated transcoding.">
 <meta name="twitter:image" content="https://allan-nava.github.io/Docker-FFmpeg-Nvenc/assets/social-preview.svg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 role=%22img%22 aria-label=%22Docker-FFmpeg-Nvenc%22><title>Docker-FFmpeg-Nvenc</title><rect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%2311201a%22/><g fill=%22%235ed3a4%22><rect x=%2210%22 y=%2214%22 width=%226%22 height=%226%22 rx=%221.5%22/><rect x=%2210%22 y=%2229%22 width=%226%22 height=%226%22 rx=%221.5%22/><rect x=%2210%22 y=%2244%22 width=%226%22 height=%226%22 rx=%221.5%22/><rect x=%2248%22 y=%2214%22 width=%226%22 height=%226%22 rx=%221.5%22/><rect x=%2248%22 y=%2229%22 width=%226%22 height=%226%22 rx=%221.5%22/><rect x=%2248%22 y=%2244%22 width=%226%22 height=%226%22 rx=%221.5%22/></g><path d=%22M26 19.5 46 32 26 44.5Z%22 fill=%22%23fbfaf8%22/><rect x=%2220%22 y=%2210%22 width=%2224%22 height=%2244%22 rx=%224%22 fill=%22none%22 stroke=%22%235ed3a4%22 stroke-width=%222.5%22 opacity=%22.55%22/></svg>">
@@ -130,27 +130,35 @@ footer a{color:var(--muted)}
     <div class="pull"><code>docker pull ghcr.io/allan-nava/docker-ffmpeg-nvenc:latest</code></div>
 
     <div class="stats">
-      <div class="stat"><b>3</b><span>variants published on every tag</span></div>
+      <div class="stat"><b>4</b><span>variants published on every tag</span></div>
       <div class="stat"><b>17</b><span>smoke-test assertions gating the publish</span></div>
       <div class="stat"><b>16</b><span><code>--enable-*</code> options in configure</span></div>
       <div class="stat"><b>0</b><span><code>--enable-nonfree</code>: redistributable image</span></div>
     </div>
     <div class="cards">
       <article class="card is-default">
-        <h3>FFmpeg 7.1.5<span class="badge">default</span></h3>
+        <h3>FFmpeg 9.0.1<span class="badge">default</span></h3>
         <dl>
           <dt>nv-codec-headers</dt><dd><code>sdk/12.1</code></dd>
           <dt>driver NVIDIA</dt><dd>&ge; 530</dd>
         </dl>
-        <p><span class="tag">latest</span><span class="tag">vX.Y.Z</span><span class="tag">latest-ffmpeg7.1.5</span><span class="tag">vX.Y.Z-ffmpeg7.1.5</span></p>
+        <p><span class="tag">latest</span><span class="tag">vX.Y.Z</span><span class="tag">latest-ffmpeg9.0.1</span><span class="tag">vX.Y.Z-ffmpeg9.0.1</span></p>
       </article>
       <article class="card">
-        <h3>FFmpeg 6.0.1</h3>
+        <h3>FFmpeg 7.1.5</h3>
         <dl>
-          <dt>nv-codec-headers</dt><dd><code>sdk/12.0</code></dd>
+          <dt>nv-codec-headers</dt><dd><code>sdk/12.1</code></dd>
           <dt>driver NVIDIA</dt><dd>&ge; 530</dd>
         </dl>
-        <p><span class="tag">latest-ffmpeg6.0.1</span><span class="tag">vX.Y.Z-ffmpeg6.0.1</span></p>
+        <p><span class="tag">latest-ffmpeg7.1.5</span><span class="tag">vX.Y.Z-ffmpeg7.1.5</span></p>
+      </article>
+      <article class="card">
+        <h3>FFmpeg 6.1.6</h3>
+        <dl>
+          <dt>nv-codec-headers</dt><dd><code>sdk/12.1</code></dd>
+          <dt>driver NVIDIA</dt><dd>&ge; 530</dd>
+        </dl>
+        <p><span class="tag">latest-ffmpeg6.1.6</span><span class="tag">vX.Y.Z-ffmpeg6.1.6</span></p>
       </article>
       <article class="card">
         <h3>FFmpeg 5.1.10</h3>
@@ -173,12 +181,14 @@ footer a{color:var(--muted)}
 <table>
 <thead><tr><th>Variant</th><th>FFmpeg</th><th>nv-codec-headers</th><th>Minimum NVIDIA driver</th><th>Tags</th></tr></thead>
 <tbody>
-<tr><td>default</td><td>7.1.5</td><td><code>sdk/12.1</code></td><td>≥ 530</td><td><code>latest</code>, <code>vX.Y.Z</code>, <code>latest-ffmpeg7.1.5</code>, <code>vX.Y.Z-ffmpeg7.1.5</code></td></tr>
-<tr><td></td><td>6.0.1</td><td><code>sdk/12.0</code></td><td>≥ 530</td><td><code>latest-ffmpeg6.0.1</code>, <code>vX.Y.Z-ffmpeg6.0.1</code></td></tr>
+<tr><td>default</td><td>9.0.1</td><td><code>sdk/12.1</code></td><td>≥ 530</td><td><code>latest</code>, <code>vX.Y.Z</code>, <code>latest-ffmpeg9.0.1</code>, <code>vX.Y.Z-ffmpeg9.0.1</code></td></tr>
+<tr><td></td><td>7.1.5</td><td><code>sdk/12.1</code></td><td>≥ 530</td><td><code>latest-ffmpeg7.1.5</code>, <code>vX.Y.Z-ffmpeg7.1.5</code></td></tr>
+<tr><td></td><td>6.1.6</td><td><code>sdk/12.1</code></td><td>≥ 530</td><td><code>latest-ffmpeg6.1.6</code>, <code>vX.Y.Z-ffmpeg6.1.6</code></td></tr>
 <tr><td></td><td>5.1.10</td><td><code>sdk/11.0</code></td><td>≥ 470</td><td><code>latest-ffmpeg5.1.10</code>, <code>vX.Y.Z-ffmpeg5.1.10</code></td></tr>
 </tbody>
 </table>
-<p>Every variant pins the <strong>latest maintenance release</strong> of its branch. The <code>sdk/*</code> branch does not move with those patches: the <code>ffnvcodec</code> constraint in <code>configure</code> is identical across a branch, so the host&#x27;s minimum driver stays the one in the table.</p>
+<p>Every variant pins the <strong>latest maintenance release</strong> of its branch, on the <strong>lowest</strong> <code>sdk/*</code> branch its <code>configure</code> accepts. Measured across every maintained FFmpeg branch: the <code>ffnvcodec</code> requirement is frozen at 12.1.14.0 from 6.1 all the way to 9.0, so <strong>a newer FFmpeg does not ask more of your driver</strong> — 9.0.1 and 7.1.5 have exactly the same floor. Only 5.1 sits lower (≥ 470), which is why it is still here.</p>
+<p><code>sdk/12.2</code> and <code>sdk/13.0</code> exist upstream and are deliberately unused: they would only raise the minimum driver without any variant needing them.</p>
 <p>The <code>nv-codec-headers</code> branch is what sets the <strong>minimum NVIDIA driver</strong> on the host: if you get <code>This NVENC API is not compatible with the installed driver</code>, either use a lower variant or update the driver.</p>
   </section>
   <section id="requirements">
@@ -231,12 +241,17 @@ footer a{color:var(--muted)}
     <h2><a href="#development">Development</a></h2>
 <p>A single parameterised <code>Dockerfile</code> produces every variant:</p>
 <pre><code class="lang-shell">docker build \
-  --build-arg FFMPEG_VERSION=6.0.1 \
-  --build-arg NVCODEC_BRANCH=sdk/12.0 \
-  -t ffmpeg-nvenc:6.0.1 .
+  --build-arg FFMPEG_VERSION=6.1.6 \
+  --build-arg NVCODEC_BRANCH=sdk/12.1 \
+  -t ffmpeg-nvenc:6.1.6 .
 
-./tests/smoke.sh ffmpeg-nvenc:6.0.1 6.0.1   # no GPU required
-./tests/gpu.sh   ffmpeg-nvenc:6.0.1         # requires an NVIDIA GPU</code></pre>
+./tests/smoke.sh ffmpeg-nvenc:6.1.6 6.1.6   # no GPU required
+./tests/gpu.sh   ffmpeg-nvenc:6.1.6         # requires an NVIDIA GPU</code></pre>
+<p>Two helper scripts do the whole round instead:</p>
+<pre><code class="lang-shell">./tests/run-all.sh        # every gate that needs no docker: tests, backlog, generated pages, linters
+./tests/build-matrix.sh   # builds and smoke-tests every variant of the publish matrix
+./tests/build-matrix.sh 9.0.1   # ...or just one</code></pre>
+<p><code>build-matrix.sh</code> reads the matrix from the publish workflow (<code>site/build.py --print-variants</code>), so it can never test a different set of variants from the one CI publishes.</p>
 <p>CI (<code>.github/workflows/ci.yml</code>) runs the linters (hadolint, shellcheck, actionlint), builds and tests all three variants on every push/PR, and runs <strong>weekly</strong> to catch base images rotting away. Publishing (<code>docker-publish.yml</code>) only fires on <code>v*</code> tag pushes and goes through the same smoke tests before pushing.</p>
 <p>The Python tooling and the page generator are covered by tests — stdlib <code>unittest</code>, no dependencies:</p>
 <pre><code class="lang-shell">python3 -m unittest discover -s tests -p &#x27;test_*.py&#x27;</code></pre>

@@ -150,7 +150,7 @@ do not reappear every week. `actions/checkout` is still on `v4` everywhere.
 
 ### `ffmpeg-8-and-9-variants` — Evaluate FFmpeg 8.1.x / 9.0.x in the matrix (and which one becomes default)
 
-- **status**: open
+- **status**: done
 - **priority**: medium
 - **labels**: docker, upgrade
 - **milestone**: Image & upstream maintenance
@@ -188,6 +188,13 @@ tags) that this repository deliberately does not use — the rule is the *lowest
 `configure`, because a higher one only raises the host's driver floor. That is the right default, but it
 also means the newest NVENC features are not exposed; if one is ever needed, the floor for that branch has
 to be checked against NVIDIA's support matrix first and documented in the README table.
+
+> **Done on 2026-09-17** ([intervention](interventions/2026-09-17-matrix-9x.md)): the matrix is now
+> **9.0.1 (default) / 7.1.5 / 6.1.6 / 5.1.10**. 9.0.1 costs no more driver than 7.1.5 did (≥ 530 both), 6.0.1
+> was replaced by 6.1.6 because 6.0 is superseded inside the same major, and 8.0/8.1 were skipped on purpose:
+> they sit between two shipped rows at the same driver floor, and each row is a ~90-minute build per tag.
+> FFmpeg 9.0 needed **no change to the `./configure` line**. Native arm64 builds + smoke: **17/17 on all
+> four** (200-205 MB). Still pending on hardware: `tests/gpu.sh` and the amd64 build in CI.
 
 ### `debian-13-trixie` — The `debian:12-slim` base is oldstable
 

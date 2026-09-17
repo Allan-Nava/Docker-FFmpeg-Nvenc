@@ -1,9 +1,10 @@
 # syntax=docker/dockerfile:1
 
 # Single source of truth for every variant of the image.
-# The matrix (FFmpeg 5.1.10 / 6.0.1 / 7.1.5) lives in the workflows, not in duplicated Dockerfiles.
+# The matrix (FFmpeg 5.1.10 / 6.1.6 / 7.1.5 / 9.0.1) lives in the workflows, not in duplicated
+# Dockerfiles.
 #
-#   docker build --build-arg FFMPEG_VERSION=6.0.1 --build-arg NVCODEC_BRANCH=sdk/12.0 -t ffmpeg-nvenc:6.0.1 .
+#   docker build --build-arg FFMPEG_VERSION=6.1.6 --build-arg NVCODEC_BRANCH=sdk/12.1 -t ffmpeg-nvenc:6.1.6 .
 #
 # Note: the versioned runtime package names (libx264-164, libx265-199, libvpx7) are specific to
 # Debian 12 (bookworm). Changing DEBIAN_VERSION means realigning them.
@@ -15,15 +16,16 @@ ARG DEBIAN_VERSION=12
 ##############################################################################
 FROM debian:${DEBIAN_VERSION}-slim AS builder
 
-ARG FFMPEG_VERSION=7.1.5
+ARG FFMPEG_VERSION=9.0.1
 
 # Must satisfy the `ffnvcodec` pkg-config check in FFmpeg's configure:
-#   FFmpeg 5.1.x -> ffnvcodec >= 9.1.23.1   (sdk/11.0 = 11.0.10.4.1)
-#   FFmpeg 6.0.x -> ffnvcodec >= 12.0.16.0  (sdk/12.0 = 12.0.16.3.0)
-#   FFmpeg 7.1.x -> ffnvcodec >= 12.1.14.0  (sdk/12.1 = 12.1.14.2.0)
-# The constraint does not move inside a maintenance branch (verified on 5.1.10, 6.0.1, 7.1.5)
-# and stays at 12.1.14.0 up to FFmpeg 9.0.1: moving up a patch does NOT raise the minimum driver.
-# A higher branch means a higher minimum NVIDIA driver: do not raise it without a reason.
+#   FFmpeg 5.1.x       -> ffnvcodec >= 9.1.23.1   (sdk/11.0)
+#   FFmpeg 6.0.x       -> ffnvcodec >= 12.0.16.0  (sdk/12.0)
+#   FFmpeg 6.1.x - 9.0 -> ffnvcodec >= 12.1.14.0  (sdk/12.1)
+# Measured on the configure of every maintained release (2026-09-17): the constraint does not move
+# inside a branch, and from 6.1 onwards it is the same up to 9.0.1 — so a newer FFmpeg does NOT
+# raise the host's minimum driver. Always pick the LOWEST branch that satisfies configure: a higher
+# one only raises that floor (sdk/12.2, sdk/13.0 exist and are deliberately unused).
 ARG NVCODEC_BRANCH=sdk/12.1
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -115,7 +117,7 @@ RUN /usr/local/bin/ffmpeg -hide_banner -encoders > /tmp/encoders.txt \
 FROM debian:${DEBIAN_VERSION}-slim AS runtime
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG FFMPEG_VERSION=7.1.5
+ARG FFMPEG_VERSION=9.0.1
 ARG NVCODEC_BRANCH=sdk/12.1
 
 LABEL org.opencontainers.image.title="Docker-FFmpeg-Nvenc" \

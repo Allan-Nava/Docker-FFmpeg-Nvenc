@@ -37,6 +37,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 - **Tests for the tooling**: `tests/test_backlog.py`, `tests/test_site_build.py`, `tests/test_release.py`
   (52+ assertions, stdlib `unittest`), run by a new `tests` job in `ci.yml` and as a gate before releasing and
   before deploying the page.
+- **`tests/build-matrix.sh`** (builds and smoke-tests every variant, reading the matrix from the publish
+  workflow through the new `site/build.py --print-variants`, so it cannot drift from what CI publishes) and
+  **`tests/run-all.sh`** (every local gate that needs no docker: unit tests, backlog lint, generated pages,
+  hadolint/shellcheck/actionlint, skipping the ones not installed). Both covered by `tests/test_scripts.py`.
 - Lint rule for **repeated meta keys** in a backlog item: the last one wins and the first is lost in silence.
   Added after making that exact mistake while writing the first backlog (a duplicated `- **labels**:`).
 - `.github/workflows/backlog.yml`: `lint` (tests + backlog-lint + roadmap `--check`) on pushes/PRs touching the
@@ -45,6 +49,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 
 ### Changed
 
+- **The published matrix is now FFmpeg 9.0.1 (default) / 7.1.5 / 6.1.6 / 5.1.10.** Measured across every
+  maintained FFmpeg branch: the `ffnvcodec` requirement is frozen at 12.1.14.0 from 6.1 through 9.0, so
+  making 9.0.1 the default **asks nothing more of the host driver** than 7.1.5 did (≥ 530 either way); 6.0.1
+  was replaced by 6.1.6 because 6.0 is superseded inside the same major; 8.0/8.1 were skipped deliberately
+  (same driver floor, and every row is a ~90-minute build per tag). FFmpeg 9.0 needed no change to the
+  `./configure` line. Native arm64 builds plus smoke tests: **17/17 on all four** (200-205 MB) — see
+  `docs/interventions/2026-09-17-matrix-9x.md`.
 - **All three variants moved to the latest maintenance release of their branch**: 7.1.1 → **7.1.5**,
   6.0 → **6.0.1**, 5.1.2 → **5.1.10**. The `sdk/*` branches are unchanged, because the `ffnvcodec` constraint
   does not move inside a branch (verified on the `configure` of n5.1.10/n6.0.1/n7.1.5), so **the host's minimum

@@ -34,11 +34,17 @@ jobs:
       matrix:
         include:
           # `default: true` also publishes the unsuffixed tags (v1.2.3, v1.2, v1, latest).
-          - ffmpeg: '7.1.5'
+          # Every row is the latest maintenance release of its branch, on the LOWEST sdk/* branch
+          # its configure accepts: from FFmpeg 6.1 onwards that is sdk/12.1 for all of them, so
+          # 9.0 costs no more driver than 7.1 does.
+          - ffmpeg: '9.0.1'
             nvcodec: 'sdk/12.1'
             default: true
-          - ffmpeg: '6.0.1'
-            nvcodec: 'sdk/12.0'
+          - ffmpeg: '7.1.5'
+            nvcodec: 'sdk/12.1'
+            default: false
+          - ffmpeg: '6.1.6'
+            nvcodec: 'sdk/12.1'
             default: false
           - ffmpeg: '5.1.10'
             nvcodec: 'sdk/11.0'
@@ -52,7 +58,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Variant-suffixed tags: v1.2.3-ffmpeg7.1.5, latest-ffmpeg7.1.5, ...
+      # Variant-suffixed tags: v1.2.3-ffmpeg9.0.1, latest-ffmpeg9.0.1, ...
       - name: Metadata (variant)
         id: meta
         uses: docker/metadata-action@v5

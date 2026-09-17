@@ -1,0 +1,35 @@
+[1mSmoke test[0m image: ffmpeg-nvenc:test-7.1.5
+
+[1m1. Binaries present and working[0m
+  [32mOK[0m   ffmpeg -version exits 0 (ffmpeg ENTRYPOINT active)
+  [32mOK[0m   ffprobe present and working
+
+[1m2. FFmpeg version[0m
+     ffmpeg version 7.1.5 Copyright (c) 2000-2026 the FFmpeg developers
+  [32mOK[0m   expected version: 7.1.5
+
+[1m3. NVENC encoders compiled in[0m
+  [32mOK[0m   encoder h264_nvenc present
+  [32mOK[0m   encoder hevc_nvenc present
+
+[1m4. Surrounding codecs enabled[0m
+  [32mOK[0m   encoder libx264 present
+  [32mOK[0m   encoder libx265 present
+  [32mOK[0m   encoder libvpx-vp9 present
+  [32mOK[0m   encoder libmp3lame present
+  [32mOK[0m   encoder libopus present
+
+[1m5. Licence of the artefact[0m
+  [32mOK[0m   no --enable-nonfree (binary redistributable under GPL)
+  [32mOK[0m   GPL build (--enable-gpl, required by libx264/libx265)
+
+[1m6. Real transcode (CPU, no GPU)[0m
+  [32mOK[0m   end-to-end libx264 transcode + ffprobe of the result
+
+[1m7. Container hygiene[0m
+  [32mOK[0m   the container does not run as root (uid 1000)
+  [32mOK[0m   NVIDIA_DRIVER_CAPABILITIES limited to video,compute,utility
+  [32mOK[0m   no compiler in the final image
+  [32mOK[0m   no FFmpeg sources in the final image
+
+[1mResult:[0m 17 ok, 0 fail

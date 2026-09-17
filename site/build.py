@@ -504,7 +504,17 @@ def main(argv=None):
     ap.add_argument("--root", default=ROOT)
     ap.add_argument("--check", action="store_true",
                     help="writes nothing: exit 1 if the output differs from what is on disk (for CI)")
+    ap.add_argument("--print-variants", action="store_true",
+                    help="print the publish matrix as `<version> <sdk branch> <default|->` and exit; "
+                         "this is how the shell scripts read the matrix instead of copying it")
     args = ap.parse_args(argv)
+
+    if args.print_variants:
+        with open(os.path.join(args.root, ".github", "workflows", "docker-publish.yml"),
+                  encoding="utf-8") as f:
+            for v in parse_variants(f.read()):
+                print(f"{v['ffmpeg']} {v['nvcodec']} {'default' if v['default'] else '-'}")
+        return 0
 
     page = render(args.root)
     index = os.path.join(args.out, "index.html")

@@ -1,0 +1,69 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load .dockerignore
+#1 transferring context: 257B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 6.20kB done
+#2 DONE 0.0s
+
+#3 resolve image config for docker.io/docker/dockerfile:1
+#3 DONE 0.6s
+
+#4 docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+#4 CACHED
+
+#5 [internal] load build definition from Dockerfile
+#5 DONE 0.0s
+
+#6 [internal] load metadata for docker.io/library/debian:12-slim
+#6 DONE 0.5s
+
+#7 [internal] load .dockerignore
+#7 DONE 0.0s
+
+#8 [builder 1/7] FROM docker.io/library/debian:12-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171
+#8 DONE 0.0s
+
+#9 [builder 6/7] RUN ./configure       --prefix=/usr/local       --enable-gpl       --enable-version3       --disable-debug       --disable-doc       --disable-ffplay       --disable-indev=sndio       --disable-outdev=sndio       --enable-nvenc       --enable-fontconfig       --enable-gray       --enable-libass       --enable-libfreetype       --enable-libmp3lame       --enable-libopus       --enable-libspeex       --enable-libtheora       --enable-libvorbis       --enable-libvpx       --enable-libx264       --enable-libx265       --enable-libxml2  && make -j"$(nproc)"  && make install
+#9 CACHED
+
+#10 [runtime 4/6] COPY --from=builder /usr/local/bin/ffprobe /usr/local/bin/ffprobe
+#10 CACHED
+
+#11 [runtime 2/6] RUN apt-get update  && apt-get install -y --no-install-recommends       ca-certificates       fontconfig       libass9       libfontconfig1       libfreetype6       libfribidi0       libharfbuzz0b       libmp3lame0       libnuma1       libopus0       libspeex1       libtheora0       libvorbis0a       libvorbisenc2       libvpx7       libx264-164       libx265-199       libxml2  && rm -rf /var/lib/apt/lists/*  && useradd --create-home --uid 1000 --shell /bin/bash ffmpeg  && mkdir -p /data  && chown ffmpeg:ffmpeg /data
+#11 CACHED
+
+#12 [builder 5/7] RUN curl -fsSL --retry 3 --retry-connrefused       "https://ffmpeg.org/releases/ffmpeg-7.1.5.tar.xz" -o /tmp/ffmpeg.tar.xz  && tar -xf /tmp/ffmpeg.tar.xz -C /usr/src/ffmpeg --strip-components=1  && rm /tmp/ffmpeg.tar.xz
+#12 CACHED
+
+#13 [builder 2/7] RUN apt-get update  && apt-get install -y --no-install-recommends       build-essential       ca-certificates       curl       git       make       nasm       pkg-config       xz-utils       yasm       libass-dev       libfontconfig1-dev       libfreetype6-dev       libfribidi-dev       libharfbuzz-dev       libmp3lame-dev       libnuma-dev       libopus-dev       libspeex-dev       libtheora-dev       libvorbis-dev       libvpx-dev       libx264-dev       libx265-dev       libxml2-dev       zlib1g-dev  && rm -rf /var/lib/apt/lists/*
+#13 CACHED
+
+#14 [builder 4/7] WORKDIR /usr/src/ffmpeg
+#14 CACHED
+
+#15 [runtime 5/6] RUN ffmpeg -hide_banner -version  && ffmpeg -hide_banner -encoders > /tmp/encoders.txt  && grep -q h264_nvenc /tmp/encoders.txt  && rm /tmp/encoders.txt
+#15 CACHED
+
+#16 [builder 3/7] RUN git clone --branch "sdk/12.1" --depth 1       https://github.com/FFmpeg/nv-codec-headers.git /tmp/nv-codec-headers  && make -C /tmp/nv-codec-headers install  && rm -rf /tmp/nv-codec-headers
+#16 CACHED
+
+#17 [builder 7/7] RUN /usr/local/bin/ffmpeg -hide_banner -encoders > /tmp/encoders.txt  && grep -q h264_nvenc /tmp/encoders.txt  && grep -q hevc_nvenc /tmp/encoders.txt  && rm /tmp/encoders.txt
+#17 CACHED
+
+#18 [runtime 3/6] COPY --from=builder /usr/local/bin/ffmpeg  /usr/local/bin/ffmpeg
+#18 CACHED
+
+#19 [runtime 6/6] WORKDIR /data
+#19 CACHED
+
+#20 exporting to image
+#20 exporting layers done
+#20 writing image sha256:6780d8edad17cdd23e44b21ea958b2fc64a6771d0b4999de94e07c1ef007ce1a done
+#20 naming to docker.io/library/ffmpeg-nvenc:test-7.1.5 done
+#20 DONE 0.0s
+
+What's Next?
+  View a summary of image vulnerabilities and recommendations → docker scout quickview

@@ -97,11 +97,14 @@ class TestParseReadme(unittest.TestCase):
 class TestFactsFromTheRepository(unittest.TestCase):
     def test_variants_from_the_publish_workflow(self):
         wf = read(".github", "workflows", "docker-publish.yml")
+        # Pinned on purpose: changing the published matrix should be a deliberate test edit,
+        # not something that slips in with a workflow tweak.
         variants = BUILD.parse_variants(wf)
-        self.assertEqual(len(variants), 3)
-        self.assertEqual([v["ffmpeg"] for v in variants], ["7.1.5", "6.0.1", "5.1.10"])
-        self.assertEqual([v["nvcodec"] for v in variants], ["sdk/12.1", "sdk/12.0", "sdk/11.0"])
-        self.assertEqual([v["default"] for v in variants], [True, False, False])
+        self.assertEqual(len(variants), 4)
+        self.assertEqual([v["ffmpeg"] for v in variants], ["9.0.1", "7.1.5", "6.1.6", "5.1.10"])
+        self.assertEqual([v["nvcodec"] for v in variants],
+                         ["sdk/12.1", "sdk/12.1", "sdk/12.1", "sdk/11.0"])
+        self.assertEqual([v["default"] for v in variants], [True, False, False, False])
 
     def test_exactly_one_variant_is_default(self):
         wf = read(".github", "workflows", "docker-publish.yml")
