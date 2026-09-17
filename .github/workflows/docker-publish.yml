@@ -28,13 +28,13 @@ jobs:
       matrix:
         include:
           # `default: true` pubblica ANCHE i tag senza suffisso (v1.2.3, v1.2, v1, latest).
-          - ffmpeg: '7.1.1'
+          - ffmpeg: '7.1.5'
             nvcodec: 'sdk/12.1'
             default: true
-          - ffmpeg: '6.0'
+          - ffmpeg: '6.0.1'
             nvcodec: 'sdk/12.0'
             default: false
-          - ffmpeg: '5.1.2'
+          - ffmpeg: '5.1.10'
             nvcodec: 'sdk/11.0'
             default: false
     steps:
@@ -44,7 +44,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Tag con suffisso di variante: v1.2.3-ffmpeg7.1.1, latest-ffmpeg7.1.1, ...
+      # Tag con suffisso di variante: v1.2.3-ffmpeg7.1.5, latest-ffmpeg7.1.5, ...
       - name: Metadata (variante)
         id: meta
         uses: docker/metadata-action@v5

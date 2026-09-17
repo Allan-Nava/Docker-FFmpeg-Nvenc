@@ -24,9 +24,11 @@ Le varianti sono una **matrice nei workflow**, non file duplicati:
 
 | FFmpeg | `NVCODEC_BRANCH` | driver NVIDIA min | default |
 |---|---|---|---|
-| 7.1.1 | `sdk/12.1` | >= 530 | si (`latest`) |
-| 6.0 | `sdk/12.0` | >= 530 | no |
-| 5.1.2 | `sdk/11.0` | >= 470 | no |
+| 7.1.5 | `sdk/12.1` | >= 530 | si (`latest`) |
+| 6.0.1 | `sdk/12.0` | >= 530 | no |
+| 5.1.10 | `sdk/11.0` | >= 470 | no |
+
+Ogni variante pinna l'**ultima release di manutenzione** del suo ramo (bump del 17/09/2026). Salire di patch dentro il ramo non muove il vincolo `ffnvcodec`, quindi non alza il driver minimo: verificato su 5.1.10, 6.0.1, 7.1.5.
 
 ATTENZIONE: **Stato di consegna al 17/09/2026: la v2.0.0 non e mai stata taggata.** Il `CHANGELOG` ha la sezione `[2.0.0]`, ma l'ultimo tag e `v1.0.1` (2023) e su GHCR `:latest` e ancora **l'immagine del 16/01/2023** (root, `ENTRYPOINT /bin/bash`, `NVIDIA_REQUIRE_CUDA ... driver<471` -> non parte su driver recenti). Non descrivere l'immagine pubblicata come se fosse quella di `main`: finche il tag non esiste, README e `action.yml` puntano a un artefatto rotto. Dettagli e piano: `docs/audit/2026-09-17-audit-stato-e-automazione.md`, item `tag-v2-0-0`.
 

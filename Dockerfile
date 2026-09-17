@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 
 # Sorgente unica di verita per tutte le varianti dell'immagine.
-# La matrice (FFmpeg 5.1.2 / 6.0 / 7.1.1) vive nei workflow, non in Dockerfile duplicati.
+# La matrice (FFmpeg 5.1.10 / 6.0.1 / 7.1.5) vive nei workflow, non in Dockerfile duplicati.
 #
-#   docker build --build-arg FFMPEG_VERSION=6.0 --build-arg NVCODEC_BRANCH=sdk/12.0 -t ffmpeg-nvenc:6.0 .
+#   docker build --build-arg FFMPEG_VERSION=6.0.1 --build-arg NVCODEC_BRANCH=sdk/12.0 -t ffmpeg-nvenc:6.0.1 .
 #
 # NB: i nomi versionati dei pacchetti runtime (libx264-164, libx265-199, libvpx7) sono
 # specifici di Debian 12 (bookworm). Cambiando DEBIAN_VERSION vanno riallineati.
@@ -15,12 +15,14 @@ ARG DEBIAN_VERSION=12
 ##############################################################################
 FROM debian:${DEBIAN_VERSION}-slim AS builder
 
-ARG FFMPEG_VERSION=7.1.1
+ARG FFMPEG_VERSION=7.1.5
 
 # Deve soddisfare il check pkg-config `ffnvcodec` del configure di FFmpeg:
 #   FFmpeg 5.1.x -> ffnvcodec >= 9.1.23.1   (sdk/11.0 = 11.0.10.4.1)
-#   FFmpeg 6.0   -> ffnvcodec >= 12.0.16.0  (sdk/12.0 = 12.0.16.3.0)
+#   FFmpeg 6.0.x -> ffnvcodec >= 12.0.16.0  (sdk/12.0 = 12.0.16.3.0)
 #   FFmpeg 7.1.x -> ffnvcodec >= 12.1.14.0  (sdk/12.1 = 12.1.14.2.0)
+# Il vincolo non si muove nei rami di manutenzione (verificato su 5.1.10, 6.0.1, 7.1.5)
+# e resta 12.1.14.0 fino a FFmpeg 9.0.1: salire di patch NON alza il driver minimo.
 # Branch piu alto = driver NVIDIA minimo piu alto: non alzarlo senza motivo.
 ARG NVCODEC_BRANCH=sdk/12.1
 
@@ -113,7 +115,7 @@ RUN /usr/local/bin/ffmpeg -hide_banner -encoders > /tmp/encoders.txt \
 FROM debian:${DEBIAN_VERSION}-slim AS runtime
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG FFMPEG_VERSION=7.1.1
+ARG FFMPEG_VERSION=7.1.5
 ARG NVCODEC_BRANCH=sdk/12.1
 
 LABEL org.opencontainers.image.title="Docker-FFmpeg-Nvenc" \

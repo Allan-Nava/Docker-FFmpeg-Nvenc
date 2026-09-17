@@ -24,9 +24,13 @@ ghcr.io/allan-nava/docker-ffmpeg-nvenc
 
 | Variante | FFmpeg | nv-codec-headers | Driver NVIDIA minimo | Tag |
 |---|---|---|---|---|
-| default | 7.1.1 | `sdk/12.1` | ≥ 530 | `latest`, `vX.Y.Z`, `latest-ffmpeg7.1.1`, `vX.Y.Z-ffmpeg7.1.1` |
-| | 6.0 | `sdk/12.0` | ≥ 530 | `latest-ffmpeg6.0`, `vX.Y.Z-ffmpeg6.0` |
-| | 5.1.2 | `sdk/11.0` | ≥ 470 | `latest-ffmpeg5.1.2`, `vX.Y.Z-ffmpeg5.1.2` |
+| default | 7.1.5 | `sdk/12.1` | ≥ 530 | `latest`, `vX.Y.Z`, `latest-ffmpeg7.1.5`, `vX.Y.Z-ffmpeg7.1.5` |
+| | 6.0.1 | `sdk/12.0` | ≥ 530 | `latest-ffmpeg6.0.1`, `vX.Y.Z-ffmpeg6.0.1` |
+| | 5.1.10 | `sdk/11.0` | ≥ 470 | `latest-ffmpeg5.1.10`, `vX.Y.Z-ffmpeg5.1.10` |
+
+Ogni variante pinna l'**ultima release di manutenzione** del suo ramo. Il branch `sdk/*` non cambia
+con le patch: il vincolo `ffnvcodec` del `configure` e identico in tutto il ramo, quindi il driver
+minimo dell'host resta quello in tabella.
 
 Il branch di `nv-codec-headers` determina il **driver NVIDIA minimo** dell'host: se ottieni `This NVENC API is not compatible with the installed driver`, usa una variante più bassa o aggiorna il driver.
 
@@ -98,12 +102,12 @@ Un solo `Dockerfile` parametrizzato genera tutte le varianti:
 
 ```shell
 docker build \
-  --build-arg FFMPEG_VERSION=6.0 \
+  --build-arg FFMPEG_VERSION=6.0.1 \
   --build-arg NVCODEC_BRANCH=sdk/12.0 \
-  -t ffmpeg-nvenc:6.0 .
+  -t ffmpeg-nvenc:6.0.1 .
 
-./tests/smoke.sh ffmpeg-nvenc:6.0 6.0     # non richiede GPU
-./tests/gpu.sh   ffmpeg-nvenc:6.0         # richiede GPU NVIDIA
+./tests/smoke.sh ffmpeg-nvenc:6.0.1 6.0.1   # non richiede GPU
+./tests/gpu.sh   ffmpeg-nvenc:6.0.1         # richiede GPU NVIDIA
 ```
 
 La CI (`.github/workflows/ci.yml`) esegue lint (hadolint, shellcheck, actionlint), builda e testa tutte e tre le varianti su ogni push/PR, e gira **settimanalmente** per intercettare il marcire delle base image. La pubblicazione (`docker-publish.yml`) parte solo su push di tag `v*` e passa dagli stessi smoke test prima del push.
