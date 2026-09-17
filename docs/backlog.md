@@ -155,15 +155,39 @@ do not reappear every week. `actions/checkout` is still on `v4` everywhere.
 - **labels**: docker, upgrade
 - **milestone**: Image & upstream maintenance
 
-Upstream (2026-09-17) is at **9.0.1**, with **8.1.2** still maintained; the repository's matrix stops at
-7.1.x. The fact that makes this cheap to evaluate: the `ffnvcodec` constraint of `n8.1.2` and `n9.0.1` is
-**identical** to 7.1's (`>= 12.1.14.0`), so `sdk/12.1` covers 9.0 too and **the host's minimum driver stays
-≥ 530** — none of the usual "newer version means newer driver" trade-off.
+Every FFmpeg branch that still gets maintenance releases, with its `ffnvcodec` floor (measured from each
+release's `configure` on 2026-09-17) and whether this repository ships it:
+
+| branch | latest | `ffnvcodec >=` | needed branch | shipped here |
+|---|---|---|---|---|
+| 5.1 | 5.1.10 | 9.1.23.1 | `sdk/11.0` | **yes** |
+| 6.0 | 6.0.1 | 12.0.16.0 | `sdk/12.0` | **yes** |
+| 6.1 | 6.1.6 | 12.1.14.0 | `sdk/12.1` | no |
+| 7.0 | 7.0.3 | 12.1.14.0 | `sdk/12.1` | no |
+| 7.1 | 7.1.5 | 12.1.14.0 | `sdk/12.1` | **yes** (default) |
+| 8.0 | 8.0.3 | 12.1.14.0 | `sdk/12.1` | no |
+| 8.1 | 8.1.2 | 12.1.14.0 | `sdk/12.1` | no |
+| 9.0 | 9.0.1 | 12.1.14.0 | `sdk/12.1` | no |
+
+Two things fall out of that table:
+
+1. **From 6.1 onwards nothing moves**: one single `sdk/12.1` covers 6.1 through 9.0, so adding 8.x or 9.x
+   costs **zero** on the host's driver floor (still ≥ 530). The usual "newer version, newer driver"
+   trade-off simply does not exist here.
+2. **The 6.x variant is on the wrong branch**: 6.0 is superseded by **6.1**, which is the maintained 6.x
+   line. Switching 6.0.1 → 6.1.6 moves that variant from `sdk/12.0` to `sdk/12.1` with the *same* ≥ 530
+   floor, so it costs nothing either and gets it back onto a live branch.
 
 To check before adding them: that the bookworm runtime package names still hold, that the `--enable-*` set
 is still valid (8.x dropped a few options), and **how many variants are worth maintaining**: each matrix row
-is a ~90-minute build on every tag. Likely end state: 9.0.x default, 7.1.x as LTS, 5.1.x for drivers ≥ 470,
-drop 6.0.
+is a ~90-minute build on every tag. Likely end state: 9.0.x default, 7.1.x as the conservative choice,
+6.1.6 in place of 6.0.1, 5.1.x kept for hosts on drivers ≥ 470.
+
+Separately, on the NVENC side: `nv-codec-headers` has `sdk/12.2` and `sdk/13.0` branches (plus `n13.1.15.0`
+tags) that this repository deliberately does not use — the rule is the *lowest* branch that satisfies
+`configure`, because a higher one only raises the host's driver floor. That is the right default, but it
+also means the newest NVENC features are not exposed; if one is ever needed, the floor for that branch has
+to be checked against NVIDIA's support matrix first and documented in the README table.
 
 ### `debian-13-trixie` — The `debian:12-slim` base is oldstable
 
