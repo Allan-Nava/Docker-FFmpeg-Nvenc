@@ -3,7 +3,7 @@
 All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
-## [Unreleased]
+## [2.0.0] - 2026-09-17
 
 ### Added
 
@@ -88,8 +88,6 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
   `site/build.py` computes it from the script and a test pins it.
 - `README.md`: the `uses: Allan-Nava/Docker-FFmpeg-Nvenc@v2` example and the tag table described artefacts that
   **are not published yet**.
-
-## [2.0.0] - 2026-08-09
 
 Repair release: at the time of the audit **neither of the two published images could still be built**. It
 contains changes that are not backwards compatible in how the image is used.
