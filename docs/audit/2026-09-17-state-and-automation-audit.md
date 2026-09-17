@@ -8,6 +8,12 @@ It follows the [initial audit of 2026-08-09](2026-08-09-initial-audit.md), which
 **none of the published images could still be built** and which closed with the repair described in the
 `[2.0.0]` section of `CHANGELOG.md`.
 
+> **Status note added the same evening.** Read this document as the snapshot that triggered the work.
+> Since then: `v2.0.0` and `v2.1.0` are tagged and released, the backlog is synced (4 milestones,
+> issues #24-#34, one already closed), the project page is live, and the matrix moved to FFmpeg 9.0.1 /
+> 7.1.5 / 6.1.6 / 5.1.10. **F1 is only half closed**: the release exists, the images do not — nothing
+> has been pushed to GHCR yet. See [the documentation audit](2026-09-17-documentation-audit.md).
+>
 > **In one line: the repair works, but it never reached anyone.** CI builds and tests the three variants
 > every Monday and passes; the `v2.0.0` tag was never created, so `:latest` on GHCR is still **the image
 > from 16 January 2023** — root, `ENTRYPOINT /bin/bash`, single-stage, and carrying an

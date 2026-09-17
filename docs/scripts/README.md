@@ -1,7 +1,20 @@
-# docs/scripts — backlog and release tooling
+# docs/scripts — backlog, changelog, release and tagging tooling
 
-Four scripts and one shared library. No external dependencies: **Python 3 stdlib only** (the
-`ubuntu-latest` runners ship `python3`, so no `setup-python` step is needed).
+Six scripts, two shell helpers and two shared libraries. No external dependencies: **Python 3 stdlib
+only** (the `ubuntu-latest` runners ship `python3`, so no `setup-python` step is needed).
+
+| file | what it decides |
+|---|---|
+| `lib/backlog.py` | how a backlog item is parsed and validated |
+| `lib/changelog.py` | what a valid commit subject is, and which CHANGELOG section it belongs to |
+| `backlog-lint.py` | whether `docs/backlog.md` is well formed (CI gate) |
+| `generate-roadmap.py` | `docs/roadmap.md` from the backlog milestones |
+| `sync-backlog-to-issues.py` | the GitHub issues and milestones |
+| `changelog-add.py` | where a new entry lands under `## [Unreleased]` |
+| `next-version.py` | which version the next release gets |
+| `image-tags.py` | which tags and OCI labels a published image gets |
+| `commit.sh` | subject + entry + local gates + commit, in one command |
+| `install-hooks.sh` | points git at `.githooks/` |
 
 ```
   docs/backlog.md ─────────┐
@@ -26,6 +39,9 @@ Four scripts and one shared library. No external dependencies: **Python 3 stdlib
                                                   (.github/workflows/release.yml; falls back to
                                                    changelog-add.py --from-commits if nobody wrote
                                                    any entry)
+
+  release + matrix row ──▶ image-tags.py ──▶ tags and OCI labels for one published image
+                                             (.github/workflows/docker-publish.yml)
 ```
 
 ## Local usage
@@ -39,6 +55,7 @@ python3 docs/scripts/sync-backlog-to-issues.py     # dry-run (default). No token
 GITHUB_TOKEN=... python3 docs/scripts/sync-backlog-to-issues.py          # dry-run COMPARED with the repo
 GITHUB_TOKEN=... python3 docs/scripts/sync-backlog-to-issues.py --apply  # actually writes
 python3 docs/scripts/next-version.py --explain     # the version the next release would get, and why
+python3 docs/scripts/image-tags.py --image ghcr.io/o/n --release v2.1.0 --ffmpeg 9.0.1 --default
 python3 docs/scripts/changelog-add.py --message "fix: x"          # file an entry under [Unreleased]
 python3 docs/scripts/changelog-add.py --message "fix: x" --entry "the sentence you want there"
 python3 docs/scripts/changelog-add.py --from-commits              # draft from commits (release fallback)
@@ -75,6 +92,11 @@ Tests: `python3 -m unittest discover -s tests -p 'test_*.py'` (`tests/test_backl
   `security:` to *Security*, `remove:`/`revert:` to *Removed*, everything else to *Changed*. What the
   bullet says is still yours to write (`--entry`), and the `--from-commits` draft exists only so a release
   nobody documented still ships a readable list.
+- **Tags are computed, not templated.** `image-tags.py` gives every variant floating pointers at each level
+  of its FFmpeg version (`latest-ffmpeg7`, `latest-ffmpeg7.1`, `latest-ffmpeg7.1.5`) plus one exact
+  `<release>-ffmpeg<full>`; only the default row takes the unsuffixed tags. Two unit tests guard the
+  invariants that actually bite: no two variants may claim the same tag, and a non-default variant may never
+  take an unsuffixed one.
 - **Releasing does not publish images.** `next-version.py` decides the version, `release.yml` tags it
   with the `GITHUB_TOKEN` — which by design does not trigger other workflows — so `docker-publish.yml`
   stays an explicit act. A CHANGELOG section numbered above the latest tag is treated as a *pending

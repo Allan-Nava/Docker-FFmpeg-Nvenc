@@ -15,12 +15,14 @@ Registry: **GitHub Container Registry** (`ghcr.io`), not Docker Hub.
 ghcr.io/allan-nava/docker-ffmpeg-nvenc
 ```
 
-> ⚠️ **Status on 2026-09-17: the tags below have not been published yet.** The repository's latest tag is
-> `v1.0.1` (2023) and `:latest` on GHCR is still the January 2023 image: it runs as **root**, has
-> `ENTRYPOINT /bin/bash`, and carries an `NVIDIA_REQUIRE_CUDA` constraint that prevents it from starting on
-> hosts with recent drivers. The image described on this page is the one `main` produces, published with the
-> first `v2.0.0` tag. Details: [audit 2026-09-17](docs/audit/2026-09-17-state-and-automation-audit.md) —
-> tracked as `publish-v2-0-0` in the [backlog](docs/backlog.md).
+> ⚠️ **Status on 2026-09-17: released, not yet published.** `v2.0.0` and `v2.1.0` are tagged and the
+> GitHub Releases exist, but **no image has been pushed to GHCR yet** — releasing and publishing are
+> separate acts here, and publishing happens when the `Publish` workflow runs. Until then `:latest` on
+> the registry is still the January 2023 build: it runs as **root**, has `ENTRYPOINT /bin/bash`, and
+> carries an `NVIDIA_REQUIRE_CUDA` constraint that prevents it from starting on hosts with recent
+> drivers. The tags below describe what `main` produces. Details:
+> [audit 2026-09-17](docs/audit/2026-09-17-state-and-automation-audit.md) — tracked as `publish-v2-0-0`
+> in the [backlog](docs/backlog.md).
 
 | Variant | FFmpeg | nv-codec-headers | Minimum NVIDIA driver | Tags |
 |---|---|---|---|---|

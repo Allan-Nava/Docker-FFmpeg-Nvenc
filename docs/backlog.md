@@ -82,8 +82,9 @@ So today: anyone following the README pulls the broken 2023 image, and the CI th
 certifies an artefact nobody can use.
 
 Closing it (the tag push is the user's):
-- [ ] `./tests/gpu.sh` on an NVIDIA host for all three variants (never run in CI)
-- [ ] release `v2.0.0` — `release.yml` tags it automatically on the next commit to main
+- [ ] `./tests/gpu.sh` on an NVIDIA host for all four variants (never run in CI)
+- [x] release `v2.0.0` — done on 2026-09-17: `release.yml` tagged it and published the GitHub Release
+      (followed by `v2.1.0`). Releasing is not publishing: the images are still the 2023 ones
 - [ ] run `Publish` (workflow_dispatch, `version: v2.0.0`) to put the images on GHCR
 - [ ] check the actual tags on GHCR afterwards: `latest`, `2.x.y`, `2.x`, `2` **without** suffix (default
       variant only), plus per variant the three floating pointers (`latest-ffmpeg9`, `latest-ffmpeg9.0`,
@@ -288,10 +289,11 @@ Everything is green locally (tests, lint, dry-run).
       repository, and no open PR was mistaken for an item
 - [ ] after the push, run `Backlog` from Actions (`workflow_dispatch`, `apply=false` then `apply=true`) to
       check the same thing happens with the workflow's `GITHUB_TOKEN`
-- [ ] enable GitHub Pages (Settings ▸ Pages ▸ Source: GitHub Actions) and check the deployed page
-- [ ] check that `Release` tags `v2.0.0` on the first commit to main, creates the GitHub Release, and does
-      **not** publish images
-- [ ] set `status: done` on this item once all of the above is green
+- [x] GitHub Pages enabled and deployed: <https://allan-nava.github.io/Docker-FFmpeg-Nvenc/> answers 200,
+      built by the `pages.yml` workflow
+- [x] `Release` verified twice on the real repository: `v2.0.0` (13:10) and `v2.1.0` (13:43), both with the
+      GitHub Release and **no image publish** — which is the intended split
+- [ ] set `status: done` on this item once the remaining box is green
 
 ## Closed items (history)
 

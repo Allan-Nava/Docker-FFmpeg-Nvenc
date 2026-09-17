@@ -3,16 +3,26 @@
 All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
-## [2.1.0] - 2026-09-17
+## [Unreleased]
 
 ### Added
 
 - every variant now gets `latest-ffmpeg<major>`, `latest-ffmpeg<major>.<minor>` and `latest-ffmpeg<full>` plus one exact `<release>-ffmpeg<full>`; only the default row keeps the unsuffixed `latest`/`X.Y.Z`/`X.Y`/`X`. Before this, the only stable pointer was `:latest` (default variant only): `latest-ffmpeg7.1.5` vanished the moment 7.1.6 shipped, and there was no way to say "the newest 7.x". Combinations such as `2-ffmpeg9.0.1` are deliberately absent — they look immutable and are not.
 
+### Changed
+
+- full documentation audit against the live systems (`docs/audit/2026-09-17-documentation-audit.md`): seven drifts found and fixed, the sharpest being two entries that a rebase had merged **inside the already-released `## [2.1.0]` section**, making the changelog claim a shipped version contained work that came after its tag. Also corrected: the delivery status in `CLAUDE.md`/`AGENTS.md` and the notice in `README.md` (released is not published — `v2.0.0` and `v2.1.0` exist, GHCR still serves the 2023 image), the scripts runbook (four files listed out of ten), and the tagging trap that still described `docker/metadata-action`.
+- `tests/test_docs.py` pins what rots: every relative link resolves, `CLAUDE.md` and `AGENTS.md` keep the same sections (and `AGENTS.md` stays ASCII), the scripts runbook lists every script and no phantom, the README variant table matches the publish matrix, and no document claims the release is untagged once a `v2.*` tag exists.
+
+### Fixed
+
+- the publish workflow no longer builds its tag list with two `docker/metadata-action` steps; it calls [`docs/scripts/image-tags.py`](docs/scripts/image-tags.py), covered by 19 unit tests — among them that no two variants can claim the same tag and that a non-default variant can never take an unsuffixed one. This is the part of the repository that has already failed silently once (`:latest` unpublished for two years), so it belongs in tested code rather than in YAML.
+
+## [2.1.0] - 2026-09-17
+
 ### Fixed
 
 - `test_the_real_changelog_has_unreleased_entries` asserted that `## [Unreleased]` had entries — true while writing them, false the moment `release.yml` folded them into `[2.0.0]`. It turned CI, Pages and the next Release red on the push right after v2.0.0 shipped. Replaced with structural checks (the file parses, a released version exists, `[Unreleased]` sits above it when present, an entry can always be filed), and the page test that looked for one README sentence now checks that no README notice is dropped.
-- the publish workflow no longer builds its tag list with two `docker/metadata-action` steps; it calls [`docs/scripts/image-tags.py`](docs/scripts/image-tags.py), covered by 19 unit tests — among them that no two variants can claim the same tag and that a non-default variant can never take an unsuffixed one. This is the part of the repository that has already failed silently once (`:latest` unpublished for two years), so it belongs in tested code rather than in YAML.
 
 ## [2.0.0] - 2026-09-17
 
