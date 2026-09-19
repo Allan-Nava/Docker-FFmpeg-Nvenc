@@ -56,7 +56,7 @@ jobs:
           ref: ${{ inputs.version || github.ref }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # Tags and labels come from docs/scripts/image-tags.py, which is unit-tested
       # (tests/test_image_tags.py). They used to come from two docker/metadata-action steps whose
