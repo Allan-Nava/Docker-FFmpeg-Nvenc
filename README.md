@@ -15,14 +15,11 @@ Registry: **GitHub Container Registry** (`ghcr.io`), not Docker Hub.
 ghcr.io/allan-nava/docker-ffmpeg-nvenc
 ```
 
-> ⚠️ **Status on 2026-09-17: released, not yet published.** `v2.0.0` and `v2.1.0` are tagged and the
-> GitHub Releases exist, but **no image has been pushed to GHCR yet** — releasing and publishing are
-> separate acts here, and publishing happens when the `Publish` workflow runs. Until then `:latest` on
-> the registry is still the January 2023 build: it runs as **root**, has `ENTRYPOINT /bin/bash`, and
-> carries an `NVIDIA_REQUIRE_CUDA` constraint that prevents it from starting on hosts with recent
-> drivers. The tags below describe what `main` produces. Details:
-> [audit 2026-09-17](docs/audit/2026-09-17-state-and-automation-audit.md) — tracked as `publish-v2-0-0`
-> in the [backlog](docs/backlog.md).
+> **Published: `v2.4.1`, 2026-11-19.** The four variants are on GHCR and `:latest` is FFmpeg 9.0.1,
+> running as user `ffmpeg` with `ENTRYPOINT ["ffmpeg"]` (checked against the registry with
+> `./tests/verify-registry.sh v2.4.1`). The older tags still there (`v0.1.x`, `v1.0.1-*`, `main`, `pr-*`)
+> are 2023 builds that run as root and do not start on recent drivers: do not use them
+> (`ghcr-tag-hygiene` in the [backlog](docs/backlog.md)).
 
 | Variant | FFmpeg | nv-codec-headers | Minimum NVIDIA driver | Tags |
 |---|---|---|---|---|

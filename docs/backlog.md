@@ -64,7 +64,7 @@ python3 docs/scripts/sync-backlog-to-issues.py      # dry-run: prints the plan, 
 
 ### `publish-v2-0-0` — The whole v2.0.0 repair is on main but unpublished: `:latest` on GHCR is the 2023 image
 
-- **status**: open
+- **status**: done
 - **priority**: high
 - **labels**: release, docker, bug
 - **milestone**: Ship v2.0.0
@@ -82,15 +82,28 @@ So today: anyone following the README pulls the broken 2023 image, and the CI th
 certifies an artefact nobody can use.
 
 Closing it (the tag push is the user's):
-- [ ] `./tests/gpu.sh` on an NVIDIA host for all four variants (never run in CI)
+- moved out: `./tests/gpu.sh` on an NVIDIA host is its own item, `gpu-test-on-host`
 - [x] release `v2.0.0` — done on 2026-09-17: `release.yml` tagged it and published the GitHub Release
       (followed by `v2.1.0`). Releasing is not publishing: the images are still the 2023 ones
-- [ ] run `Publish` (workflow_dispatch, `version: v2.0.0`) to put the images on GHCR
-- [ ] verify the registry with `./tests/verify-registry.sh vX.Y.Z` — it generates the expected tags from the
+- [x] run `Publish` — done on 2026-11-19 with `version: v2.4.1`, after the v2.4.0 run failed on the
+      upper-case image name ([intervention](interventions/2026-11-19-ghcr-lowercase.md))
+- [x] verify the registry with `./tests/verify-registry.sh vX.Y.Z` — it generates the expected tags from the
       matrix and compares them with GHCR **by digest**, so an alias pointing at the wrong image is caught
-      (today it reports 19 of 20 tags missing and `:latest` on the 2023 digest, which is the correct answer)
-- [ ] check that `:latest` now has `User=ffmpeg` and `Entrypoint=["ffmpeg"]`
-- [ ] follow [the publish runbook](runbooks/publish-release.md) for the whole sequence and the after-steps
+      — 2026-11-19: all 20 expected tags present, every alias on its variant's digest
+- [x] check that `:latest` now has `User=ffmpeg` and `Entrypoint=["ffmpeg"]` — read from the registry's
+      image config on 2026-11-19, version label 2.4.1
+- [x] follow [the publish runbook](runbooks/publish-release.md) for the whole sequence and the after-steps
+
+### `gpu-test-on-host` — `tests/gpu.sh` has never run on an NVIDIA host
+
+- **status**: open
+- **priority**: medium
+- **labels**: docker, test
+- **milestone**: Ship v2.0.0
+
+CI has no GPU, so the smoke test proves FFmpeg starts and lists the NVENC encoders, not that they encode.
+Run `./tests/gpu.sh` for the four published variants on a host with an NVIDIA GPU and the NVIDIA
+Container Toolkit, and record the driver version and the result here.
 
 ### `action-ref-and-image-input` — The published Action pins `:latest`, `@v2` does not exist, and `inputs.image` is dead code
 

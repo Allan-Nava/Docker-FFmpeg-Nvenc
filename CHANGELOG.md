@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- The images are on GHCR from `v2.4.1`: the README, CLAUDE.md and AGENTS.md no longer say the release is unpublished, `publish-v2-0-0` is closed with the registry checks, and the GPU run left over is its own item, `gpu-test-on-host`
+
 ## [2.4.1] - 2026-11-19
 
 ### Fixed

@@ -40,5 +40,7 @@ first push was the first time the name met the registry.
 
 - The four variants of `v2.4.0` compiled and passed the smoke test: the images are good, only the push
   failed, and the build cache of each variant is warm for the next run.
-- To publish: run `Publish` again with `version: v2.4.0` (the workflow on `main` now lowercases), or with
-  the release this fix becomes.
+- Published the same day as **v2.4.1**, the release this fix became: all four variants pushed
+  ([run 44504109773](https://github.com/Allan-Nava/Docker-FFmpeg-Nvenc/actions/runs/44504109773)),
+  `./tests/verify-registry.sh v2.4.1` green, and `:latest` read from the registry as FFmpeg 9.0.1 with
+  `User=ffmpeg` and `Entrypoint=["ffmpeg"]`.
