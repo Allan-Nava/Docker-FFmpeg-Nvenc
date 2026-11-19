@@ -71,6 +71,10 @@ jobs:
           FFMPEG: ${{ matrix.ffmpeg }}
           DEFAULT: ${{ matrix.default }}
         run: |
+          # Lowercase here too, not only in image-tags.py: the script comes from the tag being
+          # published, and tags up to v2.4.0 carry the version that kept the owner's case
+          # (`Allan-Nava/...`), which a registry refuses. With this, an old tag publishes too.
+          IMAGE="${IMAGE,,}"
           ARGS=(--image "$IMAGE" --release "$RELEASE" --ffmpeg "$FFMPEG")
           # NOT `[ … ] && ARGS+=(…)`: as a standalone command that returns 1 when false, and
           # Actions runs `run:` steps with `bash -e` — the three non-default rows would have died here.

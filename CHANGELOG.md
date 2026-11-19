@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- Publishing to GHCR works: the image name is lowercased (`ghcr.io/allan-nava/docker-ffmpeg-nvenc`), in `image-tags.py` and in the workflow, so the registry no longer refuses the push with "repository name must be lowercase"; tags cut before the fix publish too
+
 ## [2.4.0] - 2026-09-21
 
 ### Added

@@ -145,3 +145,18 @@ class TestCli(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheImageNameIsLowercase(unittest.TestCase):
+    """`github.repository` keeps the owner's case; a registry refuses an upper-case repository."""
+
+    def test_an_upper_case_image_comes_out_lower_case(self):
+        tags = T.tags_for("ghcr.io/Allan-Nava/Docker-FFmpeg-Nvenc", "v2.4.0", "9.0.1", default=True)
+        self.assertIn("ghcr.io/allan-nava/docker-ffmpeg-nvenc:2.4.0-ffmpeg9.0.1", tags)
+        for tag in tags:
+            name = tag.rsplit(":", 1)[0]
+            self.assertEqual(name, name.lower(), tag)
+
+    def test_the_tag_part_keeps_its_case(self):
+        tags = T.tags_for("GHCR.IO/O/N", "v2.4.0", "9.0.1")
+        self.assertIn("ghcr.io/o/n:2.4.0-ffmpeg9.0.1", tags)

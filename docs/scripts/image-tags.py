@@ -48,7 +48,13 @@ def ffmpeg_aliases(version):
 
 
 def tags_for(image, release, ffmpeg, default=False):
-    """Full list of `image:tag` for one matrix row. Deterministic order, no duplicates."""
+    """Full list of `image:tag` for one matrix row. Deterministic order, no duplicates.
+
+    The image name is lowercased: an OCI repository name must be, and the workflow builds it
+    from `github.repository`, which keeps the owner's case (`Allan-Nava/Docker-FFmpeg-Nvenc`).
+    The first publish of v2.4.0 died on exactly that (docs/interventions/2026-11-19-ghcr-lowercase.md).
+    """
+    image = image.lower()
     major, minor, patch = normalise_release(release)
     version = f"{major}.{minor}.{patch}"
     aliases = ffmpeg_aliases(ffmpeg)
